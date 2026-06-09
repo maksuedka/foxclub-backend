@@ -1,0 +1,139 @@
+
+
+.main-footer {
+    background-color: var(--primary-color);
+    color: var(--text-color-light);
+    padding: 80px 0 0;
+    position: relative;      
+    z-index: 1000;           
+}
+
+
+.footer-social {
+    position: absolute;
+    bottom: 350px; 
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1100;  
+}
+
+
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+
+.footer-block {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-brand .footer-logo {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.4));
+}
+
+.footer-slogan {
+    font-size: 1.1em;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.footer-btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    background-color: var(--primary-color);
+    color: var(--text-color-light);
+    border-radius: 8px;
+    border: 2px solid #fff;
+    transition: all 0.3s ease;
+}
+
+.footer-btn:hover {
+    background-color: #fff;
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+
+.location-group {
+    margin-bottom: 25px;
+}
+
+.location-group:last-child {
+    margin-bottom: 0;
+}
+
+.location-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.footer-contacts p {
+    font-size: 1em;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background-color: var(--bg-dark-header);
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.social-icon:hover {
+    transform: translateY(-4px) scale(1.05);
+    border-color: #fff;
+}
+
+.social-icon img {
+    width: 32px;
+    height: 32px;
+    transition: filter 0.3s ease;
+}
+
+
+
+.footer-bottom {
+    background-color: var(--bg-dark-header);
+    padding: 10px 0;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-bottom .container {
+    max-width: var(--container-width, 1280px);
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.footer-bottom p {
+    margin: 5px 0;
+}

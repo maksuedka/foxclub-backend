@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в FOX CLUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Встроенные стили для переключения форм и красивого селекта -->
+    <style>
+        .auth-container {
+            max-width: 450px;
+            margin: 50px auto;
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff8c00, #ffcc00, #ff8c00);
+        }
+        
+        .form-toggle-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .form-toggle-link:hover {
+            color: #ff8c00;
+            background: rgba(255, 140, 0, 0.1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .auth-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        /* Улучшенный стиль для селекта */
+        .custom-select-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .custom-select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #333;
+            background-color: white;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff8c00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+        }
+        
+        .custom-select:hover {
+            border-color: #ff8c00;
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+        }
+        
+        .custom-select:focus {
+            outline: none;
+            border-color: #ff8c00;
+            box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.2);
+        }
+        
+        .custom-select option {
+            padding: 15px;
+            font-size: 15px;
+            background: white;
+            color: #333;
+        }
+        
+        .custom-select option:checked {
+            background: linear-gradient(45deg, #ff8c00, #ffcc00);
+            color: white;
+        }
+        
+        .custom-select option:hover {
+            background: #fff3e0;
+        }
+        
+        /* Группа с иконкой для селекта */
+        .select-group {
+            position: relative;
+        }
+        
+        .select-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .select-label i {
+            color: #ff8c00;
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        /* Стили для выпадающего списка */
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #ff8c00;
+            border-radius: 12px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .select-dropdown.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .select-option {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .select-option:last-child {
+            border-bottom: none;
+        }
+        
+        .select-option:hover {
+            background: linear-gradient(45deg, #fff3e0, #ffe4b3);
+            padding-left: 25px;
+        }
+        
+        .select-option.selected {
+            background: linear-gradient(45deg, #ff8c00, #ffcc00);
+            color: white;
+        }
+        
+        .option-address {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .select-option.selected .option-address {
+            color: white;
+        }
+        
+        .option-city {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .select-option.selected .option-city {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* Стили для опций в нативном селекте (альтернатива) */
+        .club-option {
+            padding: 10px;
+        }
+        
+        .club-option address {
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        .club-option small {
+            display: block;
+            color: #999;
+            font-size: 11px;
+        }
+        
+        /* Анимация для формы */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #loginBlock, #registerBlock {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Стили для кнопок */
+        .btn-primary {
+            background: linear-gradient(45deg, #ff8c00, #ffcc00);
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #ff9f1c, #ffd700);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        /* Стили для полей ввода */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group label i {
+            color: #ff8c00;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:hover {
+            border-color: #ff8c00;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff8c00;
+            box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.1);
+        }
+        
+        /* Иконки (можно заменить на FontAwesome если подключен) */
+        .icon {
+            display: inline-block;
+            width: 18px;
+            text-align: center;
+        }
+        
+        /* Стили для сообщений об ошибках */
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 5px;
+            padding-left: 10px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 20px;
+                padding: 25px;
+            }
+            
+            .auth-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="floating-login-logo">
+        FOX CLUB
+    </a>
+
+    <main class="login-main">
+        <div class="auth-container">
+            
+            <!-- ФОРМА ВХОДА -->
+            <div id="loginBlock">
+                <h2 class="auth-title">Вход в клуб</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>
+                            <span class="icon">📧</span>
+                            Email:
+                        </label>
+                        <input type="email" id="loginEmail" name="email" placeholder="your@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="icon">🔒</span>
+                            Пароль:
+                        </label>
+                        <input type="password" id="loginPassword" name="password" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Войти в клуб</button>
+                </form>
+                <span class="form-toggle-link" id="showRegisterBtn">👋 Нет аккаунта? Зарегистрироваться</span>
+            </div>
+
+            <!-- ФОРМА РЕГИСТРАЦИИ -->
+            <div id="registerBlock" class="hidden">
+                <h2 class="auth-title">Стать членом клуба</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>
+                            Имя:
+                        </label>
+                        <input type="text" id="regFirstName" name="firstName" placeholder="Иван" required minlength="2">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Фамилия:
+                        </label>
+                        <input type="text" id="regLastName" name="lastName" placeholder="Петров" required minlength="2">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Email:
+                        </label>
+                        <input type="email" id="regEmail" name="email" placeholder="ivan@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="icon">🔒</span>
+                            Пароль:
+                        </label>
+                        <input type="password" id="regPassword" name="password" placeholder="Минимум 6 символов" required minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            Выберите клуб:
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="regClub" name="club" class="custom-select" required>
+                                <option value="" disabled selected>🏋️‍♂️ Выберите ближайший клуб</option>
+                                <!-- Клубы будут загружены через JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Создать аккаунт</button>
+                </form>
+                <span class="form-toggle-link" id="showLoginBtn">🔑 Уже есть аккаунт? Войти</span>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+    
+    <!-- Добавим скрипт для загрузки клубов с адресами -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const regClubSelect = document.getElementById('regClub');
+            const urlParams = new URLSearchParams(window.location.search);
+            let cityParam = urlParams.get('city') ? decodeURIComponent(urlParams.get('city')).trim() : null;
+
+            // Маппинг городов
+            const cityMapping = {
+                "minsk": "Минск",
+                "mogilev": "Могилев",
+                "grodno": "Гродно"
+            };
+
+            if (cityParam) {
+                const lower = cityParam.toLowerCase();
+                cityParam = cityMapping[lower] || cityParam;
+            }
+
+            // Функция загрузки клубов
+            async function loadClubsByCity(city) {
+                if (!regClubSelect) return;
+                
+                try {
+                    // Показываем загрузку
+                    regClubSelect.innerHTML = '<option value="" disabled selected>⏳ Загрузка клубов...</option>';
+                    
+                    const response = await fetch(`http://localhost:8080/api/clubs?city=${encodeURIComponent(city)}`);
+                    
+                    if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+                    
+                    const clubs = await response.json();
+                    console.log('Loaded clubs:', clubs);
+                    
+                    if (!Array.isArray(clubs) || clubs.length === 0) {
+                        regClubSelect.innerHTML = '<option value="" disabled>😕 Клубы не найдены</option>';
+                        return;
+                    }
+
+                    // Очищаем и добавляем опции с адресами
+                    regClubSelect.innerHTML = '<option value="" disabled selected>🏋️‍♂️ Выберите клуб</option>';
+                    
+                    clubs.forEach(club => {
+                        const option = document.createElement('option');
+                        option.value = club.id;
+                        
+                        // Форматируем текст опции: адрес (город)
+                        // Если есть название клуба и оно отличается от адреса, добавляем его
+                        let displayText = club.address;
+                        if (club.name && !club.address.includes(club.name)) {
+                            displayText = `${club.name} - ${club.address}`;
+                        }
+                        
+                        option.textContent = displayText;
+                        
+                        // Добавляем data-атрибуты для возможности стилизации через CSS
+                        option.setAttribute('data-address', club.address);
+                        option.setAttribute('data-city', club.city || city);
+                        
+                        regClubSelect.appendChild(option);
+                    });
+                    
+                } catch (error) {
+                    console.error("Ошибка загрузки клубов:", error);
+                    regClubSelect.innerHTML = '<option value="" disabled>❌ Ошибка загрузки клубов</option>';
+                }
+            }
+
+            // Загружаем клубы если есть город
+            if (regClubSelect) {
+                if (cityParam) {
+                    loadClubsByCity(cityParam);
+                } else {
+                    // Если город не выбран, показываем все клубы
+                    regClubSelect.innerHTML = '<option value="" disabled selected>📍 Сначала выберите город на главной</option>';
+                }
+            }
+            
+            // Добавим немного интерактивности для селекта
+            if (regClubSelect) {
+                regClubSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        this.style.borderColor = '#4CAF50';
+                    } else {
+                        this.style.borderColor = '#e0e0e0';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

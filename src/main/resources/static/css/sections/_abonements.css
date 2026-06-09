@@ -1,0 +1,325 @@
+.abonements-section {
+    background-color: var(--bg-dark-header, #000);
+    padding: 40px 0;
+    color: var(--text-color-light, #fff);
+    position: relative;
+}
+
+.abonements-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+}
+
+.abonements-title {
+    font-size: 3em;
+    font-weight: bold;
+    color: var(--text-color-light, #fff);
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.abonement-cards-and-add-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.abonement-carousel-wrapper {
+    flex-grow: 1;
+    overflow: hidden;
+    border-radius: 20px;
+    position: relative;
+    background-color: rgba(255, 140, 0, 0.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.abonement-cards-carousel {
+    display: flex;
+    gap: 25px;
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 25px;
+    scroll-behavior: smooth;
+}
+
+.abonement-cards-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.abonement-cards-carousel {
+    scrollbar-width: none;
+}
+
+.abonement-carousel-wrapper::before,
+.abonement-carousel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 70px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.abonement-carousel-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.abonement-carousel-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.abonements-section .price-card {
+    min-width: 280px;
+    height: auto;
+    display: flex;
+}
+
+.add-abonement-column {
+    flex-shrink: 0;
+    width: 280px;
+    height: 320px;
+    background-color: rgba(255, 140, 0, 0.08);
+    border: 2px dashed var(--primary-color, #FF8C00);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    box-shadow: none;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.add-abonement-column:hover {
+    border-color: var(--primary-color, #FF8C00);
+    background-color: rgba(255, 140, 0, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    transform: translateY(-3px);
+}
+
+.add-abonement-column p {
+    color: var(--text-color-light, #fff);
+    font-size: 1.1em;
+    margin-top: 15px;
+    opacity: 0.9;
+}
+
+.add-button {
+    background-color: var(--primary-color, #FF8C00);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    font-size: 3.5em;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 140, 0, 0.5);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #e67e22;
+    box-shadow: 0 8px 20px rgba(255, 140, 0, 0.7);
+    transform: scale(1.05);
+}
+
+.carousel-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 140, 0, 0.7);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 1.8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-nav-arrow:hover {
+    background-color: var(--primary-color, #FF8C00);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav-arrow.left {
+    left: 10px;
+}
+
+.carousel-nav-arrow.right {
+    right: 10px;
+}
+
+/* ----- МОДАЛЬНЫЕ ОКНА (общий стиль) ----- */
+.modal {
+    display: none; /* по умолчанию скрыты, открываются через JS */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #2a2a2a;
+    margin: auto;
+    padding: 40px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    color: #fff;
+    text-align: center;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primary-color, #FF8C00);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    color: var(--primary-color, #FF8C00);
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.modal-content h3 {
+    color: #fff;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    font-size: 1em;
+    color: #eee;
+    margin-bottom: 10px;
+}
+
+.qr-code-placeholder {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    border: 1px dashed #555;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #333;
+}
+
+.qr-code-placeholder p {
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+/* ----- СЕТКИ ДЛЯ АБОНЕМЕНТОВ (ПРОФИЛЬ) ----- */
+.my-abonements-grid,
+.abonements-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* ровно 3 колонки */
+    gap: 25px;
+    margin: 30px 0;
+    max-width: 1200px;
+}
+
+/* Адаптация для планшетов */
+@media (max-width: 992px) {
+    .my-abonements-grid,
+    .abonements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Адаптация для телефонов */
+@media (max-width: 576px) {
+    .my-abonements-grid,
+    .abonements-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ----- СТИЛИ ДЛЯ КНОПКИ "СКРЫТЬ ИСТЕКШИЕ" ----- */
+.expired-filter-btn {
+    background: linear-gradient(135deg, #FF8C00, #FF6600);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.expired-filter-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #FF7700, #FF5500);
+    box-shadow: 0 6px 16px rgba(255, 140, 0, 0.5);
+}
+
+.expired-filter-btn:active {
+    transform: translateY(1px);
+}
+
+.expired-filter-btn.active {
+    background: linear-gradient(135deg, #2c3e50, #1a2632);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.expired-filter-btn.active:hover {
+    background: linear-gradient(135deg, #1e2b38, #0f1720);
+}
+
+/* ----- СЕКЦИИ АБОНЕМЕНТОВ В ПРОФИЛЕ ----- */
+.my-abonements-section,
+.available-abonements-section {
+    background-color: #1a1a1a;
+    padding: 40px 0;
+}
+
+.section-title {
+    color: #fff;
+    font-size: 28px;
+    margin-bottom: 20px;
+}

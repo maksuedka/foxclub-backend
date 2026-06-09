@@ -1,0 +1,23 @@
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+}
+
+.btn-primary:hover {
+    background-color: #e67e22;
+    box-shadow: 0 6px 15px rgba(255, 140, 0, 0.6);
+}

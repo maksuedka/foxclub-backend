@@ -1,0 +1,119 @@
+.price-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 10px;
+    border-radius: 15px;
+    overflow: hidden;
+    text-align: center;
+    color: var(--text-color-light);
+    box-sizing: border-box;
+    background: linear-gradient(
+        135deg,
+        var(--gradient-dark-end) 50%,
+        var(--gradient-orange-start) 120%
+    );
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: none;
+    width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.price-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+    padding: 2px;
+    background: linear-gradient(
+        135deg,
+        var(--gradient-stroke-light) 0%,
+        rgba(255, 127, 0, 0) 100%
+    );
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+}
+
+.price-card-logo-bg {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 60px;
+    height: 60px;
+    background-image: url('../../assets/images/icons/logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.25;
+    z-index: 0;
+}
+
+.price-card-title {
+    font-size: 1.8em;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    padding-top: 30px;
+}
+
+.price-card-price {
+    font-size: 3.5em;
+    font-weight: bold;
+    color: var(--text-color-light);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.price-card-details {
+    font-size: 0.9em;
+    color: var(--link-color);
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+}
+
+.price-card-details p {
+    margin: 5px 0;
+}
+
+.price-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Кнопки внутри карточек */
+.btn-buy-abonement,
+.btn-show-qr {
+    background: linear-gradient(135deg, #FF8C00, #FF6600);
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 80%;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.btn-buy-abonement:hover,
+.btn-show-qr:hover {
+    transform: scale(1.02);
+    background: linear-gradient(135deg, #FF7700, #FF5500);
+}

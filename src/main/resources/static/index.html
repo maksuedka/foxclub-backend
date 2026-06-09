@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOX CLUB - Главная</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components/home-posts.css">
+    <style>
+
+        /* Небольшие корректировки для шапки */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ff8c00;
+            cursor: pointer;
+        }
+        .profile-name {
+            color: #fff;
+            font-weight: 500;
+        }
+        .btn-logout, .btn-user-qr {
+            background: rgba(255,68,68,0.2);
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-user-qr {
+            background: #ff8c00;
+            color: white;
+            border: none;
+        }
+        .btn-logout:hover {
+            background: #ff4444;
+            color: white;
+        }
+        .btn-user-qr:hover {
+            background: #e67e00;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">FOX CLUB</a>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#about-us-section" class="nav-link" data-section="about-us-section">О нас</a></li>
+                    <li class="nav-item"><a href="#clubs-section" class="nav-link" data-section="clubs-section">Клубы</a></li>
+                    <li class="nav-item"><a href="#promotions-section" class="nav-link" data-section="promotions-section">Акции</a></li>
+                    <li class="nav-item"><a href="#trainers-section" class="nav-link" data-section="trainers-section">Тренера</a></li>
+                    <li class="nav-item"><a href="#home-posts-section" class="nav-link" data-section="home-posts-section">Посты</a></li>
+                    <li class="nav-item"><a href="#prices-section" class="nav-link" data-section="prices-section">Цены</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle">Гродно<span class="arrow-down">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="minsk.html" class="dropdown-item">Минск</a></li>
+                            <li><a href="mogilev.html" class="dropdown-item">Могилев</a></li>
+                            <li><a href="index.html" class="dropdown-item">Гродно</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Контейнер для информации о пользователе (заполняется через main.js) -->
+            <div class="profile-info"></div>
+        </div>
+    </header>
+
+    <section class="hero-banner" id="hero-banner">
+        <div class="container hero-content">
+            <h1 class="hero-title">Достигайте своих <br> фитнес-целей с <br> помощью FOX <br> CLUB!</h1>
+        </div>
+    </section>
+
+    <section class="about-us-section" id="about-us-section">
+        <div class="container about-us-container">
+            <div class="about-us-content">
+                <p class="section-subtitle">О нас</p>
+                <h2 class="section-title">Ваш путь к здоровому образу жизни</h2>
+                <div class="about-us-main">
+                    <div class="about-us-image">
+                        <img src="assets/images/coach_2.jpg" alt="Интерьер фитнес-клуба FOX CLUB">
+                    </div>
+                    <div class="about-us-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">08+</span>
+                            <p class="stat-description">Лет опыта</p>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">100+</span>
+                            <p class="stat-description">Довольных клиентов</p>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">100+</span>
+                            <p class="stat-description">Занятий в неделю</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="clubs-section" id="clubs-section">
+
+        <div class="container clubs-container">
+            <p class="section-subtitle">Наши фитнес-клубы</p>
+            <h2 class="section-title">Выберите свой клуб</h2>
+            <div class="club-cards-wrapper">
+                <a href="kupali-club.html" class="club-card-link">
+                    <div class="club-card">
+                        <img src="assets/images/main-banner/main-banner1.jpeg" alt="Интерьер фитнес-клуба" class="club-card-image">
+                        <div class="club-card-overlay">
+                            <p class="club-address">пр-т. Я. Купалы, 22</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- Здесь можно добавить другие клубы, если нужно -->
+            </div>
+        </div>
+    </section>
+
+    <section class="promotions-section" id="promotions-section">
+        <div class="promotions-ribbon top">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+        <div class="promotions-ribbon middle">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+        <div class="container promotions-container">
+            <div class="promotions-heading">
+                <p class="section-subtitle">Акции</p>
+                <h2 class="section-title">Специальные предложения <br> от FOX CLUB</h2>
+            </div>
+            <div class="promotions-carousel">
+                <div class="promotion-card promotion-card-1">
+                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
+                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
+                </div>
+                <div class="promotion-card promotion-card-2">
+                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
+                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
+                </div>
+                <div class="promotion-card promotion-card-3">
+                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
+                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
+                </div>
+                <div class="promotion-card promotion-card-4">
+                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
+                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
+                </div>
+            </div>
+            <div class="carousel-indicators">
+                <span class="indicator-dot active"></span>
+                <span class="indicator-dot"></span>
+                <span class="indicator-dot"></span>
+                <span class="indicator-dot"></span>
+            </div>
+        </div>
+        <div class="promotions-ribbon bottom">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+    </section>
+
+  
+
+    <section class="trainers-section" id="trainers-section">
+        <div class="container trainers-content">
+            <h2 class="trainers-title">Тренера</h2>
+            <p class="trainers-description">Наши опытные тренеры готовы помочь вам на каждом этапе пути, будь то освоение основ или достижение новых вершин. Работайте индивидуально с личным наставником, чтобы максимально эффективно реализовать свой потенциал и превзойти ожидания.</p>
+        </div>
+    </section>
+
+<section class="home-posts-section" id="home-posts-section">
+    <div class="container">
+        <div class="home-posts-top">
+            <div>
+                <p class="section-subtitle">Наши посты</p>
+                <h2 class="section-title">Следите за новостями</h2>
+            </div>
+            <a href="post-feed.html" class="home-posts-open-all">Смотреть ленту →</a>
+        </div>
+        <div id="homePostsLoader" class="home-posts-loader">Загрузка постов...</div>
+        <div id="homePostsGrid" class="home-posts-grid" style="display:none;"></div>
+        <div id="homePostsEmpty" class="home-posts-empty" style="display:none;">Постов пока нет</div>
+    </div>
+</section>
+
+    <section class="prices-section" id="prices-section">
+        <div class="container prices-container">
+            <p class="section-subtitle">Цены</p>
+            <h2 class="section-title">Цены FOX CLUB!</h2>
+            <div class="tabs-navigation">
+                <button class="tab-button active" data-tab="single">РАЗОВЫЕ ЗАНЯТИЯ</button>
+                <button class="tab-button" data-tab="by-class">АБОНЕМЕНТЫ ПО ЗАНЯТИЯМ</button>
+                <button class="tab-button" data-tab="unlimited">БЕЗЛИМИТНЫЕ АБОНЕМЕНТЫ</button>
+                <button class="tab-button" data-tab="fitness">ФИТНЕС</button>
+
+                <style>
+                    /* Абонементы из БД показываются/скрываются JS (контейнеры) */
+                    #abonements-grid-by-class,
+                    #abonements-grid-unlimited,
+                    #abonements-grid-fitness { width: 100%; }
+                </style>
+
+            </div>
+            <div class="price-cards-grid">
+                <!-- Разовые занятия -->
+                <div class="price-card" data-tab="single">
+                    <div class="price-card-logo-bg"></div>
+                    <h3 class="price-card-title">Разовое занятие</h3>
+                    <p class="price-card-price">10 р.</p>
+                    <div class="price-card-details">
+                        <p>Тренажёры и кардиозона</p>
+                        <p>Без ограничения времени</p>
+                    </div>
+                </div>
+                <div class="price-card" data-tab="single">
+                    <div class="price-card-logo-bg"></div>
+                    <h3 class="price-card-title">Разовое групповое</h3>
+                    <p class="price-card-price">8 р.</p>
+                    <div class="price-card-details">
+                        <p>Йога, пилатес, стретчинг</p>
+                        <p>Зумба, силовые классы</p>
+                    </div>
+                </div>
+                <div class="price-card" data-tab="single">
+                    <div class="price-card-logo-bg"></div>
+                    <h3 class="price-card-title">Пробная с тренером</h3>
+                    <p class="price-card-price">12 р.</p>
+                    <div class="price-card-details">
+                        <p>Персональная тренировка</p>
+                        <p>Составление программы</p>
+                    </div>
+                </div>
+                <div class="price-card" data-tab="single">
+                    <div class="price-card-logo-bg"></div>
+                    <h3 class="price-card-title">Гостевой визит</h3>
+                    <p class="price-card-price">15 р.</p>
+                    <div class="price-card-details">
+                        <p>Для друзей и родственников</p>
+                        <p>участников клуба</p>
+                    </div>
+                </div>
+                <div class="price-card" data-tab="single">
+                    <div class="price-card-logo-bg"></div>
+                    <h3 class="price-card-title">Тренировка выходного дня</h3>
+                    <p class="price-card-price">9 р.</p>
+                    <div class="price-card-details">
+                        <p>Суббота, воскресенье</p>
+                        <p>Праздничные дни</p>
+                    </div>
+                </div>
+                <!-- Абонементы по занятиям -->
+                <!-- Абонементы: заполняются через /api/abonements (JS) -->
+                <div id="abonements-grid-by-class" class="abonements-grid-container" data-tab="by-class" style="display:none;"></div>
+                <div id="abonements-grid-unlimited" class="abonements-grid-container" data-tab="unlimited" style="display:none;"></div>
+                <div id="abonements-grid-fitness" class="abonements-grid-container" data-tab="fitness" style="display:none;"></div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-block footer-brand">
+                <a href="#" class="footer-logo">FOX CLUB</a>
+                <p class="footer-slogan">Станьте клиентом нашей сети.<br>Мы Fox Club!</p>
+                <a href="#" class="btn btn-primary footer-btn">Записаться на занятие</a>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Минск</h4>
+                    <p>УЛИЦА КАЗИНЦА, 11А (БЦ, ГЕРМЕС)</p>
+                    <p>УЛИЦА ДОЛГОБРОДСКАЯ, 43</p>
+                    <p>УЛИЦА ГРУШЕВСКАЯ, 83</p>
+                </div>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Могилев</h4>
+                    <p>ПРОСПЕКТ ШМИДТА, 46</p>
+                </div>
+                <div class="location-group">
+                    <h4 class="location-title">Гродно</h4>
+                    <p>ПРОСПЕКТ Я.КУПАЛЫ, 22</p>
+                </div>
+            </div>
+            <div class="footer-social">
+                <a href="#" class="social-icon"><img src="assets/images/icons/facebook.png" alt="Facebook"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/instagram.png" alt="Instagram"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/vk.png" alt="VK"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/youtube.png" alt="YouTube"></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright © 2003-2025</p>
+                <p>Сеть тренажерных залов Fox Club</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/posts.js"></script>
+    <script>
+        // Загрузка случайных постов на главной
+        (function() {
+            const homeGrid = document.getElementById('homePostsGrid');
+            const loader = document.getElementById('homePostsLoader');
+            const emptyEl = document.getElementById('homePostsEmpty');
+            if (!homeGrid || !window.loadRandomHomePosts) return;
+
+            window.loadRandomHomePosts({
+                count: 3,
+                gridEl: homeGrid,
+                loaderEl: loader,
+                emptyEl: emptyEl
+            });
+
+            // На всякий случай, если JS не прогрузился
+            if (loader) loader.style.display = 'block';
+        })();
+    </script>
+    <script>
+
+        // Дополнительно для страницы index: если пользователь залогинен, updateUserUI сам добавит блок
+        // Также добавим обработку плавной навигации (уже есть в main.js, но продублируем для надёжности)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Табы для цен
+            const tabs = document.querySelectorAll(".tab-button");
+            const cards = document.querySelectorAll(".price-card");
+            if (tabs.length && cards.length) {
+                tabs.forEach(tab => {
+                    tab.addEventListener("click", () => {
+                        tabs.forEach(btn => btn.classList.remove("active"));
+                        tab.classList.add("active");
+                        const target = tab.getAttribute("data-tab");
+                        cards.forEach(card => {
+                            if (card.getAttribute("data-tab") === target) {
+                                card.classList.remove("hidden");
+                            } else {
+                                card.classList.add("hidden");
+                            }
+                        });
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+
+
+
+.floating-login-logo {
+    position: absolute; 
+    top: 30px; 
+    left: 40px; 
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffcc00; 
+    text-decoration: none;
+    letter-spacing: 1px;
+    z-index: 100; 
+    transition: color 0.3s ease;
+}
+
+.floating-login-logo:hover {
+    color: #e6b800;
+}
+
+
+
+
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    min-height: 100vh; 
+    background-color: #f0f2f5;
+    padding: 20px 0;
+    
+    
+    
+}
+
+
+.login-form {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    
+    margin-top: -50px; 
+    
+}
+
+
+.login-form h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: #ffcc00;
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+    outline: none;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 5px;
+    min-height: 18px;
+    text-align: left;
+}
+
+.login-form .btn-primary {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 20px;
+    background-color: #ffcc00;
+    color: #333;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-form .btn-primary:hover {
+    background-color: #e6b800;
+    transform: translateY(-2px);
+}
+
+.login-form .btn-primary:active {
+    transform: translateY(0);
+}
+
+
+@media (max-width: 768px) {
+    .floating-login-logo {
+        top: 20px;
+        left: 20px;
+        font-size: 28px;
+    }
+    .login-form {
+        margin: 0 20px; 
+        padding: 30px;
+        margin-top: -50px; 
+    }
+    .login-form h2 {
+        font-size: 24px;
+        margin-bottom: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-login-logo {
+        top: 15px;
+        left: 15px;
+        font-size: 24px;
+    }
+    .login-form {
+        margin: 0 15px;
+        padding: 25px;
+        border-radius: 8px;
+        margin-top: -30px; 
+    }
+    .login-form h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+}

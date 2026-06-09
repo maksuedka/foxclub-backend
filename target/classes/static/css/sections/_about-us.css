@@ -1,0 +1,107 @@
+.about-us-section {
+    background-color: var(--bg-dark-header); 
+    padding: 50px 0; 
+    color: var(--text-color-light); 
+    position: relative;
+    overflow: hidden; 
+
+    
+    border-top-left-radius: 50px; 
+    border-top-right-radius: 50px; 
+
+    
+    margin-top: -50px; 
+
+    z-index: 3; 
+
+    
+    
+}
+
+.about-us-container {
+    position: relative; 
+    z-index: 1; 
+}
+
+.about-us-content {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 40px; 
+}
+
+.section-subtitle {
+    color: var(--primary-color); 
+    font-size: 1.1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: -20px; 
+    letter-spacing: 1px;
+}
+
+.section-title {
+    font-family: var(--font-family-main); 
+    font-size: 2.8em; 
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 40px; 
+    color: var(--text-color-light);
+}
+
+.about-us-main {
+    display: flex;
+    gap: 50px; 
+    width: 100%;
+    align-items: center; 
+    justify-content: center; 
+}
+
+.about-us-image {
+    flex: 1 1 55%; 
+    max-width: 800px; 
+    min-width: 5    00px; 
+    border-radius: 15px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+    position: relative;
+    padding: 5px; 
+    background: linear-gradient(45deg, var(--primary-color), #f7b731); 
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.about-us-image img {
+    display: block; 
+    width: 100%;
+    height: auto;
+    border-radius: 10px; 
+}
+
+.about-us-stats {
+    flex: 1 1 35%; 
+    display: flex;
+    flex-direction: column; 
+    gap: 30px; 
+    max-width: 300px; 
+    min-width: 250px; 
+}
+
+.stat-item {
+    padding: 15px 0;
+}
+
+.stat-number {
+    font-size: 3em; 
+    font-weight: bold;
+    color: var(--primary-color); 
+    display: block; 
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255, 140, 0, 0.6); 
+}
+
+.stat-description {
+    font-size: 1.1em;
+    color: var(--link-color); 
+    line-height: 1.4;
+}

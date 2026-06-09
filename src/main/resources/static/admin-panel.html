@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора | FoxClub</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox-plus-jquery.min.js"></script>
+
+    <link rel="stylesheet" href="css/pages/admin-panel.css">
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-sun"></i>
+        <span>Светлая тема</span>
+    </div>
+
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-paw"></i> FoxClub Admin
+        </div>
+        <ul class="nav-list" id="sidebarMenu">
+            <li style="padding:20px; text-align:center; color:#777;">
+                <i class="fas fa-spinner fa-spin"></i> Загрузка...
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-icon"><i class="fas fa-database"></i></div>
+                    <div class="stats-info">
+                        <p>Записей в таблице</p>
+                        <h3 id="totalRecords">0</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header-panel">
+                <div class="table-title">
+                    <h4 id="tableTitle">Таблица</h4>
+                    <p>Управление данными</p>
+                </div>
+                <div class="action-bar">
+                    <input type="text" id="searchBox" placeholder="Поиск...">
+                    <button class="btn-custom btn-add" onclick="openAddModal()" title="Создать новую запись">
+                        <i class="fas fa-plus"></i> Создать
+                    </button>
+                    <button class="btn-custom btn-del" onclick="deleteSelected()" title="Удалить выбранные записи">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                    <button class="btn-custom btn-exp" onclick="exportData()" title="Экспорт в Excel">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="btn-custom btn-scan" onclick="window.location.href='scanner.html'" title="Сканер QR-кодов абонементов">
+                        <i class="fas fa-qrcode"></i> Сканер
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="dataTable" class="table-hover">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="10" class="text-center p-4">
+                                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary-color)"></i>
+                                <p class="mt-2" style="color:var(--text-secondary);">Загрузка данных...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка комментариев -->
+    <div class="modal fade" id="commentsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Комментарии к посту #<span id="commentPostId"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="commentsList" class="list-group">
+                        <p class="text-center">Загрузка...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка для просмотра фото -->
+    <div class="modal fade" id="photosModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Фото поста #<span id="photosPostId"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="photosList" class="row g-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dataModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-edit me-2"></i>
+                        Запись
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dataForm" onsubmit="return false;">
+                        <div id="formFields" class="row g-3"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveData()">
+                        <i class="fas fa-save me-1"></i> Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/pages/admin-panel.js"></script>
+</body>
+</html>
+

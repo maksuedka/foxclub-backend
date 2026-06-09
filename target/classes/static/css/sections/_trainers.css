@@ -1,0 +1,101 @@
+
+
+.trainers-section {
+    width: 100%;
+    height: 70vh; 
+    background-image: url('../../assets/images/coach.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center; 
+    position: relative; 
+    color: #fff; 
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7); 
+}
+
+
+.trainers-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1; 
+}
+
+.trainers-content {
+    position: relative;
+    z-index: 2; 
+    padding-left: 20px; 
+    padding-right: 20px; 
+    max-width: 1280px; 
+    margin: 0 auto; 
+    width: 100%; 
+    text-align: left; 
+}
+
+.trainers-title {
+    font-family: var(--font-family-main); 
+    font-size: 3.0em; 
+    font-weight: bold;
+    line-height: 1.2;
+    margin: 0; 
+    color: var(--primary-color); 
+    margin-bottom: 15px; 
+}
+
+.trainers-description {
+    font-family: var(--font-family-main); 
+    font-size: 1.3em; 
+    line-height: 1.6; 
+    color: var(--text-color-light, #fff); 
+    margin-top: 40px; 
+    margin-bottom: 30px; 
+    max-width: 600px; 
+     
+}
+
+
+
+@media (max-width: 992px) {
+    .trainers-title {
+        font-size: 3em;
+    }
+    .trainers-description {
+        font-size: 1.2em;
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .trainers-section {
+        height: 40vh; 
+    }
+    .trainers-title {
+        font-size: 2.5em; 
+    }
+    .trainers-description {
+        font-size: 1.1em; 
+        max-width: 90%; 
+    }
+}
+
+@media (max-width: 480px) {
+    .trainers-section {
+        height: 35vh; 
+    }
+    .trainers-title {
+        font-size: 2em;
+    }
+    .trainers-content {
+        padding-left: 15px; 
+        padding-right: 15px;
+    }
+    .trainers-description {
+        font-size: 1em; 
+        margin-bottom: 20px; 
+    }
+}

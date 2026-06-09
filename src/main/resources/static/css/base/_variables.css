@@ -1,0 +1,21 @@
+
+:root {
+    --primary-color: #FF7F00; 
+    --text-color-light: #f0f0f0; 
+    --text-color-dark: #333; 
+    --bg-dark-header: #0A0A0A; 
+    --bg-dark: #201E1E;
+    --link-color: #ccc; 
+    --link-hover-color: var(--primary-color); 
+
+    --header-height: 70px; 
+
+    --font-family-main: 'Roboto', sans-serif; 
+    --container-padding-x: 20px; 
+
+        
+    --gradient-orange-start: #8b4907; 
+    --gradient-dark-end: #0A0A0A; 
+    --gradient-stroke-light: #FF7F00; 
+    --gradient-stroke-transparent-dark: rgba(0, 0, 0, 0); 
+}

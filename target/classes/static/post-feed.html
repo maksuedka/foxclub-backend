@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента постов | FOX CLUB</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components/posts.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        .main-header {
+            background-color: rgba(0, 0, 0, 0.95);
+            border-bottom: 1px solid #333;
+            padding: 15px 0;
+        }
+        .logo {
+            color: #ff8c00;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .posts-section {
+            background-color: #1a1a1a;
+            padding: 40px 0;
+            min-height: 100vh;
+        }
+        .section-title {
+            color: #fff;
+            font-size: 28px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            color: #ff8c00;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .btn-pagination, .btn-page {
+            transition: 0.2s;
+        }
+        .btn-pagination:hover, .btn-page:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    <script>
+        (function() {
+            const blockFunctions = [
+                'openGoalDetailModal', 'openCommentsModal', 'openPurchaseModal', 
+                'showUserQrCode', 'showQrCode', 'openModal', 'openFullCommentsModal'
+            ];
+            blockFunctions.forEach(fn => {
+                if (window[fn]) {
+                    window['__' + fn] = window[fn];
+                    window[fn] = function() { console.log('Блокирован вызов', fn); };
+                } else {
+                    window[fn] = function() {};
+                }
+            });
+            const hideModals = () => {
+                document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            };
+            hideModals();
+            const observer = new MutationObserver(() => hideModals());
+            observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
+            setTimeout(() => {
+                observer.disconnect();
+                blockFunctions.forEach(fn => {
+                    if (window['__' + fn]) window[fn] = window['__' + fn];
+                });
+            }, 2000);
+        })();
+    </script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">FOX CLUB</a>
+            <div class="profile-info"></div>
+        </div>
+    </header>
+
+    <section class="posts-section">
+        <div class="container">
+            <h2 class="section-title">Лента постов</h2>
+            <div id="feedPosts" class="my-posts-grid">
+                <p class="loading-message">Загрузка постов...</p>
+            </div>
+            <div id="feedPagination" style="margin-top: 40px; text-align: center;"></div>
+        </div>
+    </section>
+
+    <div id="commentsModal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <span class="close-button" id="closeCommentsModal">&times;</span>
+            <h2>Комментарии</h2>
+            <div id="commentsList" style="max-height: 400px; overflow-y: auto; margin: 20px 0;"></div>
+            <div class="modal-comment-form" style="display: flex; gap: 10px; margin-top: 20px;">
+                <textarea id="commentText" placeholder="Ваш комментарий..." rows="3" style="flex: 1; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 12px; padding: 12px; resize: vertical;"></textarea>
+                <button id="sendCommentBtn" class="btn-send-comment" style="background: #ff8c00; border: none; border-radius: 12px; padding: 0 24px; color: white; font-weight: bold; cursor: pointer;">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox">
+        <button class="lightbox-close">&times;</button>
+        <div class="lightbox-content">
+            <img class="lightbox-img" src="">
+            <button class="lightbox-prev">&#10094;</button>
+            <button class="lightbox-next">&#10095;</button>
+        </div>
+        <div class="lightbox-indicators"></div>
+    </div>
+
+    <div id="temporaryMessage" class="temporary-message" style="display: none;"></div>
+
+    <script src="js/main.js"></script>
+    <script src="js/posts.js"></script>
+</body>
+</html>
