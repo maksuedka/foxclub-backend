@@ -1,0 +1,10 @@
+# Продакшн конфигурация (чтобы пароли не попали в GitHub)
+application-production.properties
+
+# Папка сборки
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
