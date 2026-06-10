@@ -9,6 +9,5 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private Integer clubId;
-    private Integer abonementId;
-    private String avatarUrl;   // добавлено
+    private String avatarUrl;
 }

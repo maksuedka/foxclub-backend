@@ -38,7 +38,7 @@ public class DashboardController {
         RU_HEADERS.put("firstName", "Имя");
         RU_HEADERS.put("lastName", "Фамилия");
         RU_HEADERS.put("club", "Клуб");
-        RU_HEADERS.put("abonementId", "Абонемент");
+        // поле abonementId удалено, так как его больше нет в User
 
         // Клуб
         RU_HEADERS.put("name", "Название");
@@ -147,7 +147,7 @@ public class DashboardController {
                     user.setPassword(getString(payload, "password"));
                     user.setFirstName(getString(payload, "firstName"));
                     user.setLastName(getString(payload, "lastName"));
-                    user.setAbonementId(getInteger(payload, "abonementId"));
+                    // user.setAbonementId(...) – удалено, так как поля больше нет
 
                     Integer clubId = getInteger(payload, "club");
                     if (clubId != null) {
@@ -356,7 +356,7 @@ public class DashboardController {
                                     RU_HEADERS.getOrDefault(key, key)))
                             .append("</th>");
                 }
-                sb.append("</tr>");
+                sb.append("</table>");
 
                 for (Map<String, Object> row : data) {
                     sb.append("<tr>");

@@ -16,5 +16,7 @@ public interface UserMapper {
 
     @Mapping(target = "club", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "goals", ignore = true)
+    @Mapping(target = "avatarUrl", source = "avatarUrl")
     User toEntity(UserDto dto);
 }

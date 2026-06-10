@@ -2,6 +2,7 @@
  * Основной JavaScript файл для Fitness Club
  * Исправления: отображение имени в профиле, устранение дублирования кнопки входа
  * Удалены все функции покупки абонементов (доступно только через админку)
+ * Регистрация теперь не требует выбора клуба.
  */
 
 // ======================= КОНСТАНТЫ И КОНФИГУРАЦИЯ =======================
@@ -762,10 +763,6 @@ async function getAllClubs() {
 
 // ======================= Загрузка абонементов на главную =======================
 function getAbonementsGroupKey(abonement) {
-    // Нет поля "тип" в AbonementDto, поэтому группируем по длительности:
-    // - 0..30 дней => by-class
-    // - 31..150 дней => unlimited
-    // - всё остальное => fitness
     const d = abonement.duration;
     if (d == null) return 'by-class';
     if (d <= 30) return 'by-class';
@@ -794,9 +791,9 @@ function renderAbonementCard(abonement) {
 function escapeHtml(str) {
     return String(str ?? '')
         .replace(/&/g, '&amp;')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
 
@@ -807,7 +804,6 @@ async function loadAbonementsForHome() {
 
     if (!byClassEl || !unlimitedEl || !fitnessEl) return;
 
-    // Покажем индикатор загрузки во всех контейнерах
     byClassEl.innerHTML = '<div class="price-card" style="padding:30px;">Загрузка...</div>';
     unlimitedEl.innerHTML = '';
     fitnessEl.innerHTML = '';
@@ -825,7 +821,6 @@ async function loadAbonementsForHome() {
             });
         }
 
-        // Заполнение контейнеров
         byClassEl.innerHTML = groups['by-class'].length
             ? groups['by-class'].map(renderAbonementCard).join('')
             : '<p class="empty-message">Абонементов пока нет</p>';
@@ -851,30 +846,25 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM загружен - инициализация...");
     
     applyAllStyles();
-    updateUserUI(); // обновляем шапку, кроме profile.html и login.html
+    updateUserUI();
     
     const user = getCurrentUser();
-
-    
 
     // Подгружаем абонементы на главной
     if (window.location.pathname.includes('index.html')) {
         loadAbonementsForHome();
     }
 
-    // *** На странице профиля: обновляем имя и загружаем данные ***
+    // На странице профиля
     if (window.location.pathname.includes('profile.html')) {
-        // Обновляем имя пользователя
         const profileName = document.getElementById('profileUserName');
         if (profileName && user) {
             profileName.textContent = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Пользователь';
         }
-        // Если нет пользователя – редирект
         if (!user) {
             window.location.href = 'login.html';
             return;
         }
-        // Загружаем только купленные абонементы, цели
         loadMyAbonements();
         loadGoals();
     }
@@ -889,7 +879,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Показать QR-код пользователя (кнопка в профиле)
     const showUserQrBtn = document.getElementById('showUserQrBtn');
     if (showUserQrBtn) {
         showUserQrBtn.addEventListener('click', showUserQrCode);
@@ -902,7 +891,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Закрытие QR-модалки
     const closeQrModal = document.getElementById('closeQrModal');
     if (closeQrModal) {
         closeQrModal.addEventListener('click', () => {
@@ -924,7 +912,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tab.classList.add("active");
                 const target = tab.getAttribute("data-tab");
 
-                // Показываем/скрываем статические карточки (разовые занятия)
                 cards.forEach(card => {
                     if (card.getAttribute("data-tab") === target) {
                         card.classList.remove("hidden");
@@ -933,7 +920,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
 
-                // Показываем/скрываем динамические контейнеры с абонементами из БД
                 if (byClassGrid) byClassGrid.style.display = target === 'by-class' ? '' : 'none';
                 if (unlimitedGrid) unlimitedGrid.style.display = target === 'unlimited' ? '' : 'none';
                 if (fitnessGrid) fitnessGrid.style.display = target === 'fitness' ? '' : 'none';
@@ -1148,7 +1134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // ФОРМА РЕГИСТРАЦИИ (с автоматическим логином)
+    // ФОРМА РЕГИСТРАЦИИ (исправлена: клуб не обязателен)
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
@@ -1158,21 +1144,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const regEmail = document.getElementById('regEmail');
             const regPassword = document.getElementById('regPassword');
             const regClub = document.getElementById('regClub');
-            if (!regFirstName || !regLastName || !regEmail || !regPassword || !regClub) {
+            if (!regFirstName || !regLastName || !regEmail || !regPassword) {
                 alert("Пожалуйста, заполните все поля");
                 return;
             }
-            const clubId = regClub.value;
-            if (!clubId) {
-                alert("Выберите клуб");
-                return;
+            let clubId = null;
+            if (regClub && regClub.value) {
+                clubId = parseInt(regClub.value);
             }
             const registerData = {
                 firstName: regFirstName.value,
                 lastName: regLastName.value,
                 email: regEmail.value,
                 password: regPassword.value,
-                clubId: parseInt(clubId)
+                clubId: clubId
             };
             try {
                 const registerResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -1241,7 +1226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Загрузка клубов по городу на странице регистрации
+    // Загрузка клубов по городу на странице регистрации (но только если есть город)
     const regClubSelect = document.getElementById('regClub');
     const urlParams = new URLSearchParams(window.location.search);
     let cityParam = urlParams.get('city') ? decodeURIComponent(urlParams.get('city')).trim() : null;
@@ -1253,7 +1238,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cityParam) {
             loadClubsByCity(cityParam);
         } else {
-            regClubSelect.innerHTML = '<option value="">Сначала выберите город</option>';
+            // Если город не выбран, загружаем все клубы (без фильтрации)
+            loadClubsByCity('');
         }
     }
     

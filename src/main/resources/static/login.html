@@ -402,11 +402,11 @@
 
                     <div class="form-group">
                         <label>
-                            Выберите клуб:
+                            Выберите клуб (необязательно):
                         </label>
                         <div class="custom-select-wrapper">
-                            <select id="regClub" name="club" class="custom-select" required>
-                                <option value="" disabled selected>🏋️‍♂️ Выберите ближайший клуб</option>
+                            <select id="regClub" name="club" class="custom-select">
+                                <option value="" selected>📌 Не выбран (можно добавить позже)</option>
                                 <!-- Клубы будут загружены через JavaScript -->
                             </select>
                         </div>
@@ -422,34 +422,22 @@
 
     <script src="js/main.js"></script>
     
-    <!-- Добавим скрипт для загрузки клубов с адресами -->
+    <!-- Скрипт загрузки клубов (все клубы, без фильтрации по городу) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const regClubSelect = document.getElementById('regClub');
-            const urlParams = new URLSearchParams(window.location.search);
-            let cityParam = urlParams.get('city') ? decodeURIComponent(urlParams.get('city')).trim() : null;
 
-            // Маппинг городов
-            const cityMapping = {
-                "minsk": "Минск",
-                "mogilev": "Могилев",
-                "grodno": "Гродно"
-            };
-
-            if (cityParam) {
-                const lower = cityParam.toLowerCase();
-                cityParam = cityMapping[lower] || cityParam;
-            }
-
-            // Функция загрузки клубов
-            async function loadClubsByCity(city) {
+            // Функция загрузки всех клубов
+            async function loadAllClubs() {
                 if (!regClubSelect) return;
                 
                 try {
-                    // Показываем загрузку
-                    regClubSelect.innerHTML = '<option value="" disabled selected>⏳ Загрузка клубов...</option>';
+                    // Сохраняем опцию "Не выбран" как первую
+                    const emptyOption = '<option value="" selected>📌 Не выбран (можно добавить позже)</option>';
+                    regClubSelect.innerHTML = emptyOption + '<option value="" disabled>⏳ Загрузка клубов...</option>';
                     
-                    const response = await fetch(`http://localhost:8080/api/clubs?city=${encodeURIComponent(city)}`);
+                    // Загружаем все клубы без параметра city
+                    const response = await fetch(`http://localhost:8080/api/clubs`);
                     
                     if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
                     
@@ -457,47 +445,36 @@
                     console.log('Loaded clubs:', clubs);
                     
                     if (!Array.isArray(clubs) || clubs.length === 0) {
-                        regClubSelect.innerHTML = '<option value="" disabled>😕 Клубы не найдены</option>';
+                        regClubSelect.innerHTML = emptyOption + '<option value="" disabled>😕 Клубы не найдены</option>';
                         return;
                     }
 
-                    // Очищаем и добавляем опции с адресами
-                    regClubSelect.innerHTML = '<option value="" disabled selected>🏋️‍♂️ Выберите клуб</option>';
+                    // Очищаем и добавляем опции, первая - "Не выбран"
+                    regClubSelect.innerHTML = emptyOption;
                     
                     clubs.forEach(club => {
                         const option = document.createElement('option');
                         option.value = club.id;
                         
-                        // Форматируем текст опции: адрес (город)
-                        // Если есть название клуба и оно отличается от адреса, добавляем его
+                        // Форматируем текст опции: адрес (или название, если есть)
                         let displayText = club.address;
                         if (club.name && !club.address.includes(club.name)) {
                             displayText = `${club.name} - ${club.address}`;
                         }
                         
                         option.textContent = displayText;
-                        
-                        // Добавляем data-атрибуты для возможности стилизации через CSS
-                        option.setAttribute('data-address', club.address);
-                        option.setAttribute('data-city', club.city || city);
-                        
                         regClubSelect.appendChild(option);
                     });
                     
                 } catch (error) {
                     console.error("Ошибка загрузки клубов:", error);
-                    regClubSelect.innerHTML = '<option value="" disabled>❌ Ошибка загрузки клубов</option>';
+                    regClubSelect.innerHTML = '<option value="" selected>📌 Не выбран (можно добавить позже)</option><option value="" disabled>❌ Ошибка загрузки клубов</option>';
                 }
             }
 
-            // Загружаем клубы если есть город
+            // Загружаем все клубы при загрузке страницы
             if (regClubSelect) {
-                if (cityParam) {
-                    loadClubsByCity(cityParam);
-                } else {
-                    // Если город не выбран, показываем все клубы
-                    regClubSelect.innerHTML = '<option value="" disabled selected>📍 Сначала выберите город на главной</option>';
-                }
+                loadAllClubs();
             }
             
             // Добавим немного интерактивности для селекта

@@ -34,19 +34,17 @@ public class User {
     private String lastName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_клуба")
+    @JoinColumn(name = "id_клуба", nullable = true)
     @ToString.Exclude
     private Club club;
 
-    @Column(name = "id_абонемента")
-    private Integer abonementId;  // Просто ID абонемента, не связь
+    // поле abonementId удалено, т.к. абонементы теперь через таблицу покупок
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     @ToString.Exclude
     private List<Goal> goals;
 
-    // НОВОЕ ПОЛЕ ДЛЯ АВАТАРА
     @Column(name = "avatar_url")
     private String avatarUrl;
 

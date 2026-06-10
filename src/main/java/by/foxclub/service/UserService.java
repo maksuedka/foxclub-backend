@@ -41,16 +41,20 @@ public class UserService {
             throw new RuntimeException("Email уже используется");
         }
 
-        Club club = clubRepository.findById(request.getClubId())
-                .orElseThrow(() -> new RuntimeException("Клуб не найден"));
-
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        user.setClub(club);
-        // abonementId = null при регистрации
+
+        // Клуб опционален: если передан, ищем и устанавливаем
+        if (request.getClubId() != null && request.getClubId() > 0) {
+            Club club = clubRepository.findById(request.getClubId())
+                    .orElseThrow(() -> new RuntimeException("Клуб не найден"));
+            user.setClub(club);
+        } else {
+            user.setClub(null);
+        }
 
         return userMapper.toDto(userRepository.save(user));
     }
@@ -72,12 +76,14 @@ public class UserService {
 
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setAbonementId(dto.getAbonementId());
 
-        if (dto.getClubId() != null) {
+        // Обновляем клуб, если передан
+        if (dto.getClubId() != null && dto.getClubId() > 0) {
             Club club = clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
             user.setClub(club);
+        } else {
+            user.setClub(null); // если передали null или 0, сбрасываем клуб
         }
 
         return userMapper.toDto(userRepository.save(user));
