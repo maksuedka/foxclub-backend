@@ -1,9 +1,23 @@
-/* admin-panel logic extracted from inline <script> in admin-panel.html */
+/* admin-panel.js – универсальная работа и локально, и на Railway */
 
-const API_URL = 'http://localhost:8080/api/dashboard';
-const ADMIN_POSTS_URL = 'http://localhost:8080/api/admin/posts';
-const COMMENTS_API = 'http://localhost:8080/api/comments';
+// ======================= АВТООПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
+function getBaseUrl() {
+    // Если мы на localhost или 127.0.0.1, используем локальный бэкенд
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8080';
+    }
+    // Иначе берём текущий протокол и хост (работает на Railway)
+    return `${window.location.protocol}//${window.location.hostname}`;
+}
 
+const BASE_URL = getBaseUrl();
+const API_URL = `${BASE_URL}/api/dashboard`;
+const ADMIN_POSTS_URL = `${BASE_URL}/api/admin/posts`;
+const COMMENTS_API = `${BASE_URL}/api/comments`;
+
+console.log('Admin panel using API base:', BASE_URL); // Для отладки
+
+// ======================= ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ (кроме исправления ошибок) =======================
 let currentTable = '';
 let tableHeaders = [];
 let tableData = [];
@@ -47,7 +61,7 @@ async function loadReferenceData() {
         if (usersRes.ok) usersList = (await usersRes.json()).data || [];
         if (abonementsRes.ok) abonementsList = (await abonementsRes.json()).data || [];
     } catch (e) {
-        console.warn(e);
+        console.warn('Ошибка загрузки справочных данных:', e);
     }
 }
 
@@ -84,14 +98,13 @@ async function loadMenu() {
 }
 
 async function showPostsModeration(element) {
-    // Убираем активный класс со всех пунктов меню
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     if (element) element.classList.add('active');
 
     currentTable = 'posts_moderation';
     document.getElementById('tableTitle').innerText = 'Модерация постов';
     document.getElementById('totalRecords').innerText = '0';
-    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка постов...</p></td></tr>`;
+    document.getElementById('tableBody').innerHTML = `<td><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка постов...</p></td></tr>`;
 
     try {
         const res = await fetch(ADMIN_POSTS_URL);
@@ -301,12 +314,12 @@ function renderTable(data) {
     tableHeaders.forEach(h => {
         headHtml += `<th onclick="sortData('${h.key}')">${h.title} <i class="fas fa-sort small"></i></th>`;
     });
-    headHtml += '</table>';
+    headHtml += '</tr>';
 
     thead.innerHTML = headHtml;
 
     if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${tableHeaders.length + 1}" class="empty-state">Нет записей</td></tr>`;
+        tbody.innerHTML = `<td><td colspan="${tableHeaders.length + 1}" class="empty-state">Нет записей</td></tr>`;
         return;
     }
 
