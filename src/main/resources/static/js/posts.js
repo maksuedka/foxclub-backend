@@ -1,10 +1,24 @@
 // posts.js – полная логика постов, комментариев, карусели, лайтбокса и ленты
 // Добавлена проверка авторизации для комментариев и красивые сообщения
 // На ленте и главной странице скрыт статус "Одобрен / На модерации"
-(function() {
-    const API_POSTS_URL = "http://localhost:8080/api/posts";
-    const API_COMMENTS_URL = "http://localhost:8080/api/comments";
+// Автоопределение базового URL (работает и локально, и на Railway)
 
+(function() {
+    // ======================= АВТООПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
+    function getBaseUrl() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:8080';
+        }
+        return `${window.location.protocol}//${window.location.hostname}`;
+    }
+
+    const BASE_URL = getBaseUrl();
+    const API_POSTS_URL = `${BASE_URL}/api/posts`;
+    const API_COMMENTS_URL = `${BASE_URL}/api/comments`;
+
+    console.log('Posts.js using API base:', BASE_URL); // Для отладки
+
+    // ========== ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ (кроме исправления ошибок) ==========
     function getUser() {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
