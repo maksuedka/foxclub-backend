@@ -45,7 +45,7 @@ public class DashboardController {
         RU_HEADERS.put("address", "Адрес");
         RU_HEADERS.put("contacts", "Контакты");
         RU_HEADERS.put("workingHours", "Время работы");
-        RU_HEADERS.put("imageUrl", "Изображение");
+        // imageUrl удалён
 
         // Абонемент
         RU_HEADERS.put("abonement_name", "Название");
@@ -165,7 +165,7 @@ public class DashboardController {
                     club.setAddress(getString(payload, "address"));
                     club.setContacts(getString(payload, "contacts"));
                     club.setWorkingHours(getString(payload, "workingHours"));
-                    club.setImageUrl(getString(payload, "imageUrl"));
+                    // setImageUrl удалён
                     clubRepository.save(club);
                     break;
 
@@ -361,7 +361,7 @@ public class DashboardController {
                 for (Map<String, Object> row : data) {
                     sb.append("<tr>");
                     for (Object val : row.values()) {
-                        sb.append("<td>").append(val != null ? val : "").append("</td>");
+                        sb.append("<td>").append(val != null ? val : "").append("</table>");
                     }
                     sb.append("</table>");
                 }

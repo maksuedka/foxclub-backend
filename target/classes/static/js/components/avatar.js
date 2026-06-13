@@ -1,6 +1,18 @@
 // Avatar component logic (extracted from inline script in profile.html)
-
 (function () {
+    // Определяем базовый URL (как в main.js)
+    function getBaseUrl() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:8080';
+        }
+        return `${window.location.protocol}//${window.location.hostname}`;
+    }
+    const BASE_URL = getBaseUrl();
+    const API_USERS_URL = `${BASE_URL}/api/users`;
+
+    // Путь к картинке-заглушке (проверяем существование, но используем всегда)
+    const DEFAULT_AVATAR_URL = '/assets/images/default-avatar.png';
+
     const userStr = localStorage.getItem('user');
     if (!userStr) return;
 
@@ -26,16 +38,25 @@
     let cropper = null;
     let currentFile = null;
 
+    // Устанавливаем аватар с fallback на заглушку
+    function setAvatarSrc(imgElement, url) {
+        const src = url && url.trim() !== '' ? url : DEFAULT_AVATAR_URL;
+        imgElement.src = src;
+        imgElement.onerror = function() {
+            this.src = DEFAULT_AVATAR_URL;
+        };
+    }
+
     if (!avatarThumb || !modal) return;
 
-    avatarThumb.src = user.avatarUrl || '/assets/images/default-avatar.png';
+    setAvatarSrc(avatarThumb, user.avatarUrl);
     avatarThumb.addEventListener('click', () => openModal());
 
     function openModal() {
         modal.style.display = 'flex';
 
         if (previewBig) {
-            previewBig.src = user.avatarUrl || '/assets/images/default-avatar.png';
+            setAvatarSrc(previewBig, user.avatarUrl);
             previewBig.style.display = 'block';
         }
 
@@ -83,7 +104,6 @@
 
             if (cropper) cropper.destroy();
 
-            // Cropper global is expected from CDN script
             cropper = new Cropper(cropImage, {
                 aspectRatio: 1,
                 viewMode: 2,
@@ -141,7 +161,7 @@
         formData.append('avatar', blob, 'avatar.jpg');
 
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${user.id}/avatar`, {
+            const response = await fetch(`${API_USERS_URL}/${user.id}/avatar`, {
                 method: 'POST',
                 body: formData
             });
@@ -155,8 +175,8 @@
             user.avatarUrl = data.avatarUrl;
             localStorage.setItem('user', JSON.stringify(user));
 
-            if (avatarThumb) avatarThumb.src = data.avatarUrl;
-            if (previewBig) previewBig.src = data.avatarUrl;
+            setAvatarSrc(avatarThumb, data.avatarUrl);
+            if (previewBig) setAvatarSrc(previewBig, data.avatarUrl);
 
             alert('Аватар обновлён!');
             closeModal();
@@ -196,4 +216,3 @@
         });
     }
 })();
-

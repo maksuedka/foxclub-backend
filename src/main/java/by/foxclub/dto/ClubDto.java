@@ -10,5 +10,5 @@ public class ClubDto {
     private String address;
     private String contacts;
     private String workingHours;
-    private String imageUrl;
+    // imageUrl удалено
 }

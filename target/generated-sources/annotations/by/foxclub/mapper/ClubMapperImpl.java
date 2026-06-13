@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-10T18:30:03+0300",
+    date = "2026-06-13T17:45:35+0300",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
 )
 @Component
@@ -26,7 +26,6 @@ public class ClubMapperImpl implements ClubMapper {
         clubDto.setAddress( club.getAddress() );
         clubDto.setContacts( club.getContacts() );
         clubDto.setWorkingHours( club.getWorkingHours() );
-        clubDto.setImageUrl( club.getImageUrl() );
 
         return clubDto;
     }
@@ -44,7 +43,6 @@ public class ClubMapperImpl implements ClubMapper {
         club.setAddress( dto.getAddress() );
         club.setContacts( dto.getContacts() );
         club.setWorkingHours( dto.getWorkingHours() );
-        club.setImageUrl( dto.getImageUrl() );
 
         return club;
     }

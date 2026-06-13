@@ -29,6 +29,5 @@ public class Club {
     @Column(name = "время_работы")
     private String workingHours;
 
-    @Column(name = "изображение")
-    private String imageUrl;
+    // поле imageUrl удалено
 }

@@ -49,7 +49,7 @@ public class ClubService {
         club.setAddress(dto.getAddress());
         club.setContacts(dto.getContacts());
         club.setWorkingHours(dto.getWorkingHours());
-        club.setImageUrl(dto.getImageUrl());
+        // imageUrl удалён
 
         return clubMapper.toDto(clubRepository.save(club));
     }
