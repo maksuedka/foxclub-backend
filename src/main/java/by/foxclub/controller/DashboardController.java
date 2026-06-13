@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://127.0.0.1:5500", "http://localhost:5500"})
+// @CrossOrigin удалён – теперь используются глобальные настройки из WebConfig
 public class DashboardController {
 
     private final UserRepository userRepository;
@@ -356,14 +356,14 @@ public class DashboardController {
                                     RU_HEADERS.getOrDefault(key, key)))
                             .append("</th>");
                 }
-                sb.append("</table>");
+                sb.append("</tr>");
 
                 for (Map<String, Object> row : data) {
                     sb.append("<tr>");
                     for (Object val : row.values()) {
                         sb.append("<td>").append(val != null ? val : "").append("</td>");
                     }
-                    sb.append("</tr>");
+                    sb.append("</table>");
                 }
             }
             sb.append("</table></body></html>");
@@ -438,7 +438,6 @@ public class DashboardController {
     }
 
     private void deleteUserDependencies(Integer userId) {
-
         List<Goal> goals = goalRepository.findAll().stream()
                 .filter(g -> g.getUser() != null && userId.equals(g.getUser().getId()))
                 .collect(Collectors.toList());
@@ -455,7 +454,6 @@ public class DashboardController {
     }
 
     private void deleteClubDependencies(Integer clubId) {
-
         List<User> users = userRepository.findAll().stream()
                 .filter(u -> u.getClub() != null && clubId.equals(u.getClub().getId()))
                 .collect(Collectors.toList());
