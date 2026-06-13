@@ -75,7 +75,7 @@ async function loadMenu() {
         tables.forEach((t, index) => {
             const li = document.createElement('li');
             li.className = 'nav-item';
-            li.innerHTML = `<a class="nav-link ${index === 0 ? 'active' : ''}" onclick="selectTable('${t.key}', '${t.label}', this)"><i class="fas fa-table"></i> ${t.label}</a>`;
+            li.innerHTML = `<a class="nav-link ${index === 0 ? 'active' : ''}" data-key="${t.key}" data-label="${t.label}" onclick="selectTable('${t.key}', '${t.label}', this)"><i class="fas fa-table"></i> ${t.label}</a>`;
             menu.appendChild(li);
         });
 
@@ -89,8 +89,10 @@ async function loadMenu() {
         scannerLi.innerHTML = `<a class="nav-link" href="scanner.html"><i class="fas fa-qrcode"></i> Сканер QR</a>`;
         menu.appendChild(scannerLi);
 
+        // Автоматически загружаем первую таблицу
         if (tables.length > 0) {
-            await selectTable(tables[0].key, tables[0].label, menu.firstChild.querySelector('a'));
+            const firstTable = tables[0];
+            await selectTable(firstTable.key, firstTable.label, menu.querySelector('.nav-link.active'));
         }
     } catch (e) {
         document.getElementById('sidebarMenu').innerHTML = `<li style="padding:20px; text-align:center; color:#f44336;">Сервер недоступен</li>`;
@@ -289,7 +291,7 @@ async function selectTable(key, label, element) {
     currentTable = key;
 
     document.getElementById('tableTitle').innerText = label;
-    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка данных...</p></td></tr>`;
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка данных...</p></td></table>`;
 
     try {
         await loadReferenceData();
@@ -319,7 +321,7 @@ function renderTable(data) {
     thead.innerHTML = headHtml;
 
     if (data.length === 0) {
-        tbody.innerHTML = `<td><td colspan="${tableHeaders.length + 1}" class="empty-state">Нет записей</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${tableHeaders.length + 1}" class="empty-state">Нет записей</td></tr>`;
         return;
     }
 
