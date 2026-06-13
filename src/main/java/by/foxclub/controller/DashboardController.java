@@ -5,6 +5,7 @@ import by.foxclub.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
-// @CrossOrigin удалён – теперь используются глобальные настройки из WebConfig
 public class DashboardController {
 
     private final UserRepository userRepository;
@@ -28,6 +28,7 @@ public class DashboardController {
     private final GoalRepository goalRepository;
     private final AdminRepository adminRepository;
     private final PurchasedAbonementRepository purchasedAbonementRepository;
+    private final PasswordEncoder passwordEncoder;  // добавлено для шифрования паролей
 
     private static final Map<String, String> RU_HEADERS = new HashMap<>();
     static {
@@ -38,14 +39,12 @@ public class DashboardController {
         RU_HEADERS.put("firstName", "Имя");
         RU_HEADERS.put("lastName", "Фамилия");
         RU_HEADERS.put("club", "Клуб");
-        // поле abonementId удалено, так как его больше нет в User
 
         // Клуб
         RU_HEADERS.put("name", "Название");
         RU_HEADERS.put("address", "Адрес");
         RU_HEADERS.put("contacts", "Контакты");
         RU_HEADERS.put("workingHours", "Время работы");
-        // imageUrl удалён
 
         // Абонемент
         RU_HEADERS.put("abonement_name", "Название");
@@ -144,10 +143,12 @@ public class DashboardController {
                 case "users":
                     User user = (id != null) ? userRepository.findById(id).orElse(new User()) : new User();
                     user.setEmail(getString(payload, "email"));
-                    user.setPassword(getString(payload, "password"));
+                    String rawPassword = getString(payload, "password");
+                    if (rawPassword != null && !rawPassword.isEmpty()) {
+                        user.setPassword(passwordEncoder.encode(rawPassword));
+                    }
                     user.setFirstName(getString(payload, "firstName"));
                     user.setLastName(getString(payload, "lastName"));
-                    // user.setAbonementId(...) – удалено, так как поля больше нет
 
                     Integer clubId = getInteger(payload, "club");
                     if (clubId != null) {
@@ -165,7 +166,6 @@ public class DashboardController {
                     club.setAddress(getString(payload, "address"));
                     club.setContacts(getString(payload, "contacts"));
                     club.setWorkingHours(getString(payload, "workingHours"));
-                    // setImageUrl удалён
                     clubRepository.save(club);
                     break;
 
@@ -198,7 +198,10 @@ public class DashboardController {
                 case "admins":
                     Admin admin = (id != null) ? adminRepository.findById(id).orElse(new Admin()) : new Admin();
                     admin.setEmail(getString(payload, "email"));
-                    admin.setPassword(getString(payload, "password"));
+                    String adminRawPassword = getString(payload, "password");
+                    if (adminRawPassword != null && !adminRawPassword.isEmpty()) {
+                        admin.setPassword(passwordEncoder.encode(adminRawPassword));
+                    }
                     admin.setFirstName(getString(payload, "firstName"));
                     admin.setLastName(getString(payload, "lastName"));
 
@@ -361,9 +364,9 @@ public class DashboardController {
                 for (Map<String, Object> row : data) {
                     sb.append("<tr>");
                     for (Object val : row.values()) {
-                        sb.append("<td>").append(val != null ? val : "").append("</table>");
+                        sb.append("<td>").append(val != null ? val : "").append("</td>");
                     }
-                    sb.append("</table>");
+                    sb.append("</tr>");
                 }
             }
             sb.append("</table></body></html>");

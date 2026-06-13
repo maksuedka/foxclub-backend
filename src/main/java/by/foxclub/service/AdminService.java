@@ -7,6 +7,7 @@ import by.foxclub.mapper.AdminMapper;
 import by.foxclub.repository.AdminRepository;
 import by.foxclub.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final ClubRepository clubRepository;
     private final AdminMapper adminMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public List<AdminDto> getAll() {
         return adminRepository.findAll().stream()
@@ -40,6 +42,10 @@ public class AdminService {
 
         Admin admin = adminMapper.toEntity(dto);
         admin.setClub(club);
+        // Шифруем пароль при создании
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            admin.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
 
         return adminMapper.toDto(adminRepository.save(admin));
     }
@@ -50,6 +56,11 @@ public class AdminService {
 
         admin.setFirstName(dto.getFirstName());
         admin.setLastName(dto.getLastName());
+
+        // Обновляем пароль, если передан непустой
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            admin.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
 
         if (dto.getClubId() != null) {
             Club club = clubRepository.findById(dto.getClubId())

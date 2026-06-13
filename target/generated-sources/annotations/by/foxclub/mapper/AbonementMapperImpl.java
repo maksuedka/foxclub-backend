@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-13T17:45:35+0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
+    date = "2026-06-13T18:55:30+0300",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class AbonementMapperImpl implements AbonementMapper {
@@ -21,11 +21,11 @@ public class AbonementMapperImpl implements AbonementMapper {
 
         AbonementDto abonementDto = new AbonementDto();
 
+        abonementDto.setDate( abonement.getDate() );
+        abonementDto.setDuration( abonement.getDuration() );
         abonementDto.setId( abonement.getId() );
         abonementDto.setName( abonement.getName() );
         abonementDto.setPrice( abonement.getPrice() );
-        abonementDto.setDuration( abonement.getDuration() );
-        abonementDto.setDate( abonement.getDate() );
 
         return abonementDto;
     }
@@ -38,11 +38,11 @@ public class AbonementMapperImpl implements AbonementMapper {
 
         Abonement abonement = new Abonement();
 
+        abonement.setDate( dto.getDate() );
+        abonement.setDuration( dto.getDuration() );
         abonement.setId( dto.getId() );
         abonement.setName( dto.getName() );
         abonement.setPrice( dto.getPrice() );
-        abonement.setDate( dto.getDate() );
-        abonement.setDuration( dto.getDuration() );
 
         return abonement;
     }

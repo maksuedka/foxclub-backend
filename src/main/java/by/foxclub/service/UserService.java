@@ -9,6 +9,7 @@ import by.foxclub.mapper.UserMapper;
 import by.foxclub.repository.UserRepository;
 import by.foxclub.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
@@ -43,11 +45,10 @@ public class UserService {
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // Шифруем
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
-        // Клуб опционален: если передан, ищем и устанавливаем
         if (request.getClubId() != null && request.getClubId() > 0) {
             Club club = clubRepository.findById(request.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
@@ -63,7 +64,7 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Неверный пароль");
         }
 
@@ -77,13 +78,17 @@ public class UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
 
-        // Обновляем клуб, если передан
+        // Обновляем пароль, если передан непустой
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
         if (dto.getClubId() != null && dto.getClubId() > 0) {
             Club club = clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
             user.setClub(club);
         } else {
-            user.setClub(null); // если передали null или 0, сбрасываем клуб
+            user.setClub(null);
         }
 
         return userMapper.toDto(userRepository.save(user));
