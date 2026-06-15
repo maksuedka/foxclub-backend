@@ -45,7 +45,7 @@ public class UserService {
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // Шифруем
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
@@ -78,11 +78,7 @@ public class UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
 
-        // Обновляем пароль, если передан непустой
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        }
-
+        // Обновляем клуб, если передан
         if (dto.getClubId() != null && dto.getClubId() > 0) {
             Club club = clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
@@ -91,6 +87,7 @@ public class UserService {
             user.setClub(null);
         }
 
+        // Пароль не обновляется через DTO – только через DashboardController
         return userMapper.toDto(userRepository.save(user));
     }
 

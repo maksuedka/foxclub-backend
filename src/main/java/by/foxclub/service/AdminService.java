@@ -42,9 +42,10 @@ public class AdminService {
 
         Admin admin = adminMapper.toEntity(dto);
         admin.setClub(club);
-        // Шифруем пароль при создании
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            admin.setPassword(passwordEncoder.encode(dto.getPassword()));
+        // Пароль не устанавливаем из DTO – будет задан через DashboardController
+        // Для безопасности устанавливаем заглушку, но реальный пароль будет позже
+        if (admin.getPassword() == null) {
+            admin.setPassword(passwordEncoder.encode("temp"));
         }
 
         return adminMapper.toDto(adminRepository.save(admin));
@@ -57,17 +58,13 @@ public class AdminService {
         admin.setFirstName(dto.getFirstName());
         admin.setLastName(dto.getLastName());
 
-        // Обновляем пароль, если передан непустой
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            admin.setPassword(passwordEncoder.encode(dto.getPassword()));
-        }
-
         if (dto.getClubId() != null) {
             Club club = clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
             admin.setClub(club);
         }
 
+        // Пароль не обновляется через DTO – только через DashboardController
         return adminMapper.toDto(adminRepository.save(admin));
     }
 
