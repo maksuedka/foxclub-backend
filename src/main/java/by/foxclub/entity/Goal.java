@@ -36,8 +36,8 @@ public class Goal {
     @Column(name = "дата_окончания")
     private LocalDate endDate;
 
-    @Column(name = "описание")
-    private String description;
+    @Column(name = "описание", columnDefinition = "TEXT")
+    private String description;   // <-- ДОЛЖЕН БЫТЬ String!
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_пользователя")

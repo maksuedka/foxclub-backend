@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-13T18:55:30+0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-16T16:31:04+0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
 )
 @Component
 public class ClubMapperImpl implements ClubMapper {
@@ -21,10 +21,10 @@ public class ClubMapperImpl implements ClubMapper {
 
         ClubDto clubDto = new ClubDto();
 
-        clubDto.setAddress( club.getAddress() );
-        clubDto.setContacts( club.getContacts() );
         clubDto.setId( club.getId() );
         clubDto.setName( club.getName() );
+        clubDto.setAddress( club.getAddress() );
+        clubDto.setContacts( club.getContacts() );
         clubDto.setWorkingHours( club.getWorkingHours() );
 
         return clubDto;
@@ -38,10 +38,10 @@ public class ClubMapperImpl implements ClubMapper {
 
         Club club = new Club();
 
-        club.setAddress( dto.getAddress() );
-        club.setContacts( dto.getContacts() );
         club.setId( dto.getId() );
         club.setName( dto.getName() );
+        club.setAddress( dto.getAddress() );
+        club.setContacts( dto.getContacts() );
         club.setWorkingHours( dto.getWorkingHours() );
 
         return club;

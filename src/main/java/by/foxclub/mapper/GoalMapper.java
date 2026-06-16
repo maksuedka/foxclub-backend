@@ -12,8 +12,15 @@ public interface GoalMapper {
     GoalMapper INSTANCE = Mappers.getMapper(GoalMapper.class);
 
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(target = "initialValue", ignore = true)
+    @Mapping(target = "unit", ignore = true)
+    @Mapping(target = "history", ignore = true)
+    @Mapping(target = "exercise", ignore = true)
+    @Mapping(target = "fitnessLevel", ignore = true)
+    @Mapping(target = "userComment", ignore = true)
     GoalDto toDto(Goal goal);
 
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "description", source = "description")  // явно копируем
     Goal toEntity(GoalDto dto);
 }

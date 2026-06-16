@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-13T18:55:30+0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-16T16:31:04+0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
 )
 @Component
 public class GoalMapperImpl implements GoalMapper {
@@ -23,13 +23,13 @@ public class GoalMapperImpl implements GoalMapper {
         GoalDto goalDto = new GoalDto();
 
         goalDto.setUserId( goalUserId( goal ) );
-        goalDto.setCurrentValue( goal.getCurrentValue() );
-        goalDto.setDescription( goal.getDescription() );
-        goalDto.setEndDate( goal.getEndDate() );
         goalDto.setId( goal.getId() );
-        goalDto.setStartDate( goal.getStartDate() );
-        goalDto.setTargetValue( goal.getTargetValue() );
         goalDto.setType( goal.getType() );
+        goalDto.setTargetValue( goal.getTargetValue() );
+        goalDto.setCurrentValue( goal.getCurrentValue() );
+        goalDto.setStartDate( goal.getStartDate() );
+        goalDto.setEndDate( goal.getEndDate() );
+        goalDto.setDescription( goal.getDescription() );
 
         return goalDto;
     }
@@ -42,13 +42,13 @@ public class GoalMapperImpl implements GoalMapper {
 
         Goal goal = new Goal();
 
-        goal.setCurrentValue( dto.getCurrentValue() );
         goal.setDescription( dto.getDescription() );
-        goal.setEndDate( dto.getEndDate() );
         goal.setId( dto.getId() );
-        goal.setStartDate( dto.getStartDate() );
-        goal.setTargetValue( dto.getTargetValue() );
         goal.setType( dto.getType() );
+        goal.setTargetValue( dto.getTargetValue() );
+        goal.setCurrentValue( dto.getCurrentValue() );
+        goal.setStartDate( dto.getStartDate() );
+        goal.setEndDate( dto.getEndDate() );
 
         return goal;
     }

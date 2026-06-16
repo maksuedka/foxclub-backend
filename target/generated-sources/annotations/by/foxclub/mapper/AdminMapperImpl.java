@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-13T18:55:30+0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-16T16:31:04+0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
 )
 @Component
 public class AdminMapperImpl implements AdminMapper {
@@ -23,9 +23,9 @@ public class AdminMapperImpl implements AdminMapper {
         AdminDto adminDto = new AdminDto();
 
         adminDto.setClubId( adminClubId( admin ) );
+        adminDto.setId( admin.getId() );
         adminDto.setEmail( admin.getEmail() );
         adminDto.setFirstName( admin.getFirstName() );
-        adminDto.setId( admin.getId() );
         adminDto.setLastName( admin.getLastName() );
 
         return adminDto;
@@ -40,9 +40,9 @@ public class AdminMapperImpl implements AdminMapper {
         Admin admin = new Admin();
 
         admin.setClub( adminDtoToClub( dto ) );
+        admin.setId( dto.getId() );
         admin.setEmail( dto.getEmail() );
         admin.setFirstName( dto.getFirstName() );
-        admin.setId( dto.getId() );
         admin.setLastName( dto.getLastName() );
 
         return admin;

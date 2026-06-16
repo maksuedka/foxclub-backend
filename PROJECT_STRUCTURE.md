@@ -1,6 +1,6 @@
 # Структура проекта `foxclub-backend`
 
-Ниже — описание функций всего проекта (что делает система и какие сценарии закрывает), затем — полная структура репозитория.
+Ниже — описание функций всего проекта (что делает система и какие сценарии закрывает), затем — полная структура репозитория (актуальная по текущему состоянию).
 
 ## Функции проекта (логика приложения)
 
@@ -26,7 +26,7 @@
 ### 3) Клубы и справочники
 **Ключевая функция:** показывать страницы клубов и справочные данные.
 - Сущность `Club` (клуб/филиал)
-- Фильтрация по параметрам, в т.ч. по городу.
+- Фильтрация по параметрам, в т.ч. по городу
 
 ### 4) Цели (Goals)
 **Ключевая функция:** хранение и управление целями.
@@ -42,7 +42,9 @@
 - Страница `profile.html` (в структуре лежит в static) — это UI личного кабинета.
 - В рамках лк пользователь может:
   - создавать посты (через отправку на backend)
-  - просматривать свои посты (обычно в режимах `MODERATION` и `APPROVED`, в зависимости от логики)
+  - просматривать свои посты
+  - просматривать свои абонементы
+  - просматривать и управлять целями
 
 ### 7) Посты: создание, просмотр своих, просмотр ленты
 Контентные сущности:
@@ -54,17 +56,17 @@
 - Backend: `POST /api/posts` (multipart: `text` + `images`, `userId`)
 - Логика:
   - формируется `Post` со статусом `MODERATION`
-  - изображения ограничиваются максимум 5 (лишние отсекаются)
+  - изображения ограничиваются максимум 5
   - изображения загружаются во внешнее хранилище через `ImageKitService`
 
 **Просмотр своих постов:**
 - `GET /api/posts/user/{userId}`
-- Возвращаются посты в статусах: `MODERATION` и `APPROVED`.
+- Возвращаются посты в статусах: `MODERATION` и `APPROVED`
 
 **Просмотр ленты постов:**
 - `GET /api/posts/feed?page=&size=`
-- Возвращаются только `APPROVED`.
-- Фронт реализует пагинацию.
+- Возвращаются только `APPROVED`
+- Фронт реализует пагинацию
 
 ### 8) Комментарии к постам
 **Ключевая функция:** добавление и просмотр комментариев.
@@ -72,13 +74,12 @@
   - body: `userId`, `postId`, `text`
   - создается сущность `Comment`
 - `GET /api/comments/post/{postId}`
-  - фронт отображает комментарии отсортированные по времени (asc по `createdAt`)
+  - фронт отображает комментарии (отсортировано по `createdAt`)
 
 ### 9) Модерация постов (админ)
 **Ключевая функция:** админ управляет статусами постов.
 - `GET /api/admin/posts` — список всех постов для модерации
 - `PUT /api/admin/posts/{id}/moderate` — изменение статуса
-  - принимает `status` строкой, переводит `Post.status` в соответствующий `PostStatus`
 
 После перевода в `APPROVED` пост начинает отображаться в общей ленте.
 
@@ -88,13 +89,31 @@
 
 ---
 
-Ниже — полная (на основании текущего содержимого репозитория) структура проекта и назначение основных частей.
+## Актуальные изменения UI/фронтенда (важное для ИИ)
 
+### Лента постов на главной
+- `src/main/resources/static/index.html`
+  - секция `home-posts-section` присутствует на странице.
+  - карточки кликабельны и ведут на `post-feed.html`.
+- `src/main/resources/static/js/posts.js`
+  - реализована функция `loadRandomHomePosts({ count, gridEl, loaderEl, emptyEl })`
+  - карточки на главной создаются без бейджа статуса и без кнопки “Открыть ленту”.
+  - для выбранных постов подгружаются комментарии и показывается счетчик.
+  - базовый URL определяется автоматически (локально/на хостинге).
+- `src/main/resources/static/js/main.js`
+  - на главной дополнительно загружаются абонементы (`loadAbonementsForHome`).
+
+---
+
+Ниже — полная структура (по фактическим файлам в репозитории).
 
 ```text
 .
 ├─ .gitignore
 ├─ pom.xml
+├─ PROJECT_STRUCTURE.md
+├─ TODO.md
+├─ TODO_POSTS_FILES.md
 ├─ target/
 └─ src/
    ├─ main/
@@ -110,88 +129,63 @@
    │  │        │     (CORS-конфигурация через WebMvcConfigurer)
    │  │        ├─ controller/
    │  │        │  ├─ AbonementController.java
-   │  │        │  │  (CRUD для абонементов: `/api/abonements`)
    │  │        │  ├─ AdminController.java
-   │  │        │  │  (CRUD для админов: `/api/admins`)
-   │  │        │  ├─ AuthController.java
-   │  │        │  │  (регистрация/логин: `/api/auth/register`, `/api/auth/login`)
-   │  │        │  ├─ ClubController.java
-   │  │        │  │  (CRUD для клубов + фильтр по городу: `/api/clubs`)
-   │  │        │  ├─ DashboardController.java
-   │  │        │  │  (данные/таблицы для админ-панели: `/api/dashboard/...`)
-   │  │        │  ├─ GoalController.java
-   │  │        │  │  (CRUD для целей: `/api/goals`)
-   │  │        │  ├─ PostsController.java
-   │  │        │  │  (посты/лента/комментарии: `/api/posts`, `/api/posts/feed`, `/api/comments`)
    │  │        │  ├─ AdminPostsController.java
-   │  │        │  │  (модерация постов: `PUT /api/admin/posts/{id}/moderate`)
+   │  │        │  ├─ AuthController.java
+   │  │        │  ├─ ClubController.java
+   │  │        │  ├─ DashboardController.java
+   │  │        │  ├─ GoalController.java
+   │  │        │  ├─ HomeController.java
+   │  │        │  ├─ PostsController.java
    │  │        │  ├─ PurchasedAbonementController.java
-   │  │        │  │  (CRUD/выборки купленных абонементов: `/api/purchased-abonements`)
    │  │        │  ├─ ScanController.java
-   │  │        │  │  (обработка QR: `/api/scan/{qrData}`)
    │  │        │  └─ UserController.java
-   │  │        │     (профиль пользователя и эндпоинты, связанные с постами/абонементами)
    │  │        ├─ dto/
    │  │        │  ├─ AbonementDto.java
    │  │        │  ├─ AdminDto.java
    │  │        │  ├─ ClubDto.java
+   │  │        │  ├─ CommentCreateRequest.java
+   │  │        │  ├─ CommentResponse.java
    │  │        │  ├─ GoalDto.java
    │  │        │  ├─ LoginRequest.java
-   │  │        │  ├─ PurchasedAbonementDto.java
+   │  │        │  ├─ PostCreateRequest.java
    │  │        │  ├─ PostResponse.java
-   │  │        │  ├─ CommentCreateRequest.java
-   │  │        │  └─ CommentResponse.java
-   │  │        └─ entity/
-   │  │           ├─ Abonement.java
-   │  │           ├─ Admin.java
-   │  │           ├─ Club.java
-   │  │           ├─ Goal.java
-   │  │           ├─ Post.java
-   │  │           ├─ PostImage.java
-   │  │           ├─ PostStatus.java
-   │  │           ├─ Comment.java
-   │  │           ├─ PurchasedAbonement.java
-   │  │           └─ User.java
+   │  │        │  ├─ PurchasedAbonementDto.java
+   │  │        │  ├─ RegisterRequest.java
+   │  │        │  └─ UserDto.java
+   │  │        ├─ entity/
+   │  │        │  ├─ Abonement.java
+   │  │        │  ├─ Admin.java
+   │  │        │  ├─ Club.java
+   │  │        │  ├─ Comment.java
+   │  │        │  ├─ Goal.java
+   │  │        │  ├─ Post.java
+   │  │        │  ├─ PostImage.java
+   │  │        │  ├─ PostStatus.java
+   │  │        │  ├─ PurchasedAbonement.java
+   │  │        │  └─ User.java
    │  │        ├─ mapper/
    │  │        │  ├─ AbonementMapper.java
    │  │        │  ├─ AdminMapper.java
    │  │        │  ├─ ClubMapper.java
    │  │        │  ├─ GoalMapper.java
    │  │        │  ├─ PurchasedAbonementMapper.java
-   │  │        │  ├─ UserMapper.java
-   │  │        │  └─ (мапперы постов/комментариев — если используются)
+   │  │        │  └─ UserMapper.java
    │  │        └─ repository/
    │  │           ├─ AbonementRepository.java
    │  │           ├─ AdminRepository.java
    │  │           ├─ ClubRepository.java
-   │  │           ├─ GoalRepository.java
-   │  │           ├─ PostRepository.java
-   │  │           ├─ PostImageRepository.java
    │  │           ├─ CommentRepository.java
+   │  │           ├─ GoalRepository.java
+   │  │           ├─ PostImageRepository.java
+   │  │           ├─ PostRepository.java
    │  │           ├─ PurchasedAbonementRepository.java
    │  │           └─ UserRepository.java
    │  └─ resources/
+   │     ├─ application-local.properties
    │     ├─ application.properties
    │     └─ static/
    │        ├─ admin-panel.html
-   │        ├─ post-feed.html
-   │        ├─ profile.html
-   │        ├─ login.html
-   │        ├─ scanner.html
-   │        ├─ js/
-   │        │  ├─ main.js
-   │        │  ├─ posts.js
-   │        │  ├─ pages/
-   │        │  │  └─ admin-panel.js
-   │        │  └─ components/
-   │        │     └─ avatar.js
-   │        ├─ css/
-   │        │  ├─ main.css
-   │        │  ├─ components/
-   │        │  │  └─ posts.css
-   │        │  ├─ pages/
-   │        │  │  └─ admin-panel.css
-   │        │  └─ sections/
    │        ├─ dolgobrodskaya-club.html
    │        ├─ grushevskaya-club.html
    │        ├─ index.html
@@ -200,84 +194,23 @@
    │        ├─ login.html
    │        ├─ minsk.html
    │        ├─ mogilev.html
+   │        ├─ post-feed.html
    │        ├─ profile.html
    │        ├─ scanner.html
    │        ├─ shmidta-club.html
-   │        └─ assets/
-   │           ├─ fonts/
-   │           ├─ images/
-   │           │  ├─ coach.jpg
-   │           │  ├─ coach_2.jpg
-   │           │  ├─ gradient.png
-   │           │  ├─ logo2.png
-   │           │  ├─ logo3.png
-   │           │  ├─ dolgobrodskaya-43/
-   │           │  │  ├─ dolgobrodskaya-43_1.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_2.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_3.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_4.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_5.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_6.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_7.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_8.jpeg
-   │           │  │  ├─ dolgobrodskaya-43_9.jpeg
-   │           │  │  └─ dolgobrodskaya-43_10.jpeg
-   │           │  ├─ grushevskaya-83/
-   │           │  │  ├─ grushevskaya-83_1.jpeg
-   │           │  │  ├─ grushevskaya-83_2.jpeg
-   │           │  │  ├─ grushevskaya-83_3.jpeg
-   │           │  │  ├─ grushevskaya-83_4.jpeg
-   │           │  │  ├─ grushevskaya-83_5.jpeg
-   │           │  │  ├─ grushevskaya-83_6.jpeg
-   │           │  │  ├─ grushevskaya-83_7.jpeg
-   │           │  │  │  ├─ grushevskaya-83_8.jpeg
-   │           │  │  │  └─ grushevskaya-83_9.jpeg
-   │           │  │  └─ (и т.д. согласно фактическим файлам)
-   │           │  ├─ icons/
-   │           │  │  ├─ barbell.png
-   │           │  │  ├─ cardio.png
-   │           │  │  ├─ cardio_load.png
-   │           │  │  ├─ facebook.png
-   │           │  │  ├─ instagram.png
-   │           │  │  ├─ logo.png
-   │           │  │  ├─ power.png
-   │           │  │  ├─ scales.png
-   │           │  │  ├─ vk.png
-   │           │  │  ├─ youtube.png
-   │           │  │  ├─ weight_gain.png
-   │           │  │  └─ weight_loss.png
-   │           │  ├─ main-banner/
-   │           │  │  ├─ main-banner1.jpeg
-   │           │  │  ├─ main-banner2.jpeg
-   │           │  │  ├─ main-banner3.jpeg
-   │           │  │  ├─ main-banner4.jpeg
-   │           │  │  └─ main-banner5.jpeg
-   │           │  ├─ pr-shmidta-46/
-   │           │  │  ├─ pr-shmidta-46_1.jpeg
-   │           │  │  ├─ pr-shmidta-46_2.jpeg
-   │           │  │  ├─ pr-shmidta-46_3.jpeg
-   │           │  │  ├─ pr-shmidta-46_4.jpeg
-   │           │  │  ├─ pr-shmidta-46_5.jpeg
-   │           │  │  └─ pr-shmidta-46_6.jpeg
-   │           │  ├─ pr-y-kupali-22/
-   │           │  │  ├─ pr-y-kupali-22_1.jpeg
-   │           │  │  ├─ pr-y-kupali-22_2.jpeg
-   │           │  │  ├─ pr-y-kupali-22_3.jpeg
-   │           │  │  ├─ pr-y-kupali-22_4.jpeg
-   │           │  │  ├─ pr-y-kupali-22_5.jpeg
-   │           │  │  ├─ pr-y-kupali-22_6.jpeg
-   │           │  │  ├─ pr-y-kupali-22_7.jpeg
-   │           │  │  ├─ pr-y-kupali-22_8.jpeg
-   │           │  │  ├─ pr-y-kupali-22_9.jpeg
-   │           │  │  ├─ pr-y-kupali-22_10.jpeg
-   │           │  │  └─ pr-y-kupali-22_11.jpeg
-   │           │  └─ (другие папки/файлы картинок и видео согласно списку в `environment_details`)
-   │           ├─ videos/
-   │           └─ (ещё статические ресурсы согласно перечню)
-   │     
+   │        ├─ css/
+   │        │  ├─ main.css
+   │        │  ├─ responsive.css
+   │        │  ├─ base/
+   │        │  ├─ components/
+   │        │  ├─ layout/
+   │        │  └─ pages/
+   │        └─ js/
+   │           ├─ main.js
+   │           └─ posts.js
+   │
    └─ test/
       └─ java/
-
 ```
 
 ## Что важно из архитектуры
@@ -289,3 +222,4 @@
 - Статический фронтенд лежит в `src/main/resources/static/` (HTML, CSS, JS, изображения). Spring будет отдавать эти файлы напрямую.
 
 > Примечание: папка `target/` обычно генерируется сборкой Maven и может меняться между запусками.
+

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
-    <!-- Вынесенные стили компонентов -->
     <link rel="stylesheet" href="css/components/profile.css">
     <link rel="stylesheet" href="css/components/posts.css">
 
@@ -17,8 +16,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Блокировка автоматического открытия модалок -->
     <script>
         (function() {
             const backup = {};
@@ -52,10 +51,8 @@
         </div>
     </header>
 
-    <!-- Только "Мои абонементы" (секция покупок, без доступных) -->
     <section class="my-abonements-section"><div class="container"><h2 class="section-title">Мои абонементы</h2><div class="my-abonements-grid" id="myAbonementsGrid"><p class="loading-message">Загрузка...</p></div></div></section>
 
-    <!-- ПОСТЫ -->
     <section class="posts-section">
         <div class="container">
             <h2 class="section-title">Мои посты</h2>
@@ -75,11 +72,154 @@
 
     <section class="goals-section"><div class="container goals-container"><h2 class="section-title goals-title">Мои цели</h2><div class="goals-cards-and-add-wrapper"><div class="goals-carousel-wrapper"><div class="goals-cards-carousel" id="goalsCardsCarousel"><p class="empty-message">У вас пока нет целей</p></div></div><div class="add-goal-column"><button class="add-button" id="openGoalModalBtn">+</button></div></div></div></section>
 
-    <!-- МОДАЛЬНЫЕ ОКНА (удалено abonementDetailModal) -->
+    <!-- Модальные окна -->
     <div id="qrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeQrModal">&times;</span><h2 id="qrModalTitle">Ваш абонемент</h2><div class="qr-code-container" id="qrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="abonement-dates"><p>Дата покупки: <span id="qrPurchaseDate"></span></p><p>Действует до: <span id="qrExpiryDate"></span></p></div></div></div>
     <div id="userQrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeUserQrModal">&times;</span><h2>Ваш QR-код</h2><div class="qr-code-container" id="userQrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="user-info"><p>Пользователь: <span id="userQrName"></span></p><p>Email: <span id="userQrEmail"></span></p></div></div></div>
-    <div id="goalModal" class="modal"><div class="modal-content new-goal-modal-content"><span class="close-button close-goal-modal">&times;</span><div class="modal-tabs" id="modalGoalTabs"><button class="modal-tab active" data-goal-type="weight-loss"><img src="assets/images/icons/weight_loss.png"> Похудение</button><button class="modal-tab" data-goal-type="mass-gain"><img src="assets/images/icons/weight_gain.png"> Набор массы</button><button class="modal-tab" data-goal-type="strength"><img src="assets/images/icons/power.png"> Силовые показатели</button><button class="modal-tab" data-goal-type="cardio"><img src="assets/images/icons/cardio_load.png"> Кардионагрузка</button></div><h3 class="modal-section-title">Добавьте детали цели</h3><div id="goalDetailsForm"></div><div class="modal-input-group"><label for="goalComment">Комментарий</label><input type="text" id="goalComment" placeholder="Добавьте примечание..."></div><div class="modal-buttons"><button class="add-goal-btn" id="addGoalBtn">ДОБАВИТЬ ЦЕЛЬ</button><button class="cancel-btn close-goal-modal">ОТМЕНА</button></div></div></div>
-    <div id="goalDetailModal" class="modal"><div class="modal-content goal-detail-modal"><span class="close-button" id="closeGoalDetailModal">&times;</span><h2 id="goalDetailTitle">Цель</h2><p id="goalDetailDescription" class="goal-description"></p><div class="progress-info"><span class="progress-percent-large" id="goalProgressPercent">0%</span><span class="progress-message" id="goalProgressMessage"></span></div><div class="progress-bar-large"><div class="progress-fill-large" id="goalProgressFill" style="width:0%"></div></div><div class="goal-progress-stats"><div class="stat-item"><div class="stat-label">Текущее</div><div class="stat-value"><span id="goalCurrentSpan">0</span><span class="stat-unit" id="goalCurrentUnit"></span></div></div><div class="stat-item"><div class="stat-label">Цель</div><div class="stat-value"><span id="goalTargetSpan">0</span><span class="stat-unit" id="goalTargetUnit"></span></div></div></div><div class="progress-update-section"><h3>Обновить прогресс</h3><div class="input-group"><input type="number" id="goalCurrentValue" step="0.1" placeholder="Новое значение"><button class="btn-update" id="updateGoalBtn">Обновить</button></div><button class="btn-delete-goal" id="deleteGoalBtn">Удалить цель</button></div><div class="goal-dates-info"><div class="date-box"><div class="date-label">Дата начала</div><div class="date-value" id="goalStartDate">—</div></div><div class="date-box"><div class="date-label">Дата окончания</div><div class="date-value" id="goalEndDate">—</div></div><div class="date-box"><div class="date-label">Дней осталось</div><div class="date-value" id="goalDaysLeft">—</div></div></div></div></div>
+    
+    <!-- Модалка создания цели (УЛУЧШЕННАЯ - компактная, 2 колонки) -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content new-goal-modal-content">
+            <span class="close-button close-goal-modal">&times;</span>
+            
+            <!-- Заголовок и табы -->
+            <div class="goal-modal-header">
+                <h3 class="modal-section-title">Выберите тип цели</h3>
+                <div class="modal-tabs" id="modalGoalTabs">
+                    <button class="modal-tab active" data-goal-type="weight-loss">
+                        <img src="assets/images/icons/weight_loss.png" alt="Похудение"> Похудение
+                    </button>
+                    <button class="modal-tab" data-goal-type="mass-gain">
+                        <img src="assets/images/icons/weight_gain.png" alt="Набор массы"> Набор массы
+                    </button>
+                    <button class="modal-tab" data-goal-type="strength">
+                        <img src="assets/images/icons/power.png" alt="Силовые"> Силовые показатели
+                    </button>
+                    <button class="modal-tab" data-goal-type="cardio">
+                        <img src="assets/images/icons/cardio_load.png" alt="Кардио"> Кардионагрузка
+                    </button>
+                </div>
+            </div>
+
+            <!-- Основные поля (сетка 2 колонки) -->
+            <div class="goal-fields-grid">
+                <div id="goalDetailsForm" class="goal-details-form"></div>
+                <div class="goal-fields-side">
+                    <div class="modal-input-group">
+                        <label for="fitnessLevel">Уровень подготовки</label>
+                        <select id="fitnessLevel" class="form-control">
+                            <option value="beginner">Начинающий (0–3 мес.)</option>
+                            <option value="intermediate" selected>Средний (3–12 мес.)</option>
+                            <option value="advanced">Продвинутый (1–3 года)</option>
+                            <option value="professional">Профессиональный (3+ лет)</option>
+                        </select>
+                    </div>
+                    <div class="modal-input-group">
+                        <label for="goalComment">Комментарий</label>
+                        <input type="text" id="goalComment" placeholder="Ваш комментарий...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- БЛОК РЕКОМЕНДАЦИЙ ОТ ИИ -->
+            <div id="aiRecommendationBlock" style="display:none; margin-top:12px; padding:12px 16px; background:#2a2a2a; border-radius:10px; border-left:4px solid #ff8c00;">
+                <div style="display:flex; align-items:flex-start; gap:12px;">
+                    <div id="aiRecommendationIcon" style="font-size:24px; flex-shrink:0;">🤖</div>
+                    <div style="flex:1;">
+                        <div id="aiRecommendationStatus" style="font-weight:bold; font-size:15px; margin-bottom:3px;"></div>
+                        <div id="aiRecommendationReason" style="color:#ccc; font-size:13px; margin-bottom:4px;"></div>
+                        <div id="aiRecommendationAdvice" style="color:#fff; font-size:13px; background:#1a1a1a; padding:8px 12px; border-radius:6px; margin:4px 0;"></div>
+                        <div id="aiRecommendationWarning" style="color:#ff6b6b; font-size:12px; margin-top:3px;"></div>
+                        <div id="aiRecommendationSafeChange" style="color:#4CAF50; font-size:12px; margin-top:3px;"></div>
+                        <button id="adjustGoalBtn" style="display:none; margin-top:8px; background:#ff8c00; color:#fff; border:none; padding:5px 16px; border-radius:20px; font-size:12px; cursor:pointer;">Скорректировать</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="modal-buttons">
+                <button class="add-goal-btn" id="addGoalBtn">ДОБАВИТЬ ЦЕЛЬ</button>
+                <button class="cancel-btn close-goal-modal">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модалка деталей цели (УЛУЧШЕННАЯ - горизонтальная) -->
+    <div id="goalDetailModal" class="modal">
+        <div class="modal-content goal-detail-modal">
+            <span class="close-button" id="closeGoalDetailModal">&times;</span>
+            
+            <!-- Заголовок -->
+            <h2 id="goalDetailTitle">Цель</h2>
+            <p id="goalDetailDescription" class="goal-description"></p>
+            
+            <!-- Прогресс-бар (на всю ширину) -->
+            <div class="goal-progress-full">
+                <div class="progress-info">
+                    <span class="progress-percent-large" id="goalProgressPercent">0%</span>
+                    <span class="progress-message" id="goalProgressMessage"></span>
+                </div>
+                <div class="progress-bar-large">
+                    <div class="progress-fill-large" id="goalProgressFill" style="width:0%"></div>
+                </div>
+            </div>
+            
+            <!-- Сетка 2 колонки -->
+            <div class="goal-detail-grid">
+                <!-- Левая колонка: статистика + обновление -->
+                <div class="left-col">
+                    <!-- Три показателя: начальное, текущее, цель -->
+                    <div class="goal-progress-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Начальное</div>
+                            <div class="stat-value"><span id="goalInitialSpan">0</span><span class="stat-unit" id="goalInitialUnit"></span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Текущее</div>
+                            <div class="stat-value"><span id="goalCurrentSpan">0</span><span class="stat-unit" id="goalCurrentUnit"></span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Цель</div>
+                            <div class="stat-value"><span id="goalTargetSpan">0</span><span class="stat-unit" id="goalTargetUnit"></span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Блок обновления прогресса -->
+                    <div class="progress-update-section">
+                        <h3>Обновить прогресс</h3>
+                        <div class="input-group">
+                            <input type="number" id="goalCurrentValue" step="0.1" placeholder="Новое значение">
+                            <button class="btn-update" id="updateGoalBtn">Обновить</button>
+                        </div>
+                        <button class="btn-delete-goal" id="deleteGoalBtn">Удалить цель</button>
+                    </div>
+                </div>
+                
+                <!-- Правая колонка: график + мотивация -->
+                <div class="right-col">
+                    <h3 class="chart-title" style="color:#ff8c00; font-size:15px; margin:0 0 6px 0;">Динамика прогресса</h3>
+                    <canvas id="goalHistoryChart" width="400" height="150" style="background:#1a1a1a; border-radius:10px; padding:6px; width:100%; max-height:160px;"></canvas>
+                    <div id="goalMotivationMessage" style="padding:8px 12px; background:#2a2a2a; border-radius:10px; text-align:center; font-size:13px; color:#ddd; min-height:40px;"></div>
+                </div>
+            </div>
+            
+            <!-- Даты (три колонки внизу) -->
+            <div class="goal-dates-info">
+                <div class="date-box">
+                    <div class="date-label">Дата начала</div>
+                    <div class="date-value" id="goalStartDate">—</div>
+                </div>
+                <div class="date-box">
+                    <div class="date-label">Дата окончания</div>
+                    <div class="date-value" id="goalEndDate">—</div>
+                </div>
+                <div class="date-box">
+                    <div class="date-label">Дней осталось</div>
+                    <div class="date-value" id="goalDaysLeft">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div id="avatarModal" class="modal"><div class="modal-content" style="max-width:650px; max-height:85vh; display:flex; flex-direction:column;"><span class="close-button" id="closeAvatarModal">&times;</span><h2>Редактировать аватар</h2><div style="flex:1; overflow-y:auto; text-align:center; background:#1a1a1a; border-radius:16px; padding:20px;"><img id="avatarPreviewBig" src="" alt="Текущий аватар" style="max-width:100%; max-height:50vh; border-radius:12px; display:block; margin:0 auto;"><div id="cropperContainer" style="display:none;"><img id="cropImage" src="" alt="Обрезка"></div><div id="noImageMessage" style="display:none; padding:40px; color:#999;">Нет изображения</div></div><div style="margin-top:20px; display:flex; gap:15px; justify-content:center;"><button id="uploadPhotoBtn" class="btn-upload-photo">📷 Загрузить фото</button><button id="saveAvatarBtn" class="btn-save-avatar" style="display:none;">💾 Сохранить</button><button id="cancelCropBtn" class="btn-cancel-crop" style="display:none;">Отмена</button></div><input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/jpg" style="display:none;"></div></div>
     <div id="commentsModal" class="modal"><div class="modal-content" style="max-width:650px;"><span class="close-button" id="closeCommentsModal">&times;</span><h2>Комментарии</h2><div id="commentsList" style="max-height:400px; overflow-y:auto; margin:20px 0;"></div><div class="modal-comment-form" style="display:flex; gap:10px; margin-top:20px;"><textarea id="commentText" placeholder="Ваш комментарий..." rows="3"></textarea><button id="sendCommentBtn" class="btn-send-comment">Отправить</button></div></div></div>
     <div id="lightbox" class="lightbox"><button class="lightbox-close">&times;</button><div class="lightbox-content"><img class="lightbox-img" src=""><button class="lightbox-prev">&#10094;</button><button class="lightbox-next">&#10095;</button></div><div class="lightbox-indicators"></div></div>
@@ -95,7 +235,6 @@
         <div class="footer-bottom"><div class="container"><p>Copyright © 2003-2025</p><p>Сеть тренажерных залов Fox Club</p></div></div>
     </footer>
 
-    <!-- Скрипты: main.js (аватар, абонементы, цели) и posts.js (посты) -->
     <script src="js/main.js"></script>
     <script src="js/posts.js"></script>
     <script src="js/components/avatar.js"></script>

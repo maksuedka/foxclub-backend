@@ -1,8 +1,8 @@
 /**
  * Основной JavaScript файл для Fitness Club
- * Исправления: отображение имени в профиле, устранение дублирования кнопки входа
- * Удалены все функции покупки абонементов (доступно только через админку)
- * Регистрация теперь не требует выбора клуба.
+ * Версия с select вместо datalist и улучшенной модалкой создания цели
+ * Исправлена функция "Скорректировать" для всех типов целей
+ * Исправлен поиск полей для корректировки (учитывает initialWeight/targetWeight)
  */
 
 // ======================= КОНСТАНТЫ И КОНФИГУРАЦИЯ =======================
@@ -13,6 +13,67 @@ const CITY_MAPPING = {
     "mogilev": "Могилев",
     "grodno": "Гродно"
 };
+
+// Соответствие упражнений и единиц измерения
+const EXERCISE_UNITS = {
+    'Жим лежа': 'кг',
+    'Жим гантелей лежа': 'кг',
+    'Разводка гантелей': 'кг',
+    'Кроссовер': 'кг',
+    'Становая тяга': 'кг',
+    'Тяга штанги в наклоне': 'кг',
+    'Тяга верхнего блока': 'кг',
+    'Тяга гантели к поясу': 'кг',
+    'Приседания со штангой': 'кг',
+    'Жим ногами': 'кг',
+    'Разгибание ног': 'кг',
+    'Сгибание ног': 'кг',
+    'Жим штанги стоя': 'кг',
+    'Жим гантелей сидя': 'кг',
+    'Разведение гантелей в стороны': 'кг',
+    'Подъем штанги на бицепс': 'кг',
+    'Молотки': 'кг',
+    'Французский жим': 'кг',
+    'Отжимания на брусьях': 'кг',
+    'Бег на дорожке': 'км',
+    'Бег на улице': 'км',
+    'Интервальный бег': 'км',
+    'Велотренажер': 'км',
+    'Сайкл': 'км',
+    'Велосипед на улице': 'км',
+    'Эллиптический тренажер': 'км',
+    'Степпер': 'шагов',
+    'Гребной тренажер': 'м',
+    'Скакалка': 'прыжков',
+    'Плавание': 'м',
+    'Ходьба': 'км',
+    'Скандинавская ходьба': 'км',
+    'Танцы': 'мин',
+    'Бокс/Груша': 'мин'
+};
+
+const EXERCISES = {
+    'Грудные': ['Жим лежа', 'Жим гантелей лежа', 'Разводка гантелей', 'Кроссовер'],
+    'Спина': ['Становая тяга', 'Тяга штанги в наклоне', 'Тяга верхнего блока', 'Тяга гантели к поясу'],
+    'Ноги': ['Приседания со штангой', 'Жим ногами', 'Разгибание ног', 'Сгибание ног'],
+    'Плечи': ['Жим штанги стоя', 'Жим гантелей сидя', 'Разведение гантелей в стороны'],
+    'Руки': ['Подъем штанги на бицепс', 'Молотки', 'Французский жим', 'Отжимания на брусьях']
+};
+
+const CARDIO_ACTIVITIES = [
+    'Бег на дорожке', 'Бег на улице', 'Интервальный бег',
+    'Велотренажер', 'Сайкл', 'Велосипед на улице',
+    'Эллиптический тренажер', 'Степпер', 'Гребной тренажер',
+    'Скакалка', 'Плавание', 'Ходьба', 'Скандинавская ходьба',
+    'Танцы', 'Бокс/Груша'
+];
+
+const FITNESS_LEVELS = [
+    { value: 'beginner', label: 'Начинающий (0–3 месяца)' },
+    { value: 'intermediate', label: 'Средний (3–12 месяцев)' },
+    { value: 'advanced', label: 'Продвинутый (1–3 года)' },
+    { value: 'professional', label: 'Профессиональный (3+ лет)' }
+];
 
 const GOAL_TYPE_CONFIG = {
     'weight-loss': { title: 'Похудение', iconClass: 'icon-bg-weight', unit: 'кг' },
@@ -42,21 +103,28 @@ const GOAL_FIELD_CONFIG = {
         title: 'Силовые показатели',
         iconPath: 'assets/images/icons/power.png',
         fields: [
-            { id: 'exerciseType', label: 'Упражнение', type: 'text', placeholder: 'Например: Жим лежа' },
-            { id: 'initialValue', label: 'Начальный результат (кг)', type: 'number', placeholder: 'Например: 60', step: '0.5' },
-            { id: 'targetValue', label: 'Желаемый результат (кг)', type: 'number', placeholder: 'Например: 100', step: '0.5' }
+            { id: 'exerciseSelect', label: 'Выберите упражнение', type: 'select', options: EXERCISES },
+            { id: 'initialValue', label: 'Начальный результат', type: 'number', placeholder: 'Например: 60', step: '0.5' },
+            { id: 'targetValue', label: 'Желаемый результат', type: 'number', placeholder: 'Например: 100', step: '0.5' }
         ]
     },
     'cardio': {
         title: 'Кардионагрузка',
         iconPath: 'assets/images/icons/cardio_load.png',
         fields: [
-            { id: 'initialValue', label: 'Начальные шаги/день', type: 'number', placeholder: 'Например: 3000' },
-            { id: 'targetValue', label: 'Целевые шаги/день', type: 'number', placeholder: 'Например: 10000' }
+            { id: 'cardioSelect', label: 'Выберите вид активности', type: 'select', options: CARDIO_ACTIVITIES },
+            { id: 'initialValue', label: 'Начальное значение', type: 'number', placeholder: 'Например: 5', step: '0.1' },
+            { id: 'targetValue', label: 'Целевое значение', type: 'number', placeholder: 'Например: 10', step: '0.1' }
         ]
     }
 };
 
+let goalChart = null;
+let goalValidationDone = false;
+let goalValidationData = null;
+let currentGoalType = 'weight-loss';
+
+// ======================= ОСНОВНЫЕ ФУНКЦИИ =======================
 function getCurrentUser() {
     const userStr = localStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
@@ -71,17 +139,10 @@ function requireAuth() {
     return user;
 }
 
-/**
- * Обновляет интерфейс пользователя в шапке (аватар или кнопка "Войти")
- * На странице профиля не вызывается. Скрывает оригинальную кнопку входа.
- */
 function updateUserUI() {
-    // Не трогаем страницу логина и страницу профиля
     if (window.location.pathname.includes('login.html') || window.location.pathname.includes('profile.html')) {
         return;
     }
-
-    // Находим или создаём контейнер для профиля
     let profileContainer = document.querySelector('.profile-info');
     if (!profileContainer) {
         const header = document.querySelector('.main-header .container, header .container');
@@ -94,19 +155,15 @@ function updateUserUI() {
             return;
         }
     }
-
-    // Скрываем оригинальную кнопку входа, чтобы не дублировать
     const originalLoginBtn = document.querySelector('.btn-login, .btn-login-header, .btn.btn-primary.btn-login');
     if (originalLoginBtn) {
         originalLoginBtn.style.display = 'none';
     }
-
     const user = getCurrentUser();
     profileContainer.innerHTML = '';
     profileContainer.style.display = 'flex';
     profileContainer.style.alignItems = 'center';
     profileContainer.style.marginLeft = 'auto';
-
     if (user) {
         const avatarLink = document.createElement('a');
         avatarLink.href = 'profile.html';
@@ -140,7 +197,7 @@ function updateUserUI() {
     }
 }
 
-// ======================= ФУНКЦИИ ФОРМАТИРОВАНИЯ ДАТ =======================
+// ======================= ФОРМАТИРОВАНИЕ ДАТ =======================
 function formatDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -163,7 +220,7 @@ function toJavaDate(dateStr) {
     return null;
 }
 
-// ======================= ФУНКЦИИ ДЛЯ РАБОТЫ С АБОНЕМЕНТАМИ (только купленные) =======================
+// ======================= АБОНЕМЕНТЫ =======================
 let allPurchasedAbonements = [];
 let hideExpiredAbonements = false;
 
@@ -342,7 +399,55 @@ function showUserQrCode() {
     modal.style.display = 'flex';
 }
 
-// ======================= ФУНКЦИИ ДЛЯ РАБОТЫ С ЦЕЛЯМИ =======================
+// ======================= ЦЕЛИ =======================
+
+function renderGoalHistoryChart(history, unit) {
+    const canvas = document.getElementById('goalHistoryChart');
+    if (!canvas) return;
+    if (!window.Chart) return;
+    const ctx = canvas.getContext('2d');
+    if (goalChart) goalChart.destroy();
+    if (!history || history.length === 0) {
+        canvas.style.display = 'none';
+        return;
+    }
+    canvas.style.display = 'block';
+    const sorted = [...history].sort((a,b) => new Date(a.date) - new Date(b.date));
+    const labels = sorted.map(h => {
+        const d = new Date(h.date);
+        return `${d.getDate()}.${d.getMonth()+1}`;
+    });
+    const values = sorted.map(h => parseFloat(h.value));
+    goalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `Прогресс (${unit})`,
+                data: values,
+                borderColor: '#ff8c00',
+                backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#ff8c00',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { labels: { color: '#fff' } },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.raw} ${unit}` } }
+            },
+            scales: {
+                y: { grid: { color: '#333' }, ticks: { color: '#fff' } },
+                x: { grid: { color: '#333' }, ticks: { color: '#ccc' } }
+            }
+        }
+    });
+}
+
 async function loadGoals() {
     const goalsCarousel = document.getElementById('goalsCardsCarousel');
     if (!goalsCarousel) return;
@@ -370,8 +475,8 @@ function renderGoalCard(goal) {
     if (!goalsCarousel) return;
     const config = GOAL_TYPE_CONFIG[goal.type] || GOAL_TYPE_CONFIG['weight-loss'];
     const displayTitle = goal.description || config.title;
-    const displayUnit = config.unit;
-    const { percentComplete, progressText } = calculateGoalProgress(goal, displayUnit);
+    const unit = goal.unit || config.unit;
+    const { percentComplete, progressText } = calculateGoalProgress(goal, unit);
     const startDate = goal.startDate ? formatDisplayDate(goal.startDate) : '—';
     const endDate = goal.endDate ? formatDisplayDate(goal.endDate) : '—';
     let progressColor = '#ff8c00';
@@ -384,10 +489,10 @@ function renderGoalCard(goal) {
     card.addEventListener('click', () => openGoalDetailModal(goal.id));
     card.innerHTML = `
         <div class="goal-card-icon-bg ${config.iconClass}"></div>
-        <h3 class="goal-card-title">${displayTitle}</h3>
+        <h3 class="goal-card-title">${escapeHtml(displayTitle)}</h3>
         <div class="goal-card-values">
-            <p>Текущее: <strong>${goal.currentValue || 0} ${displayUnit}</strong></p>
-            <p>Цель: <strong>${goal.targetValue || 0} ${displayUnit}</strong></p>
+            <p>Текущее: <strong>${goal.currentValue || 0} ${unit}</strong></p>
+            <p>Цель: <strong>${goal.targetValue || 0} ${unit}</strong></p>
         </div>
         <div class="goal-card-progress">
             <div class="progress-bar">
@@ -409,43 +514,60 @@ function calculateGoalProgress(goal, unit) {
     if (!goal.targetValue || goal.targetValue <= 0) {
         return { percentComplete: 0, progressText: 'Цель не задана' };
     }
+    const target = parseFloat(goal.targetValue);
+    const current = parseFloat(goal.currentValue) || 0;
+    const initial = goal.initialValue ? parseFloat(goal.initialValue) : current;
     if (goal.type === 'weight-loss') {
-        const initialValue = goal.initialValue || goal.currentValue * 1.1;
-        if (goal.currentValue <= goal.targetValue) {
+        const start = goal.initialValue ? parseFloat(goal.initialValue) : current * 1.1;
+        if (current <= target) {
             percentComplete = 100;
             progressText = 'Цель достигнута! 🎉';
         } else {
-            const totalToLose = initialValue - goal.targetValue;
-            const lost = initialValue - goal.currentValue;
+            const totalToLose = start - target;
+            const lost = start - current;
             percentComplete = Math.min(99, Math.round((lost / totalToLose) * 100));
-            const remaining = goal.currentValue - goal.targetValue;
+            const remaining = current - target;
             progressText = `Осталось сбросить ${remaining.toFixed(1)} ${unit}`;
         }
     } else {
-        if (goal.currentValue >= goal.targetValue) {
+        if (current >= target) {
             percentComplete = 100;
             progressText = 'Цель достигнута! 🎉';
         } else {
-            percentComplete = Math.min(99, Math.round((goal.currentValue / goal.targetValue) * 100));
-            const remaining = goal.targetValue - goal.currentValue;
+            const totalToGain = target - initial;
+            const gained = current - initial;
+            percentComplete = Math.min(99, Math.round((gained / totalToGain) * 100));
+            const remaining = target - current;
             progressText = `Осталось ${remaining.toFixed(1)} ${unit}`;
         }
     }
     return { percentComplete, progressText };
 }
 
+// ===== ДИНАМИЧЕСКАЯ ГЕНЕРАЦИЯ ПОЛЕЙ =====
 function renderGoalFields(goalType) {
+    currentGoalType = goalType;
     const formContainer = document.getElementById('goalDetailsForm');
     if (!formContainer) return;
     const config = GOAL_FIELD_CONFIG[goalType] || GOAL_FIELD_CONFIG['weight-loss'];
     let html = '';
     config.fields.forEach(field => {
-        html += `
-            <div class="modal-input-group">
+        if (field.type === 'select') {
+            html += `<div class="modal-input-group">
                 <label for="${field.id}">${field.label}</label>
-                <input type="${field.type}" id="${field.id}" placeholder="${field.placeholder}" ${field.step ? `step="${field.step}"` : ''}>
-            </div>
-        `;
+                <select id="${field.id}" class="form-control" onchange="updateUnitForExercise('${field.id}')">
+                    ${generateOptionsHtml(field.options)}
+                </select>
+            </div>`;
+        } else {
+            html += `
+                <div class="modal-input-group">
+                    <label for="${field.id}">${field.label}</label>
+                    <input type="${field.type}" id="${field.id}" placeholder="${field.placeholder}" ${field.step ? `step="${field.step}"` : ''}>
+                    <span id="unitLabel_${field.id}" style="color:#999; font-size:0.85rem; margin-top:2px;"></span>
+                </div>
+            `;
+        }
     });
     const today = new Date();
     const nextMonth = new Date(today);
@@ -467,74 +589,449 @@ function renderGoalFields(goalType) {
         flatpickr("#startDate", { locale: "ru", dateFormat: "d.m.Y", defaultDate: today });
         flatpickr("#endDate", { locale: "ru", dateFormat: "d.m.Y", defaultDate: nextMonth });
     }
+    if (goalType === 'strength' || goalType === 'cardio') {
+        const selectId = goalType === 'strength' ? 'exerciseSelect' : 'cardioSelect';
+        setTimeout(() => updateUnitForExercise(selectId), 100);
+    }
+}
+
+function generateOptionsHtml(options) {
+    if (Array.isArray(options)) {
+        return options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    } else if (typeof options === 'object' && !Array.isArray(options)) {
+        let html = '';
+        for (const [category, items] of Object.entries(options)) {
+            html += `<optgroup label="${category}">`;
+            items.forEach(item => {
+                html += `<option value="${item}">${item}</option>`;
+            });
+            html += '</optgroup>';
+        }
+        return html;
+    }
+    return '';
+}
+
+function updateUnitForExercise(selectId) {
+    const selectEl = document.getElementById(selectId);
+    if (!selectEl) return;
+    const exercise = selectEl.value;
+    const unit = EXERCISE_UNITS[exercise] || '';
+    const initialField = document.getElementById('initialValue');
+    const targetField = document.getElementById('targetValue');
+    const initialUnitLabel = document.getElementById('unitLabel_initialValue');
+    const targetUnitLabel = document.getElementById('unitLabel_targetValue');
+    if (initialUnitLabel) initialUnitLabel.textContent = unit ? `Единица: ${unit}` : '';
+    if (targetUnitLabel) targetUnitLabel.textContent = unit ? `Единица: ${unit}` : '';
+    if (initialField) initialField.placeholder = unit ? `Например: 5 ${unit}` : 'Например: 5';
+    if (targetField) targetField.placeholder = unit ? `Например: 10 ${unit}` : 'Например: 10';
+    if (initialField) initialField.dataset.unit = unit;
+    if (targetField) targetField.dataset.unit = unit;
 }
 
 function clearGoalForm() {
     const formContainer = document.getElementById('goalDetailsForm');
     if (formContainer) formContainer.innerHTML = '';
-    const commentInput = document.getElementById('goalComment');
-    if (commentInput) commentInput.value = '';
     const tabs = document.querySelectorAll("#modalGoalTabs .modal-tab");
     if (tabs.length > 0) {
         tabs.forEach(t => t.classList.remove('active'));
         tabs[0].classList.add('active');
         renderGoalFields(tabs[0].dataset.goalType);
     }
+    document.getElementById('aiRecommendationBlock').style.display = 'none';
+    goalValidationDone = false;
+    goalValidationData = null;
+    const addBtn = document.getElementById('addGoalBtn');
+    if (addBtn) {
+        addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
+        addBtn.style.background = '';
+    }
 }
 
+// ===== ВАЛИДАЦИЯ ЧЕРЕЗ ИИ =====
+async function validateGoal(goalData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/goals/validate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(goalData)
+        });
+        if (response.ok) {
+            const result = await response.json();
+            showRecommendations(result);
+            return result;
+        } else {
+            console.error('Ошибка валидации:', response.status);
+            document.getElementById('aiRecommendationBlock').style.display = 'none';
+            showTemporaryMessage('Не удалось проверить цель через ИИ', 'error');
+            return null;
+        }
+    } catch (error) {
+        console.error('Ошибка сети:', error);
+        document.getElementById('aiRecommendationBlock').style.display = 'none';
+        showTemporaryMessage('Ошибка сети при проверке цели', 'error');
+        return null;
+    }
+}
+
+function showRecommendations(result) {
+    const block = document.getElementById('aiRecommendationBlock');
+    const status = document.getElementById('aiRecommendationStatus');
+    const icon = document.getElementById('aiRecommendationIcon');
+    const reason = document.getElementById('aiRecommendationReason');
+    const advice = document.getElementById('aiRecommendationAdvice');
+    const warning = document.getElementById('aiRecommendationWarning');
+    const safeChange = document.getElementById('aiRecommendationSafeChange');
+    const adjustBtn = document.getElementById('adjustGoalBtn');
+
+    block.style.display = 'block';
+    icon.textContent = result.realistic ? '✅' : '⚠️';
+    status.textContent = result.realistic ? 'Цель реалистична!' : 'Цель требует корректировки';
+    status.style.color = result.realistic ? '#4CAF50' : '#ff6b6b';
+    reason.textContent = result.reason || '';
+    advice.textContent = result.recommendation || '';
+    warning.textContent = result.warning ? `⚠️ ${result.warning}` : '';
+    warning.style.display = result.warning ? 'block' : 'none';
+    safeChange.textContent = result.safeWeeklyChange ? `Безопасный темп: ${result.safeWeeklyChange} в неделю` : '';
+    safeChange.style.display = result.safeWeeklyChange ? 'block' : 'none';
+
+    if (adjustBtn) {
+        if (!result.realistic) {
+            adjustBtn.style.display = 'inline-block';
+            adjustBtn.onclick = () => applyAdjustment(result);
+        } else {
+            adjustBtn.style.display = 'none';
+        }
+    }
+}
+
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ТЕКУЩЕГО ЗНАЧЕНИЯ =====
+function getCurrentGoalValue() {
+    const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
+    const goalType = activeTab ? activeTab.dataset.goalType : 'strength';
+    
+    let fieldId = 'initialValue';
+    if (goalType === 'weight-loss' || goalType === 'mass-gain') {
+        fieldId = 'initialWeight';
+    }
+    const field = document.getElementById(fieldId);
+    if (field) {
+        const val = parseFloat(field.value);
+        if (!isNaN(val) && val > 0) return val;
+    }
+    const altField = document.getElementById('currentValue') || document.getElementById('initialValue');
+    if (altField) {
+        const val = parseFloat(altField.value);
+        if (!isNaN(val) && val > 0) return val;
+    }
+    if (goalValidationData && goalValidationData.currentValue) {
+        return parseFloat(goalValidationData.currentValue);
+    }
+    return null;
+}
+
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ "СКОРРЕКТИРОВАТЬ" =====
+function applyAdjustment(validationResult) {
+    const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
+    const goalType = activeTab ? activeTab.dataset.goalType : 'strength';
+    
+    let targetFieldId = 'targetValue';
+    let currentFieldId = 'initialValue';
+    if (goalType === 'weight-loss' || goalType === 'mass-gain') {
+        targetFieldId = 'targetWeight';
+        currentFieldId = 'initialWeight';
+    }
+    
+    const endDateInput = document.getElementById('endDate');
+    const targetInput = document.getElementById(targetFieldId);
+    const currentInput = document.getElementById(currentFieldId);
+    
+    if (!endDateInput || !targetInput || !currentInput) {
+        showTemporaryMessage('Не удалось найти поля для корректировки', 'error');
+        console.warn('Поля не найдены:', { endDateInput, targetInput, currentInput });
+        return;
+    }
+    
+    let currentValue = parseFloat(currentInput.value);
+    if (isNaN(currentValue) || currentValue <= 0) {
+        showTemporaryMessage('Не удалось определить текущее значение', 'error');
+        return;
+    }
+    
+    let safeChange = 0.5;
+    if (validationResult.safeWeeklyChange) {
+        const match = validationResult.safeWeeklyChange.match(/([\d.]+)\s*[-–]\s*([\d.]+)/);
+        if (match) {
+            safeChange = (parseFloat(match[1]) + parseFloat(match[2])) / 2;
+        } else {
+            const num = parseFloat(validationResult.safeWeeklyChange);
+            if (!isNaN(num)) safeChange = num;
+        }
+    }
+    
+    let weeks = 4;
+    const endDateStr = endDateInput.value;
+    if (endDateStr) {
+        const parts = endDateStr.split('.');
+        if (parts.length === 3) {
+            const endDate = new Date(parts[2], parts[1]-1, parts[0]);
+            const today = new Date();
+            const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays > 0) {
+                weeks = diffDays / 7;
+            }
+        }
+    }
+    
+    let newTarget = currentValue;
+    
+    switch (goalType) {
+        case 'weight-loss':
+            const loss = safeChange * weeks;
+            newTarget = Math.max(30, currentValue - loss);
+            if (newTarget >= currentValue) {
+                newTarget = currentValue - 0.5;
+            }
+            break;
+            
+        case 'mass-gain':
+            const gain = safeChange * weeks;
+            newTarget = currentValue + gain;
+            if (newTarget > currentValue * 2) {
+                newTarget = currentValue * 1.5;
+            }
+            break;
+            
+        case 'strength':
+            let percentPerWeek = 2;
+            if (validationResult.safeWeeklyChange && validationResult.safeWeeklyChange.includes('%')) {
+                const match = validationResult.safeWeeklyChange.match(/([\d.]+)\s*%/);
+                if (match) percentPerWeek = parseFloat(match[1]);
+            }
+            const totalPercent = percentPerWeek * weeks;
+            newTarget = currentValue * (1 + totalPercent / 100);
+            if (newTarget > currentValue * 3) {
+                newTarget = currentValue * 2;
+            }
+            break;
+            
+        case 'cardio':
+            const cardioPercent = 5;
+            const totalCardioPercent = cardioPercent * weeks;
+            newTarget = currentValue * (1 + totalCardioPercent / 100);
+            if (newTarget > currentValue * 5) {
+                newTarget = currentValue * 3;
+            }
+            break;
+            
+        default:
+            showTemporaryMessage('Неизвестный тип цели', 'error');
+            return;
+    }
+    
+    newTarget = Math.round(newTarget * 10) / 10;
+    if (newTarget < 1) newTarget = 1;
+    
+    if (goalType === 'weight-loss' && newTarget >= currentValue) {
+        newTarget = currentValue - 1;
+        if (newTarget < 30) newTarget = 30;
+    }
+    if ((goalType === 'mass-gain' || goalType === 'strength' || goalType === 'cardio') && newTarget <= currentValue) {
+        newTarget = currentValue + 1;
+    }
+    
+    targetInput.value = newTarget;
+    
+    document.getElementById('aiRecommendationBlock').style.display = 'none';
+    goalValidationDone = false;
+    goalValidationData = null;
+    
+    const addBtn = document.getElementById('addGoalBtn');
+    if (addBtn) {
+        addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
+        addBtn.style.background = '';
+    }
+    
+    showTemporaryMessage('Целевое значение скорректировано до ' + newTarget, 'success');
+}
+
+// ===== СОЗДАНИЕ ЦЕЛИ (С ВАЛИДАЦИЕЙ) =====
 async function addNewGoal() {
     const user = getCurrentUser();
     if (!user) {
-        alert('Необходимо авторизоваться');
+        showTemporaryMessage('Необходимо авторизоваться', 'error');
         window.location.href = 'login.html';
         return;
     }
+
+    if (goalValidationDone && goalValidationData && !goalValidationData.realistic) {
+        await saveGoalDirectly();
+        return;
+    }
+
     const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
     if (!activeTab) {
-        alert('Выберите тип цели');
+        showTemporaryMessage('Выберите тип цели', 'error');
         return;
     }
     const goalType = activeTab.dataset.goalType;
     const config = GOAL_FIELD_CONFIG[goalType];
     let targetValue = 0, currentValue = 0, initialValue = 0, description = '';
-    if (goalType === 'weight-loss' || goalType === 'mass-gain') {
+    let unit = 'кг';
+    let exercise = '';
+
+    if (goalType === 'weight-loss') {
+        unit = 'кг';
         const initialWeight = document.getElementById('initialWeight');
         const targetWeight = document.getElementById('targetWeight');
         initialValue = initialWeight ? parseFloat(initialWeight.value) || 0 : 0;
         targetValue = targetWeight ? parseFloat(targetWeight.value) || 0 : 0;
         currentValue = initialValue;
-        description = goalType === 'weight-loss' ? `Похудение с ${initialValue}кг до ${targetValue}кг` : `Набор массы с ${initialValue}кг до ${targetValue}кг`;
+        description = `Похудение с ${initialValue}кг до ${targetValue}кг`;
+    } else if (goalType === 'mass-gain') {
+        unit = 'кг';
+        const initialWeight = document.getElementById('initialWeight');
+        const targetWeight = document.getElementById('targetWeight');
+        initialValue = initialWeight ? parseFloat(initialWeight.value) || 0 : 0;
+        targetValue = targetWeight ? parseFloat(targetWeight.value) || 0 : 0;
+        currentValue = initialValue;
+        description = `Набор массы с ${initialValue}кг до ${targetValue}кг`;
     } else if (goalType === 'strength') {
-        const exerciseType = document.getElementById('exerciseType');
+        const exerciseSelect = document.getElementById('exerciseSelect');
         const initialVal = document.getElementById('initialValue');
         const targetVal = document.getElementById('targetValue');
-        const exercise = exerciseType ? exerciseType.value : 'силовое упражнение';
+        exercise = exerciseSelect ? exerciseSelect.value : '';
+        unit = EXERCISE_UNITS[exercise] || 'кг';
         initialValue = initialVal ? parseFloat(initialVal.value) || 0 : 0;
         targetValue = targetVal ? parseFloat(targetVal.value) || 0 : 0;
         currentValue = initialValue;
-        description = `${exercise}: с ${initialValue}кг до ${targetValue}кг`;
+        description = `${exercise}: с ${initialValue} до ${targetValue} ${unit}`;
     } else if (goalType === 'cardio') {
+        const cardioSelect = document.getElementById('cardioSelect');
         const initialVal = document.getElementById('initialValue');
         const targetVal = document.getElementById('targetValue');
+        exercise = cardioSelect ? cardioSelect.value : '';
+        unit = EXERCISE_UNITS[exercise] || 'шагов';
         initialValue = initialVal ? parseFloat(initialVal.value) || 0 : 0;
         targetValue = targetVal ? parseFloat(targetVal.value) || 0 : 0;
         currentValue = initialValue;
-        description = `Шаги/день: с ${initialValue} до ${targetValue}`;
+        description = `${exercise}: с ${initialValue} до ${targetValue} ${unit}`;
     }
-    const commentInput = document.getElementById('goalComment');
-    const userComment = commentInput ? commentInput.value : '';
+
+    const userComment = document.getElementById('goalComment')?.value || '';
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
+    const fitnessLevel = document.getElementById('fitnessLevel')?.value || 'intermediate';
+
     const goalData = {
         type: goalType,
         targetValue: targetValue,
         currentValue: currentValue,
-        initialValue: initialValue,
         startDate: toJavaDate(startDateInput ? startDateInput.value : null),
         endDate: toJavaDate(endDateInput ? endDateInput.value : null),
         description: userComment || description || config.title,
-        userId: user.id
+        userId: user.id,
+        initialValue: initialValue,
+        unit: unit,
+        history: [{ value: currentValue, date: toJavaDate(startDateInput.value) || new Date().toISOString().split('T')[0] }],
+        exercise: exercise,
+        fitnessLevel: fitnessLevel,
+        userComment: userComment
     };
+
+    const validation = await validateGoal(goalData);
+    if (!validation) {
+        showTemporaryMessage('Не удалось проверить цель, попробуйте позже', 'error');
+        return;
+    }
+
+    goalValidationData = validation;
+
+    if (validation.realistic) {
+        await saveGoalDirectly(goalData);
+        return;
+    }
+
+    goalValidationDone = true;
+    const addBtn = document.getElementById('addGoalBtn');
+    if (addBtn) {
+        addBtn.textContent = 'СОХРАНИТЬ ВСЁ РАВНО';
+        addBtn.style.background = '#ff6b6b';
+    }
+    showTemporaryMessage('Цель требует корректировки, но вы можете сохранить её повторным нажатием', 'warning');
+}
+
+// ===== СОХРАНЕНИЕ ЦЕЛИ =====
+async function saveGoalDirectly(goalData) {
+    if (!goalData) {
+        const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
+        if (!activeTab) {
+            showTemporaryMessage('Ошибка: не выбран тип цели', 'error');
+            return;
+        }
+        const goalType = activeTab.dataset.goalType;
+        const config = GOAL_FIELD_CONFIG[goalType];
+        let targetValue = 0, currentValue = 0, initialValue = 0, description = '';
+        let unit = 'кг';
+        let exercise = '';
+        if (goalType === 'weight-loss') {
+            unit = 'кг';
+            const initialWeight = document.getElementById('initialWeight');
+            const targetWeight = document.getElementById('targetWeight');
+            initialValue = initialWeight ? parseFloat(initialWeight.value) || 0 : 0;
+            targetValue = targetWeight ? parseFloat(targetWeight.value) || 0 : 0;
+            currentValue = initialValue;
+            description = `Похудение с ${initialValue}кг до ${targetValue}кг`;
+        } else if (goalType === 'mass-gain') {
+            unit = 'кг';
+            const initialWeight = document.getElementById('initialWeight');
+            const targetWeight = document.getElementById('targetWeight');
+            initialValue = initialWeight ? parseFloat(initialWeight.value) || 0 : 0;
+            targetValue = targetWeight ? parseFloat(targetWeight.value) || 0 : 0;
+            currentValue = initialValue;
+            description = `Набор массы с ${initialValue}кг до ${targetValue}кг`;
+        } else if (goalType === 'strength') {
+            const exerciseSelect = document.getElementById('exerciseSelect');
+            const initialVal = document.getElementById('initialValue');
+            const targetVal = document.getElementById('targetValue');
+            exercise = exerciseSelect ? exerciseSelect.value : '';
+            unit = EXERCISE_UNITS[exercise] || 'кг';
+            initialValue = initialVal ? parseFloat(initialVal.value) || 0 : 0;
+            targetValue = targetVal ? parseFloat(targetVal.value) || 0 : 0;
+            currentValue = initialValue;
+            description = `${exercise}: с ${initialValue} до ${targetValue} ${unit}`;
+        } else if (goalType === 'cardio') {
+            const cardioSelect = document.getElementById('cardioSelect');
+            const initialVal = document.getElementById('initialValue');
+            const targetVal = document.getElementById('targetValue');
+            exercise = cardioSelect ? cardioSelect.value : '';
+            unit = EXERCISE_UNITS[exercise] || 'шагов';
+            initialValue = initialVal ? parseFloat(initialVal.value) || 0 : 0;
+            targetValue = targetVal ? parseFloat(targetVal.value) || 0 : 0;
+            currentValue = initialValue;
+            description = `${exercise}: с ${initialValue} до ${targetValue} ${unit}`;
+        }
+        const userComment = document.getElementById('goalComment')?.value || '';
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const fitnessLevel = document.getElementById('fitnessLevel')?.value || 'intermediate';
+        goalData = {
+            type: goalType,
+            targetValue: targetValue,
+            currentValue: currentValue,
+            startDate: toJavaDate(startDateInput ? startDateInput.value : null),
+            endDate: toJavaDate(endDateInput ? endDateInput.value : null),
+            description: userComment || description || config.title,
+            userId: getCurrentUser().id,
+            initialValue: initialValue,
+            unit: unit,
+            history: [{ value: currentValue, date: toJavaDate(startDateInput.value) || new Date().toISOString().split('T')[0] }],
+            exercise: exercise,
+            fitnessLevel: fitnessLevel,
+            userComment: userComment
+        };
+    }
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/goals`, {
             method: 'POST',
@@ -546,16 +1043,24 @@ async function addNewGoal() {
             if (goalModal) goalModal.style.display = 'none';
             clearGoalForm();
             await loadGoals();
-            alert('Цель успешно создана!');
+            showTemporaryMessage('Цель успешно создана! 🎉', 'success');
+            goalValidationDone = false;
+            goalValidationData = null;
+            const addBtn = document.getElementById('addGoalBtn');
+            if (addBtn) {
+                addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
+                addBtn.style.background = '';
+            }
         } else {
             const errorText = await response.text();
-            alert('Ошибка при создании цели: ' + (errorText || 'Неизвестная ошибка'));
+            showTemporaryMessage('Ошибка при создании цели: ' + (errorText || 'Неизвестная ошибка'), 'error');
         }
     } catch (error) {
-        alert('Ошибка сети: ' + error.message);
+        showTemporaryMessage('Ошибка сети: ' + error.message, 'error');
     }
 }
 
+// ===== ДЕТАЛИ ЦЕЛИ =====
 async function openGoalDetailModal(goalId) {
     const user = getCurrentUser();
     if (!user) return;
@@ -567,7 +1072,7 @@ async function openGoalDetailModal(goalId) {
         const modal = document.getElementById('goalDetailModal');
         if (modal) modal.style.display = 'flex';
     } catch (error) {
-        alert('Ошибка загрузки данных цели');
+        showTemporaryMessage('Ошибка загрузки данных цели', 'error');
     }
 }
 
@@ -582,21 +1087,50 @@ function fillGoalDetailModal(goal) {
     const modal = document.getElementById('goalDetailModal');
     if (modal) modal.dataset.goalId = goal.id;
     updateGoalProgressDisplay(goal);
+    const history = goal.history || [];
+    const unit = goal.unit || GOAL_TYPE_CONFIG[goal.type]?.unit || '';
+    renderGoalHistoryChart(history, unit);
+    const motivationMsg = document.getElementById('goalMotivationMessage');
+    if (motivationMsg && history.length >= 2) {
+        const last = parseFloat(history[history.length-1].value);
+        const prev = parseFloat(history[history.length-2].value);
+        const diff = last - prev;
+        const unitLocal = unit;
+        if (goal.type === 'weight-loss') {
+            if (diff < 0) motivationMsg.innerHTML = `🎉 Отлично! Вы сбросили ${Math.abs(diff).toFixed(1)} ${unitLocal} с прошлого замера!`;
+            else if (diff > 0) motivationMsg.innerHTML = `⚠️ Вес увеличился на ${diff.toFixed(1)} ${unitLocal}. Возможно, стоит скорректировать питание.`;
+            else motivationMsg.innerHTML = `👍 Прогресс стабильный. Продолжайте в том же духе!`;
+        } else if (goal.type === 'mass-gain' || goal.type === 'strength') {
+            if (diff > 0) motivationMsg.innerHTML = `💪 Отличный рост! +${diff.toFixed(1)} ${unitLocal} с прошлого раза!`;
+            else if (diff < 0) motivationMsg.innerHTML = `📉 Прогресс замедлился. Возможно, нужна смена программы.`;
+            else motivationMsg.innerHTML = `👍 Стабильно, продолжайте!`;
+        } else if (goal.type === 'cardio') {
+            if (diff > 0) motivationMsg.innerHTML = `🏃‍♂️ Супер! Вы прошли на ${diff.toFixed(0)} ${unitLocal} больше!`;
+            else if (diff < 0) motivationMsg.innerHTML = `😴 Немного меньше, чем в прошлый раз. Держите темп!`;
+            else motivationMsg.innerHTML = `✅ Стабильно, так держать!`;
+        }
+    } else if (motivationMsg) {
+        motivationMsg.innerHTML = 'Ведите прогресс регулярно для лучших результатов!';
+    }
 }
 
 function updateGoalProgressDisplay(goal) {
     const config = GOAL_TYPE_CONFIG[goal.type] || GOAL_TYPE_CONFIG['weight-loss'];
-    const unit = config.unit;
+    const unit = goal.unit || config.unit;
     const currentEl = document.getElementById('goalCurrentValue');
     const currentSpan = document.getElementById('goalCurrentSpan');
     const targetSpan = document.getElementById('goalTargetSpan');
+    const initialSpan = document.getElementById('goalInitialSpan');
     const currentUnit = document.getElementById('goalCurrentUnit');
     const targetUnit = document.getElementById('goalTargetUnit');
+    const initialUnit = document.getElementById('goalInitialUnit');
     if (currentEl) currentEl.value = goal.currentValue || 0;
     if (currentSpan) currentSpan.textContent = goal.currentValue || 0;
     if (targetSpan) targetSpan.textContent = goal.targetValue || 0;
+    if (initialSpan) initialSpan.textContent = goal.initialValue !== undefined ? goal.initialValue : (goal.currentValue || 0);
     if (currentUnit) currentUnit.textContent = unit;
     if (targetUnit) targetUnit.textContent = unit;
+    if (initialUnit) initialUnit.textContent = unit;
     const startDateEl = document.getElementById('goalStartDate');
     const endDateEl = document.getElementById('goalEndDate');
     const daysLeftEl = document.getElementById('goalDaysLeft');
@@ -628,16 +1162,24 @@ async function updateGoalProgress() {
     if (!user) return;
     const modal = document.getElementById('goalDetailModal');
     const goalId = modal.dataset.goalId;
-    const newValue = document.getElementById('goalCurrentValue').value;
-    if (!goalId) { alert('Ошибка: не выбрана цель'); return; }
-    if (!newValue || isNaN(parseFloat(newValue))) { alert('Введите корректное значение'); return; }
+    const newValueInput = document.getElementById('goalCurrentValue');
+    const newValue = newValueInput.value;
+    if (!goalId) { showTemporaryMessage('Ошибка: не выбрана цель', 'error'); return; }
+    if (!newValue || isNaN(parseFloat(newValue))) { showTemporaryMessage('Введите корректное значение', 'error'); return; }
     try {
         const getResponse = await fetch(`${API_BASE_URL}/api/goals/${goalId}`);
         if (!getResponse.ok) throw new Error('Ошибка загрузки цели');
         const goal = await getResponse.json();
-        const previousValue = goal.currentValue;
+        const oldValue = goal.currentValue;
         goal.currentValue = parseFloat(newValue);
-        if (!goal.initialValue && previousValue > 0) goal.initialValue = previousValue;
+        if (!goal.history) goal.history = [];
+        goal.history.push({
+            value: goal.currentValue,
+            date: new Date().toISOString().split('T')[0]
+        });
+        if (!goal.initialValue && oldValue > 0 && goal.history.length === 1) {
+            goal.initialValue = oldValue;
+        }
         const response = await fetch(`${API_BASE_URL}/api/goals/${goalId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -646,14 +1188,15 @@ async function updateGoalProgress() {
         if (response.ok) {
             const updatedGoal = await response.json();
             updateGoalProgressDisplay(updatedGoal);
+            renderGoalHistoryChart(updatedGoal.history || [], updatedGoal.unit || '');
             loadGoals();
             showTemporaryMessage('Прогресс обновлен!', 'success');
         } else {
             const error = await response.text();
-            alert('Ошибка обновления: ' + error);
+            showTemporaryMessage('Ошибка обновления: ' + error, 'error');
         }
     } catch (error) {
-        alert('Ошибка сети: ' + error.message);
+        showTemporaryMessage('Ошибка сети: ' + error.message, 'error');
     }
 }
 
@@ -662,7 +1205,7 @@ async function deleteGoal() {
     if (!user) return;
     const modal = document.getElementById('goalDetailModal');
     const goalId = modal.dataset.goalId;
-    if (!goalId) { alert('Ошибка: не выбрана цель'); return; }
+    if (!goalId) { showTemporaryMessage('Ошибка: не выбрана цель', 'error'); return; }
     if (!confirm('Вы уверены, что хотите удалить эту цель?')) return;
     try {
         const response = await fetch(`${API_BASE_URL}/api/goals/${goalId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
@@ -672,10 +1215,10 @@ async function deleteGoal() {
             showTemporaryMessage('Цель удалена', 'success');
         } else {
             const error = await response.text();
-            alert('Ошибка удаления: ' + error);
+            showTemporaryMessage('Ошибка удаления: ' + error, 'error');
         }
     } catch (error) {
-        alert('Ошибка сети: ' + error.message);
+        showTemporaryMessage('Ошибка сети: ' + error.message, 'error');
     }
 }
 
@@ -685,10 +1228,11 @@ function showTemporaryMessage(text, type) {
     messageEl.textContent = text;
     messageEl.className = `temporary-message ${type}`;
     messageEl.style.display = 'block';
-    setTimeout(() => messageEl.style.display = 'none', 3000);
+    clearTimeout(messageEl._timeout);
+    messageEl._timeout = setTimeout(() => messageEl.style.display = 'none', 4000);
 }
 
-// ======================= ФУНКЦИИ ДЛЯ РАБОТЫ С КЛУБАМИ =======================
+// ======================= КЛУБЫ =======================
 async function loadClubsByCity(city) {
     const regClubSelect = document.getElementById('regClub');
     if (!regClubSelect) return;
@@ -713,10 +1257,7 @@ async function loadClubsByCity(city) {
     }
 }
 
-// ======================= ИНИЦИАЛИЗАЦИЯ СТИЛЕЙ =======================
-function applyAllStyles() {}
-
-// ======================= ФУНКЦИИ ДЛЯ АДМИН-ПАНЕЛИ =======================
+// ======================= АДМИН-ПАНЕЛЬ =======================
 async function getAllGoals() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/goals`);
@@ -761,7 +1302,7 @@ async function getAllClubs() {
     }
 }
 
-// ======================= Загрузка абонементов на главную =======================
+// ======================= ЗАГРУЗКА АБОНЕМЕНТОВ НА ГЛАВНУЮ =======================
 function getAbonementsGroupKey(abonement) {
     const d = abonement.duration;
     if (d == null) return 'by-class';
@@ -774,7 +1315,6 @@ function renderAbonementCard(abonement) {
     const price = abonement.price != null ? abonement.price : 0;
     const duration = abonement.duration != null ? abonement.duration : 0;
     const date = abonement.date ? formatDisplayDate(abonement.date) : '—';
-
     return `
         <div class="price-card" data-tab="${escapeHtml(getAbonementsGroupKey(abonement))}">
             <div class="price-card-logo-bg"></div>
@@ -801,18 +1341,14 @@ async function loadAbonementsForHome() {
     const byClassEl = document.getElementById('abonements-grid-by-class');
     const unlimitedEl = document.getElementById('abonements-grid-unlimited');
     const fitnessEl = document.getElementById('abonements-grid-fitness');
-
     if (!byClassEl || !unlimitedEl || !fitnessEl) return;
-
     byClassEl.innerHTML = '<div class="price-card" style="padding:30px;">Загрузка...</div>';
     unlimitedEl.innerHTML = '';
     fitnessEl.innerHTML = '';
-
     try {
         const response = await fetch(`${API_BASE_URL}/api/abonements`);
         if (!response.ok) throw new Error('Ошибка загрузки абонементов');
         const abonements = await response.json();
-
         const groups = { 'by-class': [], 'unlimited': [], 'fitness': [] };
         if (Array.isArray(abonements)) {
             abonements.forEach(a => {
@@ -820,19 +1356,15 @@ async function loadAbonementsForHome() {
                 groups[key].push(a);
             });
         }
-
         byClassEl.innerHTML = groups['by-class'].length
             ? groups['by-class'].map(renderAbonementCard).join('')
             : '<p class="empty-message">Абонементов пока нет</p>';
-
         unlimitedEl.innerHTML = groups['unlimited'].length
             ? groups['unlimited'].map(renderAbonementCard).join('')
             : '<p class="empty-message">Абонементов пока нет</p>';
-
         fitnessEl.innerHTML = groups['fitness'].length
             ? groups['fitness'].map(renderAbonementCard).join('')
             : '<p class="empty-message">Абонементов пока нет</p>';
-
     } catch (e) {
         console.error(e);
         byClassEl.innerHTML = '<p class="error-message">Ошибка загрузки абонементов</p>';
@@ -844,18 +1376,15 @@ async function loadAbonementsForHome() {
 // ======================= ОСНОВНОЙ ОБРАБОТЧИК СОБЫТИЙ =======================
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM загружен - инициализация...");
-    
     applyAllStyles();
     updateUserUI();
-    
+    initMobileMenu();
     const user = getCurrentUser();
 
-    // Подгружаем абонементы на главной
     if (window.location.pathname.includes('index.html')) {
         loadAbonementsForHome();
     }
 
-    // На странице профиля
     if (window.location.pathname.includes('profile.html')) {
         const profileName = document.getElementById('profileUserName');
         if (profileName && user) {
@@ -868,8 +1397,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadMyAbonements();
         loadGoals();
     }
-    
-    // Кнопка выхода (только на странице профиля)
+
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -878,40 +1406,35 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = 'index.html';
         });
     }
-    
+
     const showUserQrBtn = document.getElementById('showUserQrBtn');
     if (showUserQrBtn) {
         showUserQrBtn.addEventListener('click', showUserQrCode);
     }
-    
     const closeUserQrModal = document.getElementById('closeUserQrModal');
     if (closeUserQrModal) {
         closeUserQrModal.addEventListener('click', () => {
             document.getElementById('userQrModal').style.display = 'none';
         });
     }
-    
     const closeQrModal = document.getElementById('closeQrModal');
     if (closeQrModal) {
         closeQrModal.addEventListener('click', () => {
             document.getElementById('qrModal').style.display = 'none';
         });
     }
-    
-    // Табы для цен (на главной странице)
+
     const tabs = document.querySelectorAll(".tab-button");
     const cards = document.querySelectorAll(".price-card");
     const byClassGrid = document.getElementById('abonements-grid-by-class');
     const unlimitedGrid = document.getElementById('abonements-grid-unlimited');
     const fitnessGrid = document.getElementById('abonements-grid-fitness');
-
     if (tabs.length > 0) {
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 tabs.forEach(btn => btn.classList.remove("active"));
                 tab.classList.add("active");
                 const target = tab.getAttribute("data-tab");
-
                 cards.forEach(card => {
                     if (card.getAttribute("data-tab") === target) {
                         card.classList.remove("hidden");
@@ -919,15 +1442,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         card.classList.add("hidden");
                     }
                 });
-
                 if (byClassGrid) byClassGrid.style.display = target === 'by-class' ? '' : 'none';
                 if (unlimitedGrid) unlimitedGrid.style.display = target === 'unlimited' ? '' : 'none';
                 if (fitnessGrid) fitnessGrid.style.display = target === 'fitness' ? '' : 'none';
             });
         });
     }
-    
-    // Карусель акций (как была)
+
     const carousel = document.querySelector(".promotions-carousel");
     const promotionCards = document.querySelectorAll(".promotion-card");
     const indicatorsContainer = document.querySelector(".carousel-indicators");
@@ -1012,8 +1533,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCarousel();
         startAutoSlide();
     }
-    
-    // Анимация галереи
+
     const strips = document.querySelectorAll(".gallery-strip");
     if (strips.length > 0) {
         const normalDuration = 15;
@@ -1027,8 +1547,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-    
-    // Lightbox для галереи клубов
     const lightbox = document.getElementById("galleryLightbox");
     const lightboxImage = document.getElementById("lightboxImage");
     const galleryItems = document.querySelectorAll(".gallery-item img");
@@ -1043,8 +1561,7 @@ document.addEventListener("DOMContentLoaded", () => {
             lightbox.style.display = "none";
         });
     }
-    
-    // Модальное окно целей
+
     const goalModal = document.getElementById("goalModal");
     const openGoalModalBtn = document.getElementById("openGoalModalBtn");
     const addGoalBtn = document.getElementById("addGoalBtn");
@@ -1059,6 +1576,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 firstTab.classList.add('active');
                 renderGoalFields('weight-loss');
             }
+            goalValidationDone = false;
+            goalValidationData = null;
+            const addBtn = document.getElementById('addGoalBtn');
+            if (addBtn) {
+                addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
+                addBtn.style.background = '';
+            }
+            document.getElementById('aiRecommendationBlock').style.display = 'none';
         });
         closeGoalModalButtons.forEach(button => {
             button.addEventListener("click", () => {
@@ -1083,8 +1608,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
-    // Выпадающее меню в шапке
+
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     if (dropdownToggle) {
         dropdownToggle.addEventListener('click', function(e) {
@@ -1092,8 +1616,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.parentNode.classList.toggle('active');
         });
     }
-    
-    // Плавная навигация по якорям
+
     const navLinks = document.querySelectorAll('.main-nav .nav-link[data-section]');
     const sections = document.querySelectorAll('section[id]');
     const mainHeader = document.querySelector('.main-header');
@@ -1115,8 +1638,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-    
-    // Переключение между логином и регистрацией (если есть на странице)
+
     const loginBlock = document.getElementById("loginBlock");
     const registerBlock = document.getElementById("registerBlock");
     const showRegisterBtn = document.getElementById("showRegisterBtn");
@@ -1133,8 +1655,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (loginBlock) loginBlock.classList.remove("hidden");
         });
     }
-    
-    // ФОРМА РЕГИСТРАЦИИ (исправлена: клуб не обязателен)
+
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
@@ -1145,7 +1666,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const regPassword = document.getElementById('regPassword');
             const regClub = document.getElementById('regClub');
             if (!regFirstName || !regLastName || !regEmail || !regPassword) {
-                alert("Пожалуйста, заполните все поля");
+                showTemporaryMessage("Пожалуйста, заполните все поля", 'error');
                 return;
             }
             let clubId = null;
@@ -1167,10 +1688,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 if (!registerResponse.ok) {
                     const errorData = await registerResponse.json();
-                    alert("Ошибка регистрации: " + (errorData.error || "Неизвестная ошибка"));
+                    showTemporaryMessage("Ошибка регистрации: " + (errorData.error || "Неизвестная ошибка"), 'error');
                     return;
                 }
-                // Автоматический вход
                 const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1179,20 +1699,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (loginResponse.ok) {
                     const userDto = await loginResponse.json();
                     localStorage.setItem('user', JSON.stringify(userDto));
-                    alert("Регистрация и вход выполнены успешно!");
+                    showTemporaryMessage("Регистрация и вход выполнены успешно!", 'success');
                     window.location.href = 'profile.html';
                 } else {
-                    alert("Регистрация успешна! Теперь войдите, используя свой email и пароль.");
+                    showTemporaryMessage("Регистрация успешна! Теперь войдите, используя свой email и пароль.", 'success');
                     window.location.href = 'login.html';
                 }
             } catch (error) {
                 console.error("Ошибка сети:", error);
-                alert("Сервер недоступен");
+                showTemporaryMessage("Сервер недоступен", 'error');
             }
         });
     }
-    
-    // ФОРМА ВХОДА
+
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (event) => {
@@ -1200,7 +1719,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const loginEmail = document.getElementById('loginEmail');
             const loginPassword = document.getElementById('loginPassword');
             if (!loginEmail || !loginPassword) {
-                alert("Пожалуйста, заполните все поля");
+                showTemporaryMessage("Пожалуйста, заполните все поля", 'error');
                 return;
             }
             const email = loginEmail.value;
@@ -1215,18 +1734,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     const userDto = await response.json();
                     localStorage.setItem('user', JSON.stringify(userDto));
                     updateUserUI();
+                    showTemporaryMessage("Вход выполнен успешно!", 'success');
                     window.location.href = 'profile.html';
                 } else {
-                    alert("Ошибка входа: Неверный логин или пароль");
+                    showTemporaryMessage("Ошибка входа: Неверный логин или пароль", 'error');
                 }
             } catch (error) {
                 console.error("Ошибка сети:", error);
-                alert("Сервер недоступен");
+                showTemporaryMessage("Сервер недоступен", 'error');
             }
         });
     }
-    
-    // Загрузка клубов по городу на странице регистрации (но только если есть город)
+
     const regClubSelect = document.getElementById('regClub');
     const urlParams = new URLSearchParams(window.location.search);
     let cityParam = urlParams.get('city') ? decodeURIComponent(urlParams.get('city')).trim() : null;
@@ -1238,12 +1757,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cityParam) {
             loadClubsByCity(cityParam);
         } else {
-            // Если город не выбран, загружаем все клубы (без фильтрации)
             loadClubsByCity('');
         }
     }
-    
-    // Закрытие модальных окон по клику вне
+
     window.addEventListener('click', (event) => {
         const isProfilePage = window.location.pathname.includes('profile.html');
         const isIndexPage = window.location.pathname.includes('index.html');
@@ -1257,8 +1774,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (goalDetailModalEl && event.target === goalDetailModalEl) goalDetailModalEl.style.display = 'none';
         if (userQrModal && event.target === userQrModal) userQrModal.style.display = 'none';
     });
-    
-    // Модальное окно деталей цели
+
     const goalDetailModal = document.getElementById('goalDetailModal');
     const closeGoalDetailBtn = document.getElementById('closeGoalDetailModal');
     const updateGoalBtn = document.getElementById('updateGoalBtn');
@@ -1284,10 +1800,54 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     }
-    
-    // Фильтр истекших абонементов
+
     addExpiredFilterButton();
 });
+
+// ======================= БУРГЕР-МЕНЮ =======================
+function initMobileMenu() {
+    if (window.location.pathname.includes('login.html') || 
+        window.location.pathname.includes('admin-panel.html') ||
+        window.location.pathname.includes('scanner.html')) {
+        return;
+    }
+    if (document.querySelector('.mobile-menu-btn')) return;
+    const headerContainers = document.querySelectorAll('.header-container, .profile-header-container');
+    headerContainers.forEach(container => {
+        const burgerBtn = document.createElement('button');
+        burgerBtn.className = 'mobile-menu-btn';
+        burgerBtn.innerHTML = '<span></span><span></span><span></span>';
+        burgerBtn.setAttribute('aria-label', 'Меню');
+        const dropdownMenu = document.createElement('div');
+        dropdownMenu.className = 'mobile-dropdown';
+        const profileInfo = container.querySelector('.profile-info');
+        if (profileInfo) {
+            const clonedInfo = profileInfo.cloneNode(true);
+            dropdownMenu.appendChild(clonedInfo);
+        } else {
+            const loginLink = document.createElement('a');
+            loginLink.href = 'login.html';
+            loginLink.className = 'btn-login-mobile';
+            loginLink.textContent = 'ВОЙТИ';
+            dropdownMenu.appendChild(loginLink);
+        }
+        container.appendChild(burgerBtn);
+        container.appendChild(dropdownMenu);
+        burgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('open');
+            burgerBtn.classList.toggle('active');
+        });
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !burgerBtn.contains(e.target)) {
+                dropdownMenu.classList.remove('open');
+                burgerBtn.classList.remove('active');
+            }
+        });
+    });
+}
+
+function applyAllStyles() {}
 
 // Экспорт в глобальную область
 window.getCurrentUser = getCurrentUser;
@@ -1304,3 +1864,9 @@ window.getAllGoals = getAllGoals;
 window.getAllUsers = getAllUsers;
 window.getAllAbonements = getAllAbonements;
 window.getAllClubs = getAllClubs;
+window.validateGoal = validateGoal;
+window.showRecommendations = showRecommendations;
+window.saveGoalDirectly = saveGoalDirectly;
+window.applyAdjustment = applyAdjustment;
+window.updateUnitForExercise = updateUnitForExercise;
+window.getCurrentGoalValue = getCurrentGoalValue;

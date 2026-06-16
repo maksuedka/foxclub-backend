@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-13T18:55:30+0300",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-06-16T16:31:04+0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.5 (BellSoft)"
 )
 @Component
 public class PurchasedAbonementMapperImpl implements PurchasedAbonementMapper {
@@ -26,11 +26,11 @@ public class PurchasedAbonementMapperImpl implements PurchasedAbonementMapper {
         purchasedAbonementDto.setUserId( entityUserId( entity ) );
         purchasedAbonementDto.setAbonementId( entityAbonementId( entity ) );
         purchasedAbonementDto.setAbonementName( entityAbonementName( entity ) );
-        purchasedAbonementDto.setEndDate( entity.getEndDate() );
         purchasedAbonementDto.setId( entity.getId() );
-        purchasedAbonementDto.setPriceAtPurchase( entity.getPriceAtPurchase() );
         purchasedAbonementDto.setPurchaseDate( entity.getPurchaseDate() );
         purchasedAbonementDto.setStartDate( entity.getStartDate() );
+        purchasedAbonementDto.setEndDate( entity.getEndDate() );
+        purchasedAbonementDto.setPriceAtPurchase( entity.getPriceAtPurchase() );
 
         return purchasedAbonementDto;
     }
@@ -43,11 +43,11 @@ public class PurchasedAbonementMapperImpl implements PurchasedAbonementMapper {
 
         PurchasedAbonement purchasedAbonement = new PurchasedAbonement();
 
-        purchasedAbonement.setEndDate( dto.getEndDate() );
         purchasedAbonement.setId( dto.getId() );
-        purchasedAbonement.setPriceAtPurchase( dto.getPriceAtPurchase() );
         purchasedAbonement.setPurchaseDate( dto.getPurchaseDate() );
         purchasedAbonement.setStartDate( dto.getStartDate() );
+        purchasedAbonement.setEndDate( dto.getEndDate() );
+        purchasedAbonement.setPriceAtPurchase( dto.getPriceAtPurchase() );
 
         return purchasedAbonement;
     }

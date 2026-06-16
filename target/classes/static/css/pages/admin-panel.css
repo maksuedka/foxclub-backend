@@ -388,3 +388,5 @@ tr:hover {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+@import 'responsive.css';

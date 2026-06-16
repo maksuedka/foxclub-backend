@@ -1,0 +1,523 @@
+/* ========== АДАПТИВНОСТЬ ДЛЯ ПРОЕКТА FOX CLUB ========== */
+/* Включает бургер-меню для мобильных и полную адаптацию всех элементов */
+
+/* -------------------- ОБЩИЕ ПРАВКИ -------------------- */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    body {
+        font-size: 14px;
+    }
+}
+
+/* -------------------- ШАПКА И БУРГЕР-МЕНЮ -------------------- */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    height: 24px;
+    position: relative;
+    z-index: 1001;
+    margin-left: auto;
+}
+.mobile-menu-btn span {
+    display: block;
+    position: absolute;
+    height: 3px;
+    width: 100%;
+    background: var(--primary-color, #ff8c00);
+    border-radius: 3px;
+    left: 0;
+    transition: 0.25s ease-in-out;
+}
+.mobile-menu-btn span:nth-child(1) { top: 0; }
+.mobile-menu-btn span:nth-child(2) { top: 10px; }
+.mobile-menu-btn span:nth-child(3) { top: 20px; }
+.mobile-menu-btn.active span:nth-child(1) {
+    top: 10px;
+    transform: rotate(135deg);
+}
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+    left: -20px;
+}
+.mobile-menu-btn.active span:nth-child(3) {
+    top: 10px;
+    transform: rotate(-135deg);
+}
+
+.mobile-dropdown {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-dark-header, #0A0A0A);
+    border-left: 1px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    padding: 80px 20px 20px;
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+    overflow-y: auto;
+}
+.mobile-dropdown.open {
+    display: block;
+    transform: translateX(0);
+}
+.mobile-dropdown .profile-info {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+    margin: 0 !important;
+}
+.mobile-dropdown .profile-info .profile-avatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+.mobile-dropdown .profile-info .profile-name {
+    font-size: 18px;
+    color: #fff;
+}
+.mobile-dropdown .profile-info .btn-user-qr,
+.mobile-dropdown .profile-info .btn-logout {
+    width: 100%;
+    text-align: center;
+    margin: 5px 0;
+}
+.mobile-dropdown .btn-login-mobile {
+    display: block;
+    background: var(--primary-color, #ff8c00);
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 30px;
+    text-align: center;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .main-header .profile-info,
+    .profile-header .profile-info {
+        display: none !important;
+    }
+    .mobile-menu-btn {
+        display: block;
+    }
+    .header-container,
+    .profile-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .profile-avatar {
+        display: none;
+    }
+    /* Навигационное меню (ссылки) – пусть остаётся под шапкой, но с прокруткой */
+    .main-nav {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        text-align: left;
+    }
+    .main-nav .nav-list {
+        display: inline-flex;
+        gap: 20px;
+        padding: 0 5px;
+    }
+}
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none !important;
+    }
+    .mobile-dropdown {
+        display: none !important;
+    }
+    .main-header .profile-info,
+    .profile-header .profile-info {
+        display: flex !important;
+    }
+    .profile-avatar {
+        display: block !important;
+    }
+    .main-nav {
+        overflow: visible;
+        white-space: normal;
+    }
+}
+
+/* -------------------- АДМИН-ПАНЕЛЬ (полная адаптация) -------------------- */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 260px;
+        z-index: 1050;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--sidebar-bg, #242424);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px;
+    }
+    .menu-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-color, #ff8c00);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-bottom: 15px;
+        gap: 8px;
+        position: sticky;
+        top: 10px;
+        z-index: 1060;
+    }
+    .theme-toggle {
+        position: static;
+        margin-bottom: 15px;
+        justify-content: center;
+        background: var(--card-bg, #242424);
+        border: 1px solid var(--border-color, #333);
+        width: fit-content;
+    }
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    #dataTable {
+        min-width: 600px;
+    }
+    .table-header-panel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 0 10px;
+        top: 0;
+        position: relative;
+    }
+    .action-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+    }
+    .btn-custom {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    #searchBox {
+        width: 100%;
+        max-width: none;
+    }
+    .stats-card {
+        margin-bottom: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+    .stats-icon {
+        margin-top: 0;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    .modal-dialog {
+        margin: 10px;
+    }
+    .modal-content {
+        width: auto;
+        margin: 10px;
+    }
+    .modal-body {
+        overflow-x: auto;
+    }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 220px;
+        transform: none !important;
+    }
+    .main-content {
+        margin-left: 220px;
+    }
+    .menu-toggle-btn {
+        display: none;
+    }
+}
+@media (min-width: 1025px) {
+    .menu-toggle-btn {
+        display: none;
+    }
+    .sidebar {
+        transform: none !important;
+    }
+}
+
+/* -------------------- МОДАЛЬНЫЕ ОКНА -------------------- */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        padding: 20px !important;
+        margin: 20px auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-tabs {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .modal-tab {
+        width: calc(50% - 10px);
+        white-space: normal;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .modal-buttons button {
+        width: 100%;
+    }
+    #commentsModal .modal-content {
+        max-width: 95%;
+    }
+    .modal-comment-form {
+        flex-direction: column;
+    }
+    .modal-comment-form textarea {
+        width: 100%;
+    }
+    .btn-send-comment {
+        padding: 12px;
+    }
+    #avatarModal .modal-content {
+        max-width: 95%;
+        padding: 15px;
+    }
+    .btn-upload-photo, .btn-save-avatar, .btn-cancel-crop {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    .goal-detail-modal {
+        max-width: 95% !important;
+    }
+    .goal-progress-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .goal-dates-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .date-box {
+        width: 100%;
+    }
+}
+
+/* -------------------- ЛАЙТБОКС -------------------- */
+@media (max-width: 768px) {
+    .lightbox-content {
+        max-width: 95%;
+    }
+    .lightbox-prev, .lightbox-next {
+        padding: 5px 10px;
+        font-size: 20px;
+    }
+}
+
+/* -------------------- КАРУСЕЛЬ АКЦИЙ -------------------- */
+@media (max-width: 992px) {
+    .promotions-carousel {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .promotion-card {
+        width: 280px;
+    }
+}
+@media (max-width: 576px) {
+    .promotion-card {
+        width: 260px;
+        height: 280px;
+    }
+    .promotion-card-title {
+        font-size: 1.8rem;
+    }
+    .promotions-ribbon {
+        font-size: 1.2em;
+        height: 35px;
+    }
+}
+
+/* -------------------- СЕТКИ И КАРТОЧКИ -------------------- */
+@media (max-width: 992px) {
+    .club-cards-wrapper {
+        justify-content: center;
+    }
+    .club-card {
+        width: calc(50% - 20px);
+        min-width: 280px;
+    }
+    .my-posts-grid, .my-abonements-grid, .abonements-grid, .home-posts-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+    }
+}
+@media (max-width: 768px) {
+    .club-card {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+    }
+    .club-card-overlay {
+        width: calc(100% - 40px);
+        font-size: 0.9rem;
+    }
+}
+@media (max-width: 576px) {
+    .my-posts-grid, .my-abonements-grid, .abonements-grid, .home-posts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+}
+
+/* -------------------- ФУТЕР -------------------- */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .footer-block {
+        min-width: auto;
+    }
+    .footer-social {
+        position: static;
+        transform: none;
+        margin-top: 20px;
+        justify-content: center;
+    }
+    .social-icon {
+        width: 50px;
+        height: 50px;
+    }
+    .footer-bottom p {
+        font-size: 12px;
+    }
+}
+
+/* -------------------- СТРАНИЦА КЛУБА -------------------- */
+@media (max-width: 768px) {
+    .club-contacts-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .club-map-wrapper {
+        width: 90%;
+        height: auto;
+        aspect-ratio: 1;
+    }
+    .club-features-container {
+        padding: 0 15px;
+    }
+    .gallery-item {
+        width: 280px;
+        height: 160px;
+    }
+    .club-intro-title {
+        font-size: 2.5rem;
+    }
+    .club-intro-subtitle {
+        font-size: 1.2rem;
+    }
+}
+
+/* -------------------- СКАНЕР QR -------------------- */
+@media (max-width: 576px) {
+    .manual-input {
+        flex-direction: column;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    .action-buttons {
+        flex-direction: column;
+    }
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* -------------------- ТАБЫ ЦЕН -------------------- */
+@media (max-width: 768px) {
+    .tabs-navigation {
+        justify-content: center;
+        gap: 8px;
+    }
+    .tab-button {
+        padding: 8px 16px;
+        font-size: 12px;
+        white-space: normal;
+    }
+}
+@media (max-width: 480px) {
+    .tab-button {
+        width: calc(50% - 8px);
+        text-align: center;
+    }
+}
+
+/* -------------------- МЕЛКИЕ ПРАВКИ -------------------- */
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    .section-title {
+        font-size: 1.6rem;
+    }
+    .section-subtitle {
+        font-size: 0.9rem;
+    }
+    .price-card-title {
+        font-size: 1.4rem;
+    }
+    .price-card-price {
+        font-size: 2rem;
+    }
+    .stat-number {
+        font-size: 2rem;
+    }
+    .trainers-title {
+        font-size: 1.8rem;
+    }
+    .trainers-description {
+        font-size: 0.9rem;
+    }
+    .footer-logo {
+        font-size: 1.8rem;
+    }
+    .floating-login-logo {
+        position: static;
+        display: block;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .login-main {
+        padding-top: 20px;
+    }
+}
