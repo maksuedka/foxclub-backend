@@ -4,7 +4,10 @@ import by.foxclub.repository.*;
 import by.foxclub.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -28,31 +31,25 @@ public class DashboardController {
     private final GoalRepository goalRepository;
     private final AdminRepository adminRepository;
     private final PurchasedAbonementRepository purchasedAbonementRepository;
-    private final PasswordEncoder passwordEncoder;  // добавлено для шифрования паролей
+    private final PasswordEncoder passwordEncoder;
 
     private static final Map<String, String> RU_HEADERS = new HashMap<>();
     static {
-        // Пользователь
         RU_HEADERS.put("id", "ID");
         RU_HEADERS.put("email", "Почта");
         RU_HEADERS.put("password", "Пароль");
         RU_HEADERS.put("firstName", "Имя");
         RU_HEADERS.put("lastName", "Фамилия");
         RU_HEADERS.put("club", "Клуб");
-
-        // Клуб
+        RU_HEADERS.put("isAdmin", "Администратор");
         RU_HEADERS.put("name", "Название");
         RU_HEADERS.put("address", "Адрес");
         RU_HEADERS.put("contacts", "Контакты");
         RU_HEADERS.put("workingHours", "Время работы");
-
-        // Абонемент
         RU_HEADERS.put("abonement_name", "Название");
         RU_HEADERS.put("price", "Цена");
         RU_HEADERS.put("duration", "Длительность");
         RU_HEADERS.put("date", "Дата");
-
-        // Цель
         RU_HEADERS.put("type", "Тип");
         RU_HEADERS.put("targetValue", "Целевое значение");
         RU_HEADERS.put("currentValue", "Текущее значение");
@@ -60,15 +57,11 @@ public class DashboardController {
         RU_HEADERS.put("endDate", "Дата окончания");
         RU_HEADERS.put("description", "Описание");
         RU_HEADERS.put("goal_user", "Пользователь");
-
-        // Администратор
         RU_HEADERS.put("admin_email", "Почта");
         RU_HEADERS.put("admin_password", "Пароль");
         RU_HEADERS.put("admin_firstName", "Имя");
         RU_HEADERS.put("admin_lastName", "Фамилия");
         RU_HEADERS.put("admin_club", "Клуб");
-
-        // Приобретенный абонемент
         RU_HEADERS.put("purchased_user", "Пользователь");
         RU_HEADERS.put("purchased_abonement", "Абонемент");
         RU_HEADERS.put("purchaseDate", "Дата покупки");
@@ -96,18 +89,15 @@ public class DashboardController {
             Class<?> entityClass = getEntityClass(tableName);
 
             List<Map<String, String>> headers = new ArrayList<>();
-
             headers.add(Map.of("key", "id", "title", "ID"));
 
             for (Field field : entityClass.getDeclaredFields()) {
                 if (Collection.class.isAssignableFrom(field.getType()) || field.getName().equals("id")) {
                     continue;
                 }
-
                 if (field.getName().equals("abonements") || field.getName().equals("goals")) {
                     continue;
                 }
-
                 Map<String, String> header = new HashMap<>();
                 String key = field.getName();
                 String prefixedKey = tableName + "_" + key;
@@ -118,7 +108,6 @@ public class DashboardController {
             }
 
             List<Map<String, Object>> safeData = sanitizeData(rawData);
-
             Map<String, Object> response = new HashMap<>();
             response.put("headers", headers);
             response.put("data", safeData);
@@ -157,7 +146,48 @@ public class DashboardController {
                         user.setClub(null);
                     }
 
+                    boolean newIsAdmin = false;
+                    if (payload.containsKey("isAdmin")) {
+                        Object val = payload.get("isAdmin");
+                        if (val instanceof Boolean) {
+                            newIsAdmin = (Boolean) val;
+                        } else if (val instanceof String) {
+                            newIsAdmin = "true".equalsIgnoreCase((String) val) || "1".equals(val);
+                        } else if (val instanceof Number) {
+                            newIsAdmin = ((Number) val).intValue() == 1;
+                        }
+                    }
+                    boolean oldIsAdmin = user.getIsAdmin() != null && user.getIsAdmin();
+
+                    user.setIsAdmin(newIsAdmin);
                     userRepository.save(user);
+
+                    // Синхронизация с таблицей администраторов
+                    if (newIsAdmin && !oldIsAdmin) {
+                        // Добавить в администраторы
+                        Admin admin = new Admin();
+                        admin.setEmail(user.getEmail());
+                        admin.setPassword(user.getPassword());
+                        admin.setFirstName(user.getFirstName());
+                        admin.setLastName(user.getLastName());
+
+                        // Если у пользователя нет клуба, берём первый существующий клуб
+                        if (user.getClub() != null) {
+                            admin.setClub(user.getClub());
+                        } else {
+                            List<Club> clubs = clubRepository.findAll();
+                            if (!clubs.isEmpty()) {
+                                admin.setClub(clubs.get(0));
+                            } else {
+                                // Если клубов нет, создаём временный? Лучше выбросить исключение
+                                throw new RuntimeException("Нет ни одного клуба. Невозможно создать администратора без клуба.");
+                            }
+                        }
+                        adminRepository.save(admin);
+                    } else if (!newIsAdmin && oldIsAdmin) {
+                        // Удалить из администраторов
+                        adminRepository.findByEmail(user.getEmail()).ifPresent(adminRepository::delete);
+                    }
                     break;
 
                 case "clubs":
@@ -191,7 +221,6 @@ public class DashboardController {
                     if (goalUserId != null) {
                         goal.setUser(userRepository.findById(goalUserId).orElse(null));
                     }
-
                     goalRepository.save(goal);
                     break;
 
@@ -208,9 +237,23 @@ public class DashboardController {
                     Integer adminClubId = getInteger(payload, "club");
                     if (adminClubId != null) {
                         admin.setClub(clubRepository.findById(adminClubId).orElse(null));
+                    } else {
+                        List<Club> clubs = clubRepository.findAll();
+                        if (!clubs.isEmpty()) {
+                            admin.setClub(clubs.get(0));
+                        } else {
+                            throw new RuntimeException("Нет ни одного клуба");
+                        }
                     }
-
                     adminRepository.save(admin);
+
+                    // Также обновляем пользователя, если есть
+                    if (admin.getEmail() != null) {
+                        userRepository.findByEmail(admin.getEmail()).ifPresent(u -> {
+                            u.setIsAdmin(true);
+                            userRepository.save(u);
+                        });
+                    }
                     break;
 
                 case "purchased-abonements":
@@ -259,6 +302,10 @@ public class DashboardController {
                 case "users":
                     for (Integer id : ids) {
                         try {
+                            User user = userRepository.findById(id).orElse(null);
+                            if (user != null && user.getIsAdmin() != null && user.getIsAdmin()) {
+                                adminRepository.findByEmail(user.getEmail()).ifPresent(adminRepository::delete);
+                            }
                             deleteUserDependencies(id);
                             userRepository.deleteById(id);
                             successfullyDeleted.add(id);
@@ -305,6 +352,13 @@ public class DashboardController {
                 case "admins":
                     for (Integer id : ids) {
                         try {
+                            Admin admin = adminRepository.findById(id).orElse(null);
+                            if (admin != null && admin.getEmail() != null) {
+                                userRepository.findByEmail(admin.getEmail()).ifPresent(u -> {
+                                    u.setIsAdmin(false);
+                                    userRepository.save(u);
+                                });
+                            }
                             adminRepository.deleteById(id);
                             successfullyDeleted.add(id);
                         } catch (Exception e) {
@@ -380,6 +434,68 @@ public class DashboardController {
             return ResponseEntity.badRequest().body(new byte[0]);
         }
     }
+
+    @PostMapping("/make-admin")
+    public ResponseEntity<?> makeAdmin(@RequestBody Map<String, Integer> payload) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Не авторизован");
+            }
+
+            String currentEmail = auth.getName();
+            User currentUser = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new RuntimeException("Текущий пользователь не найден"));
+
+            if (currentUser.getIsAdmin() == null || !currentUser.getIsAdmin()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Доступ запрещён: только администраторы могут назначать админов");
+            }
+
+            Integer userId = payload.get("userId");
+            if (userId == null) {
+                return ResponseEntity.badRequest().body("Не указан userId");
+            }
+
+            User targetUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+            if (targetUser.getId().equals(currentUser.getId())) {
+                return ResponseEntity.badRequest().body("Нельзя изменить свои права");
+            }
+
+            targetUser.setIsAdmin(true);
+            userRepository.save(targetUser);
+
+            // Добавить в администраторы, если ещё нет
+            if (adminRepository.findByEmail(targetUser.getEmail()).isEmpty()) {
+                Admin admin = new Admin();
+                admin.setEmail(targetUser.getEmail());
+                admin.setPassword(targetUser.getPassword());
+                admin.setFirstName(targetUser.getFirstName());
+                admin.setLastName(targetUser.getLastName());
+
+                if (targetUser.getClub() != null) {
+                    admin.setClub(targetUser.getClub());
+                } else {
+                    List<Club> clubs = clubRepository.findAll();
+                    if (!clubs.isEmpty()) {
+                        admin.setClub(clubs.get(0));
+                    } else {
+                        throw new RuntimeException("Нет ни одного клуба");
+                    }
+                }
+                adminRepository.save(admin);
+            }
+
+            return ResponseEntity.ok("Пользователь назначен администратором");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Ошибка: " + e.getMessage());
+        }
+    }
+
+    // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
 
     private String getString(Map<String, Object> payload, String key) {
         Object value = payload.get(key);
@@ -498,7 +614,6 @@ public class DashboardController {
                     Object value = field.get(entity);
 
                     if (value != null) {
-                        // Для связанных сущностей берем только ID
                         if (value.getClass().getName().startsWith("by.foxclub.entity")) {
                             try {
                                 Field relIdField = value.getClass().getDeclaredField("id");

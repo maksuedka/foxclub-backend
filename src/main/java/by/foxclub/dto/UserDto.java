@@ -10,4 +10,5 @@ public class UserDto {
     private String lastName;
     private Integer clubId;
     private String avatarUrl;
+    private Boolean isAdmin;
 }

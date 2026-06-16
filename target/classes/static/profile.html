@@ -45,12 +45,17 @@
                 <img id="profileAvatar" src="" alt="Аватар" class="profile-avatar">
                 <span class="profile-name" id="profileUserName">Загрузка...</span>
                 <button class="btn-user-qr" id="showUserQrBtn">Мой QR</button>
+                <!-- Кнопка "Админ-панель" (показывается только администраторам) -->
+                <a href="admin-panel.html" class="btn-admin-panel" id="adminPanelBtn" style="display:none; background:#ff8c00; color:#fff; padding:8px 20px; border-radius:30px; text-decoration:none; font-weight:600; font-size:14px; margin-left:10px;">
+                    ⚙️ Админ-панель
+                </a>
                 <button class="btn-logout" id="logoutBtn">Выйти</button>
                 <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
             </div>
         </div>
     </header>
 
+    <!-- Остальной код страницы без изменений ... -->
     <section class="my-abonements-section"><div class="container"><h2 class="section-title">Мои абонементы</h2><div class="my-abonements-grid" id="myAbonementsGrid"><p class="loading-message">Загрузка...</p></div></div></section>
 
     <section class="posts-section">
@@ -76,31 +81,19 @@
     <div id="qrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeQrModal">&times;</span><h2 id="qrModalTitle">Ваш абонемент</h2><div class="qr-code-container" id="qrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="abonement-dates"><p>Дата покупки: <span id="qrPurchaseDate"></span></p><p>Действует до: <span id="qrExpiryDate"></span></p></div></div></div>
     <div id="userQrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeUserQrModal">&times;</span><h2>Ваш QR-код</h2><div class="qr-code-container" id="userQrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="user-info"><p>Пользователь: <span id="userQrName"></span></p><p>Email: <span id="userQrEmail"></span></p></div></div></div>
     
-    <!-- Модалка создания цели (УЛУЧШЕННАЯ - компактная, 2 колонки) -->
+    <!-- Модалка создания цели -->
     <div id="goalModal" class="modal">
         <div class="modal-content new-goal-modal-content">
             <span class="close-button close-goal-modal">&times;</span>
-            
-            <!-- Заголовок и табы -->
             <div class="goal-modal-header">
                 <h3 class="modal-section-title">Выберите тип цели</h3>
                 <div class="modal-tabs" id="modalGoalTabs">
-                    <button class="modal-tab active" data-goal-type="weight-loss">
-                        <img src="assets/images/icons/weight_loss.png" alt="Похудение"> Похудение
-                    </button>
-                    <button class="modal-tab" data-goal-type="mass-gain">
-                        <img src="assets/images/icons/weight_gain.png" alt="Набор массы"> Набор массы
-                    </button>
-                    <button class="modal-tab" data-goal-type="strength">
-                        <img src="assets/images/icons/power.png" alt="Силовые"> Силовые показатели
-                    </button>
-                    <button class="modal-tab" data-goal-type="cardio">
-                        <img src="assets/images/icons/cardio_load.png" alt="Кардио"> Кардионагрузка
-                    </button>
+                    <button class="modal-tab active" data-goal-type="weight-loss"><img src="assets/images/icons/weight_loss.png" alt="Похудение"> Похудение</button>
+                    <button class="modal-tab" data-goal-type="mass-gain"><img src="assets/images/icons/weight_gain.png" alt="Набор массы"> Набор массы</button>
+                    <button class="modal-tab" data-goal-type="strength"><img src="assets/images/icons/power.png" alt="Силовые"> Силовые показатели</button>
+                    <button class="modal-tab" data-goal-type="cardio"><img src="assets/images/icons/cardio_load.png" alt="Кардио"> Кардионагрузка</button>
                 </div>
             </div>
-
-            <!-- Основные поля (сетка 2 колонки) -->
             <div class="goal-fields-grid">
                 <div id="goalDetailsForm" class="goal-details-form"></div>
                 <div class="goal-fields-side">
@@ -119,8 +112,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- БЛОК РЕКОМЕНДАЦИЙ ОТ ИИ -->
             <div id="aiRecommendationBlock" style="display:none; margin-top:12px; padding:12px 16px; background:#2a2a2a; border-radius:10px; border-left:4px solid #ff8c00;">
                 <div style="display:flex; align-items:flex-start; gap:12px;">
                     <div id="aiRecommendationIcon" style="font-size:24px; flex-shrink:0;">🤖</div>
@@ -134,8 +125,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Кнопки -->
             <div class="modal-buttons">
                 <button class="add-goal-btn" id="addGoalBtn">ДОБАВИТЬ ЦЕЛЬ</button>
                 <button class="cancel-btn close-goal-modal">ОТМЕНА</button>
@@ -143,16 +132,12 @@
         </div>
     </div>
     
-    <!-- Модалка деталей цели (УЛУЧШЕННАЯ - горизонтальная) -->
+    <!-- Модалка деталей цели -->
     <div id="goalDetailModal" class="modal">
         <div class="modal-content goal-detail-modal">
             <span class="close-button" id="closeGoalDetailModal">&times;</span>
-            
-            <!-- Заголовок -->
             <h2 id="goalDetailTitle">Цель</h2>
             <p id="goalDetailDescription" class="goal-description"></p>
-            
-            <!-- Прогресс-бар (на всю ширину) -->
             <div class="goal-progress-full">
                 <div class="progress-info">
                     <span class="progress-percent-large" id="goalProgressPercent">0%</span>
@@ -162,12 +147,8 @@
                     <div class="progress-fill-large" id="goalProgressFill" style="width:0%"></div>
                 </div>
             </div>
-            
-            <!-- Сетка 2 колонки -->
             <div class="goal-detail-grid">
-                <!-- Левая колонка: статистика + обновление -->
                 <div class="left-col">
-                    <!-- Три показателя: начальное, текущее, цель -->
                     <div class="goal-progress-stats">
                         <div class="stat-item">
                             <div class="stat-label">Начальное</div>
@@ -182,8 +163,6 @@
                             <div class="stat-value"><span id="goalTargetSpan">0</span><span class="stat-unit" id="goalTargetUnit"></span></div>
                         </div>
                     </div>
-                    
-                    <!-- Блок обновления прогресса -->
                     <div class="progress-update-section">
                         <h3>Обновить прогресс</h3>
                         <div class="input-group">
@@ -193,16 +172,12 @@
                         <button class="btn-delete-goal" id="deleteGoalBtn">Удалить цель</button>
                     </div>
                 </div>
-                
-                <!-- Правая колонка: график + мотивация -->
                 <div class="right-col">
                     <h3 class="chart-title" style="color:#ff8c00; font-size:15px; margin:0 0 6px 0;">Динамика прогресса</h3>
                     <canvas id="goalHistoryChart" width="400" height="150" style="background:#1a1a1a; border-radius:10px; padding:6px; width:100%; max-height:160px;"></canvas>
                     <div id="goalMotivationMessage" style="padding:8px 12px; background:#2a2a2a; border-radius:10px; text-align:center; font-size:13px; color:#ddd; min-height:40px;"></div>
                 </div>
             </div>
-            
-            <!-- Даты (три колонки внизу) -->
             <div class="goal-dates-info">
                 <div class="date-box">
                     <div class="date-label">Дата начала</div>
@@ -238,5 +213,20 @@
     <script src="js/main.js"></script>
     <script src="js/posts.js"></script>
     <script src="js/components/avatar.js"></script>
+    <script>
+        // Показать кнопку "Админ-панель" только для администраторов
+        document.addEventListener('DOMContentLoaded', function() {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const adminBtn = document.getElementById('adminPanelBtn');
+                    if (adminBtn && user.isAdmin) {
+                        adminBtn.style.display = 'inline-block';
+                    }
+                } catch(e) {}
+            }
+        });
+    </script>
 </body>
 </html>

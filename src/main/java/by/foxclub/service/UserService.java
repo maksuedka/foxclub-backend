@@ -5,9 +5,11 @@ import by.foxclub.dto.RegisterRequest;
 import by.foxclub.dto.UserDto;
 import by.foxclub.entity.User;
 import by.foxclub.entity.Club;
+import by.foxclub.entity.Admin;
 import by.foxclub.mapper.UserMapper;
 import by.foxclub.repository.UserRepository;
 import by.foxclub.repository.ClubRepository;
+import by.foxclub.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
+    private final AdminRepository adminRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -57,7 +60,44 @@ public class UserService {
             user.setClub(null);
         }
 
-        return userMapper.toDto(userRepository.save(user));
+        // ===== ПЕРВЫЙ ПОЛЬЗОВАТЕЛЬ СТАНОВИТСЯ АДМИНОМ =====
+        long userCount = userRepository.count();
+        boolean isFirstUser = (userCount == 0);
+        user.setIsAdmin(isFirstUser);
+
+        User savedUser = userRepository.save(user);
+
+        // ===== ЕСЛИ ПЕРВЫЙ ПОЛЬЗОВАТЕЛЬ – ДОБАВЛЯЕМ В ТАБЛИЦУ АДМИНИСТРАТОРОВ =====
+        if (isFirstUser) {
+            Admin admin = new Admin();
+            admin.setEmail(savedUser.getEmail());
+            admin.setPassword(savedUser.getPassword());
+            admin.setFirstName(savedUser.getFirstName());
+            admin.setLastName(savedUser.getLastName());
+
+            // Если у пользователя нет клуба, берём первый существующий клуб
+            if (savedUser.getClub() != null) {
+                admin.setClub(savedUser.getClub());
+            } else {
+                List<Club> clubs = clubRepository.findAll();
+                if (!clubs.isEmpty()) {
+                    admin.setClub(clubs.get(0));
+                } else {
+                    // Если клубов нет вообще, создаём временный клуб (можно выбросить исключение)
+                    // Вместо исключения создадим клуб "Главный офис"
+                    Club defaultClub = new Club();
+                    defaultClub.setName("Главный офис");
+                    defaultClub.setAddress("г. Минск, ул. Центральная, 1");
+                    defaultClub.setContacts("+375 29 123-45-67");
+                    defaultClub.setWorkingHours("Пн-Вс 08:00–22:00");
+                    clubRepository.save(defaultClub);
+                    admin.setClub(defaultClub);
+                }
+            }
+            adminRepository.save(admin);
+        }
+
+        return userMapper.toDto(savedUser);
     }
 
     public UserDto login(LoginRequest request) {

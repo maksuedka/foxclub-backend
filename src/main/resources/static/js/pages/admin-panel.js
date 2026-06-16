@@ -1,12 +1,29 @@
 /* admin-panel.js – универсальная работа и локально, и на Railway */
 
+// ======================= ПРОВЕРКА ПРАВ АДМИНИСТРАТОРА =======================
+(function checkAdminAccess() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+        window.location.href = 'index.html';
+        return;
+    }
+    try {
+        const user = JSON.parse(userStr);
+        if (!user.isAdmin) {
+            window.location.href = 'index.html';
+            return;
+        }
+        window.currentAdmin = user;
+    } catch (e) {
+        window.location.href = 'index.html';
+    }
+})();
+
 // ======================= АВТООПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
 function getBaseUrl() {
-    // Если мы на localhost или 127.0.0.1, используем локальный бэкенд
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return 'http://localhost:8080';
     }
-    // Иначе берём текущий протокол и хост (работает на Railway)
     return `${window.location.protocol}//${window.location.hostname}`;
 }
 
@@ -14,11 +31,14 @@ const BASE_URL = getBaseUrl();
 const API_URL = `${BASE_URL}/api/dashboard`;
 const ADMIN_POSTS_URL = `${BASE_URL}/api/admin/posts`;
 const COMMENTS_API = `${BASE_URL}/api/comments`;
+const AUTH_API = `${BASE_URL}/api/auth`;
 
-console.log('Admin panel using API base:', BASE_URL); // Для отладки
+console.log('Admin panel using API base:', BASE_URL);
 
-// ======================= ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ (кроме исправления ошибок) =======================
+// ======================= ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =======================
 let currentTable = '';
+let currentTableLabel = '';
+let currentTableElement = null;
 let tableHeaders = [];
 let tableData = [];
 let modal;
@@ -29,27 +49,56 @@ let clubsList = [];
 let usersList = [];
 let abonementsList = [];
 
+// ======================= ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ =======================
 function toggleTheme() {
     const body = document.body;
-    const themeToggle = document.querySelector('.theme-toggle span');
-    const icon = document.querySelector('.theme-toggle i');
+    const label = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeIcon');
+    
     body.classList.toggle('dark-theme');
-    if (body.classList.contains('dark-theme')) {
-        themeToggle.textContent = 'Темная тема';
-        icon.className = 'fas fa-moon';
+    const isDark = body.classList.contains('dark-theme');
+    
+    if (isDark) {
+        // Тёмная тема → показываем «Светлая тема» и солнце
+        if (label) label.textContent = 'Светлая тема';
+        if (icon) icon.className = 'fas fa-sun';
     } else {
-        themeToggle.textContent = 'Светлая тема';
-        icon.className = 'fas fa-sun';
+        // Светлая тема → показываем «Тёмная тема» и луну
+        if (label) label.textContent = 'Тёмная тема';
+        if (icon) icon.className = 'fas fa-moon';
     }
 }
 
+// ======================= ОБНОВЛЕНИЕ ТАБЛИЦЫ =======================
+function refreshTable() {
+    if (currentTable === 'posts_moderation') {
+        showPostsModeration(currentTableElement);
+    } else if (currentTable) {
+        selectTable(currentTable, currentTableLabel, currentTableElement);
+    } else {
+        showNotification('warning', 'Нет активной таблицы для обновления');
+    }
+}
+
+// ======================= ИНИЦИАЛИЗАЦИЯ =======================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализация темы – по умолчанию тёмная
+    const body = document.body;
+    if (!body.classList.contains('dark-theme')) {
+        body.classList.add('dark-theme');
+    }
+    const label = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeIcon');
+    if (label) label.textContent = 'Светлая тема';
+    if (icon) icon.className = 'fas fa-sun';
+
     modal = new bootstrap.Modal(document.getElementById('dataModal'));
     commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
     photosModal = new bootstrap.Modal(document.getElementById('photosModal'));
     await loadMenu();
 });
 
+// ======================= ЗАГРУЗКА СПРАВОЧНЫХ ДАННЫХ =======================
 async function loadReferenceData() {
     try {
         const [clubsRes, usersRes, abonementsRes] = await Promise.all([
@@ -65,6 +114,7 @@ async function loadReferenceData() {
     }
 }
 
+// ======================= ЗАГРУЗКА МЕНЮ =======================
 async function loadMenu() {
     try {
         const res = await fetch(`${API_URL}/tables`);
@@ -89,7 +139,6 @@ async function loadMenu() {
         scannerLi.innerHTML = `<a class="nav-link" href="scanner.html"><i class="fas fa-qrcode"></i> Сканер QR</a>`;
         menu.appendChild(scannerLi);
 
-        // Автоматически загружаем первую таблицу
         if (tables.length > 0) {
             const firstTable = tables[0];
             await selectTable(firstTable.key, firstTable.label, menu.querySelector('.nav-link.active'));
@@ -99,14 +148,18 @@ async function loadMenu() {
     }
 }
 
+// ======================= МОДЕРАЦИЯ ПОСТОВ =======================
 async function showPostsModeration(element) {
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
     if (element) element.classList.add('active');
 
     currentTable = 'posts_moderation';
+    currentTableLabel = 'Модерация постов';
+    currentTableElement = element;
+
     document.getElementById('tableTitle').innerText = 'Модерация постов';
     document.getElementById('totalRecords').innerText = '0';
-    document.getElementById('tableBody').innerHTML = `<td><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка постов...</p></td></tr>`;
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка постов...</p></td></tr>`;
 
     try {
         const res = await fetch(ADMIN_POSTS_URL);
@@ -282,6 +335,7 @@ async function deletePost(postId) {
     }
 }
 
+// ======================= ВЫБОР ТАБЛИЦЫ =======================
 async function selectTable(key, label, element) {
     if (element) {
         document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
@@ -289,9 +343,11 @@ async function selectTable(key, label, element) {
     }
 
     currentTable = key;
+    currentTableLabel = label;
+    currentTableElement = element;
 
     document.getElementById('tableTitle').innerText = label;
-    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка данных...</p></td></table>`;
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="10" class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Загрузка данных...</p></td></tr>`;
 
     try {
         await loadReferenceData();
@@ -308,6 +364,7 @@ async function selectTable(key, label, element) {
     }
 }
 
+// ======================= ОТРИСОВКА ТАБЛИЦЫ =======================
 function renderTable(data) {
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
@@ -333,13 +390,14 @@ function renderTable(data) {
         tableHeaders.forEach(h => {
             let value = row[h.key] !== undefined && row[h.key] !== null ? row[h.key] : '';
 
+            // Спецобработка для связанных полей
             if (currentTable === 'users') {
                 if (h.key === 'club' && value) {
                     const club = clubsList.find(c => c.id == value);
                     value = club ? club.name || '?' : 'ID: ' + value;
-                } else if (h.key === 'abonementId' && value) {
-                    const abonement = abonementsList.find(a => a.id == value);
-                    value = abonement ? abonement.name || '?' : 'ID: ' + value;
+                }
+                if (h.key === 'isAdmin') {
+                    value = value ? '✅ Да' : '❌ Нет';
                 }
             } else if (currentTable === 'admins') {
                 if (h.key === 'club' && value) {
@@ -361,6 +419,7 @@ function renderTable(data) {
                 }
             }
 
+            // Форматирование чисел и дат
             if (h.key === 'price' || h.key === 'targetValue' || h.key === 'currentValue' || h.key === 'priceAtPurchase') {
                 value = value ? Number(value).toFixed(2) : '';
             } else if (h.key.includes('date') && value) {
@@ -376,6 +435,7 @@ function renderTable(data) {
     });
 }
 
+// ======================= ПОИСК В ТАБЛИЦЕ =======================
 let searchTimeout;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -397,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ======================= РЕДАКТИРОВАНИЕ ЗАПИСЕЙ =======================
 function openAddModal() {
     if (currentTable === 'posts_moderation') return;
     document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Новая запись';
@@ -431,7 +492,22 @@ function generateForm(data) {
         div.className = 'mb-3';
         div.innerHTML = `<label class="form-label fw-bold" style="color:var(--primary-color);">${h.title}</label>`;
 
-        if (h.key === 'club') {
+        if (h.key === 'isAdmin') {
+            const select = document.createElement('select');
+            select.className = 'form-select';
+            select.name = h.key;
+            const optNo = document.createElement('option');
+            optNo.value = '0';
+            optNo.textContent = 'Нет';
+            if (data[h.key] == 0 || data[h.key] === false || data[h.key] === null) optNo.selected = true;
+            select.appendChild(optNo);
+            const optYes = document.createElement('option');
+            optYes.value = '1';
+            optYes.textContent = 'Да';
+            if (data[h.key] == 1 || data[h.key] === true) optYes.selected = true;
+            select.appendChild(optYes);
+            div.appendChild(select);
+        } else if (h.key === 'club') {
             const select = document.createElement('select');
             select.className = 'form-select';
             select.name = h.key;
@@ -471,7 +547,6 @@ function generateForm(data) {
             empty.value = '';
             empty.textContent = '-- Не выбран --';
             select.appendChild(empty);
-
             abonementsList.forEach(ab => {
                 const opt = document.createElement('option');
                 opt.value = ab.id;
@@ -543,6 +618,7 @@ function generateForm(data) {
     });
 }
 
+// ======================= СОХРАНЕНИЕ ДАННЫХ =======================
 async function saveData() {
     if (currentTable === 'posts_moderation') return;
     const form = document.getElementById('dataForm');
@@ -556,6 +632,8 @@ async function saveData() {
             payload[key] = value ? parseInt(value, 10) : null;
         } else if (key === 'price' || key === 'targetValue' || key === 'currentValue' || key === 'priceAtPurchase') {
             payload[key] = value ? parseFloat(value) : null;
+        } else if (key === 'isAdmin') {
+            payload[key] = value === '1' || value === true;
         } else if (key.includes('date') && value) {
             payload[key] = value;
         } else if (key === 'password' && !value) {
@@ -595,6 +673,7 @@ async function saveData() {
     }
 }
 
+// ======================= УДАЛЕНИЕ ЗАПИСЕЙ =======================
 async function deleteSelected() {
     if (currentTable === 'posts_moderation') return;
 
@@ -636,6 +715,7 @@ async function deleteSelected() {
     }
 }
 
+// ======================= СОРТИРОВКА =======================
 function sortData(key) {
     if (currentTable === 'posts_moderation') return;
     sortOrder *= -1;
@@ -648,11 +728,13 @@ function sortData(key) {
     renderTable(tableData);
 }
 
+// ======================= ВЫБОР ВСЕХ =======================
 function toggleAll(source) {
     if (currentTable === 'posts_moderation') return;
     document.querySelectorAll('.row-check').forEach(c => c.checked = source.checked);
 }
 
+// ======================= ЭКСПОРТ В EXCEL =======================
 function exportData() {
     if (currentTable === 'posts_moderation') {
         showNotification('warning', 'Экспорт постов не реализован');
@@ -661,6 +743,7 @@ function exportData() {
     window.open(`${API_URL}/export/${currentTable}`, '_blank');
 }
 
+// ======================= УВЕДОМЛЕНИЯ =======================
 function showNotification(type, message) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'warning'} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
