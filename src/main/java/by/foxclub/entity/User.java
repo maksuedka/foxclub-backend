@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -38,8 +39,6 @@ public class User {
     @ToString.Exclude
     private Club club;
 
-    // поле abonementId удалено, т.к. абонементы теперь через таблицу покупок
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     @ToString.Exclude
@@ -50,4 +49,11 @@ public class User {
 
     @Column(name = "is_admin")
     private Boolean isAdmin;
+
+    // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ =====
+    @Column(name = "reset_token", unique = true)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
 }

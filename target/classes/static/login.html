@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в FOX CLUB</title>
     <link rel="stylesheet" href="css/main.css">
-    <!-- Встроенные стили для переключения форм и красивого селекта -->
     <style>
         .auth-container {
             max-width: 450px;
@@ -60,7 +59,6 @@
             padding-bottom: 15px;
         }
         
-        /* Улучшенный стиль для селекта */
         .custom-select-wrapper {
             position: relative;
             margin-bottom: 25px;
@@ -113,7 +111,6 @@
             background: #fff3e0;
         }
         
-        /* Группа с иконкой для селекта */
         .select-group {
             position: relative;
         }
@@ -133,7 +130,6 @@
             font-size: 18px;
         }
         
-        /* Стили для выпадающего списка */
         .select-dropdown {
             position: absolute;
             top: 100%;
@@ -206,7 +202,6 @@
             color: rgba(255,255,255,0.8);
         }
         
-        /* Стили для опций в нативном селекте (альтернатива) */
         .club-option {
             padding: 10px;
         }
@@ -222,7 +217,6 @@
             font-size: 11px;
         }
         
-        /* Анимация для формы */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -238,7 +232,6 @@
             animation: fadeIn 0.5s ease;
         }
         
-        /* Стили для кнопок */
         .btn-primary {
             background: linear-gradient(45deg, #ff8c00, #ffcc00);
             border: none;
@@ -265,7 +258,6 @@
             transform: translateY(0);
         }
         
-        /* Стили для полей ввода */
         .form-group {
             margin-bottom: 20px;
         }
@@ -305,14 +297,12 @@
             box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.1);
         }
         
-        /* Иконки (можно заменить на FontAwesome если подключен) */
         .icon {
             display: inline-block;
             width: 18px;
             text-align: center;
         }
         
-        /* Стили для сообщений об ошибках */
         .error-message {
             color: #ff4444;
             font-size: 12px;
@@ -320,7 +310,6 @@
             padding-left: 10px;
         }
         
-        /* Адаптивность */
         @media (max-width: 480px) {
             .auth-container {
                 margin: 20px;
@@ -330,6 +319,118 @@
             .auth-title {
                 font-size: 24px;
             }
+        }
+
+        /* ===== СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН ВОССТАНОВЛЕНИЯ ===== */
+        .reset-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .reset-modal.active {
+            display: flex;
+        }
+        .reset-modal-content {
+            background: #1a1a1a;
+            color: #fff;
+            max-width: 420px;
+            width: 90%;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,140,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        .reset-modal-content .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+        }
+        .reset-modal-content .close-btn:hover {
+            color: #ff8c00;
+        }
+        .reset-modal-content h2 {
+            color: #ff8c00;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+        }
+        .reset-modal-content p {
+            color: #ccc;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .reset-modal-content input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .reset-modal-content input:focus {
+            outline: none;
+            border-color: #ff8c00;
+        }
+        .reset-modal-content .btn-reset {
+            width: 100%;
+            padding: 14px;
+            background: #ff8c00;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .reset-modal-content .btn-reset:hover {
+            background: #e67e00;
+        }
+        .reset-modal-content .message {
+            margin-top: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .reset-modal-content .message.success {
+            color: #4CAF50;
+        }
+        .reset-modal-content .message.error {
+            color: #f44336;
+        }
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: #ff8c00;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .forgot-link:hover {
+            color: #e67e00;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -363,6 +464,9 @@
                     </div>
 
                     <button type="submit" class="btn-primary">Войти в клуб</button>
+                    
+                    <!-- Ссылка "Забыли пароль?" -->
+                    <span class="forgot-link" id="forgotPasswordLink">🔑 Забыли пароль?</span>
                 </form>
                 <span class="form-toggle-link" id="showRegisterBtn">👋 Нет аккаунта? Зарегистрироваться</span>
             </div>
@@ -372,23 +476,17 @@
                 <h2 class="auth-title">Стать членом клуба</h2>
                 <form id="registerForm">
                     <div class="form-group">
-                        <label>
-                            Имя:
-                        </label>
+                        <label>Имя:</label>
                         <input type="text" id="regFirstName" name="firstName" placeholder="Иван" required minlength="2">
                     </div>
 
                     <div class="form-group">
-                        <label>
-                            Фамилия:
-                        </label>
+                        <label>Фамилия:</label>
                         <input type="text" id="regLastName" name="lastName" placeholder="Петров" required minlength="2">
                     </div>
 
                     <div class="form-group">
-                        <label>
-                            Email:
-                        </label>
+                        <label>Email:</label>
                         <input type="email" id="regEmail" name="email" placeholder="ivan@example.com" required>
                     </div>
 
@@ -401,13 +499,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label>
-                            Выберите клуб (необязательно):
-                        </label>
+                        <label>Выберите клуб (необязательно):</label>
                         <div class="custom-select-wrapper">
                             <select id="regClub" name="club" class="custom-select">
                                 <option value="" selected>📌 Не выбран (можно добавить позже)</option>
-                                <!-- Клубы будут загружены через JavaScript -->
                             </select>
                         </div>
                     </div>
@@ -420,71 +515,216 @@
         </div>
     </main>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ВВОД EMAIL ===== -->
+    <div class="reset-modal" id="forgotPasswordModal">
+        <div class="reset-modal-content">
+            <button class="close-btn" id="closeForgotModal">&times;</button>
+            <h2>Восстановление пароля</h2>
+            <p>Введите email, на который мы отправим код для сброса.</p>
+            <input type="email" id="resetEmail" placeholder="Ваш email">
+            <button class="btn-reset" id="sendResetCodeBtn">Отправить код</button>
+            <div class="message" id="resetMessage"></div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО: ВВОД КОДА И НОВОГО ПАРОЛЯ ===== -->
+    <div class="reset-modal" id="resetPasswordModal">
+        <div class="reset-modal-content">
+            <button class="close-btn" id="closeResetModal">&times;</button>
+            <h2>Новый пароль</h2>
+            <p>Введите код из письма и новый пароль (мин. 6 символов).</p>
+            <input type="text" id="resetCode" placeholder="Код из письма">
+            <input type="password" id="newPassword" placeholder="Новый пароль">
+            <input type="password" id="confirmPassword" placeholder="Подтвердите пароль">
+            <button class="btn-reset" id="resetPasswordBtn">Сменить пароль</button>
+            <div class="message" id="resetPasswordMessage"></div>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
-    
-    <!-- Скрипт загрузки клубов (все клубы, без фильтрации по городу) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ===== ЗАГРУЗКА КЛУБОВ =====
             const regClubSelect = document.getElementById('regClub');
-
-            // Функция загрузки всех клубов
             async function loadAllClubs() {
                 if (!regClubSelect) return;
-                
                 try {
-                    // Сохраняем опцию "Не выбран" как первую
                     const emptyOption = '<option value="" selected>📌 Не выбран (можно добавить позже)</option>';
                     regClubSelect.innerHTML = emptyOption + '<option value="" disabled>⏳ Загрузка клубов...</option>';
-                    
-                    // Загружаем все клубы без параметра city
-                    const response = await fetch(`http://localhost:8080/api/clubs`);
-                    
+                    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                        ? 'http://localhost:8080'
+                        : `${window.location.protocol}//${window.location.hostname}`;
+                    const response = await fetch(`${baseUrl}/api/clubs`);
                     if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
-                    
                     const clubs = await response.json();
-                    console.log('Loaded clubs:', clubs);
-                    
                     if (!Array.isArray(clubs) || clubs.length === 0) {
                         regClubSelect.innerHTML = emptyOption + '<option value="" disabled>😕 Клубы не найдены</option>';
                         return;
                     }
-
-                    // Очищаем и добавляем опции, первая - "Не выбран"
                     regClubSelect.innerHTML = emptyOption;
-                    
                     clubs.forEach(club => {
                         const option = document.createElement('option');
                         option.value = club.id;
-                        
-                        // Форматируем текст опции: адрес (или название, если есть)
                         let displayText = club.address;
                         if (club.name && !club.address.includes(club.name)) {
                             displayText = `${club.name} - ${club.address}`;
                         }
-                        
                         option.textContent = displayText;
                         regClubSelect.appendChild(option);
                     });
-                    
                 } catch (error) {
                     console.error("Ошибка загрузки клубов:", error);
                     regClubSelect.innerHTML = '<option value="" selected>📌 Не выбран (можно добавить позже)</option><option value="" disabled>❌ Ошибка загрузки клубов</option>';
                 }
             }
-
-            // Загружаем все клубы при загрузке страницы
             if (regClubSelect) {
                 loadAllClubs();
-            }
-            
-            // Добавим немного интерактивности для селекта
-            if (regClubSelect) {
                 regClubSelect.addEventListener('change', function() {
-                    if (this.value) {
-                        this.style.borderColor = '#4CAF50';
-                    } else {
-                        this.style.borderColor = '#e0e0e0';
+                    this.style.borderColor = this.value ? '#4CAF50' : '#e0e0e0';
+                });
+            }
+
+            // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ =====
+            const API_BASE_URL = (function() {
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    return 'http://localhost:8080';
+                }
+                return `${window.location.protocol}//${window.location.hostname}`;
+            })();
+
+            const forgotModal = document.getElementById('forgotPasswordModal');
+            const resetModal = document.getElementById('resetPasswordModal');
+            const closeForgot = document.getElementById('closeForgotModal');
+            const closeReset = document.getElementById('closeResetModal');
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const sendCodeBtn = document.getElementById('sendResetCodeBtn');
+            const resetEmail = document.getElementById('resetEmail');
+            const resetMessage = document.getElementById('resetMessage');
+            const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+            const resetCode = document.getElementById('resetCode');
+            const newPassword = document.getElementById('newPassword');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const resetPasswordMessage = document.getElementById('resetPasswordMessage');
+
+            // Открыть модалку "Забыли пароль"
+            if (forgotLink && forgotModal) {
+                forgotLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    forgotModal.classList.add('active');
+                    resetMessage.textContent = '';
+                    resetMessage.className = 'message';
+                });
+            }
+
+            // Закрытие модалок
+            if (closeForgot && forgotModal) {
+                closeForgot.addEventListener('click', function() {
+                    forgotModal.classList.remove('active');
+                });
+            }
+            if (closeReset && resetModal) {
+                closeReset.addEventListener('click', function() {
+                    resetModal.classList.remove('active');
+                });
+            }
+            // Закрытие по клику вне
+            window.addEventListener('click', function(e) {
+                if (e.target === forgotModal) forgotModal.classList.remove('active');
+                if (e.target === resetModal) resetModal.classList.remove('active');
+            });
+
+            // Отправить код
+            if (sendCodeBtn && resetEmail) {
+                sendCodeBtn.addEventListener('click', async function() {
+                    const email = resetEmail.value.trim();
+                    if (!email) {
+                        resetMessage.textContent = 'Введите email';
+                        resetMessage.className = 'message error';
+                        return;
                     }
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email })
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            resetMessage.textContent = data.message || 'Код отправлен! Проверьте почту.';
+                            resetMessage.className = 'message success';
+                            // Закрыть первую модалку и открыть вторую
+                            forgotModal.classList.remove('active');
+                            resetModal.classList.add('active');
+                            resetPasswordMessage.textContent = '';
+                            resetPasswordMessage.className = 'message';
+                        } else {
+                            resetMessage.textContent = data.error || data.message || 'Ошибка';
+                            resetMessage.className = 'message error';
+                        }
+                    } catch (error) {
+                        resetMessage.textContent = 'Ошибка сети';
+                        resetMessage.className = 'message error';
+                    }
+                });
+            }
+
+            // Сбросить пароль
+            if (resetPasswordBtn) {
+                resetPasswordBtn.addEventListener('click', async function() {
+                    const token = resetCode.value.trim();
+                    const pass = newPassword.value;
+                    const confirm = confirmPassword.value;
+
+                    if (!token || !pass || !confirm) {
+                        resetPasswordMessage.textContent = 'Заполните все поля';
+                        resetPasswordMessage.className = 'message error';
+                        return;
+                    }
+                    if (pass !== confirm) {
+                        resetPasswordMessage.textContent = 'Пароли не совпадают';
+                        resetPasswordMessage.className = 'message error';
+                        return;
+                    }
+                    if (pass.length < 6) {
+                        resetPasswordMessage.textContent = 'Пароль должен быть не менее 6 символов';
+                        resetPasswordMessage.className = 'message error';
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token, newPassword: pass })
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            resetPasswordMessage.textContent = data.message || 'Пароль успешно изменён!';
+                            resetPasswordMessage.className = 'message success';
+                            setTimeout(() => {
+                                resetModal.classList.remove('active');
+                                window.location.href = 'login.html';
+                            }, 1500);
+                        } else {
+                            resetPasswordMessage.textContent = data.error || data.message || 'Ошибка';
+                            resetPasswordMessage.className = 'message error';
+                        }
+                    } catch (error) {
+                        resetPasswordMessage.textContent = 'Ошибка сети';
+                        resetPasswordMessage.className = 'message error';
+                    }
+                });
+            }
+
+            // Enter для отправки кода и сброса пароля (дополнительно)
+            if (resetEmail) {
+                resetEmail.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') sendCodeBtn.click();
+                });
+            }
+            if (confirmPassword) {
+                confirmPassword.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') resetPasswordBtn.click();
                 });
             }
         });

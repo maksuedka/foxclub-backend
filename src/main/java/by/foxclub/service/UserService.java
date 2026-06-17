@@ -11,11 +11,17 @@ import by.foxclub.repository.UserRepository;
 import by.foxclub.repository.ClubRepository;
 import by.foxclub.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +34,26 @@ public class UserService {
     private final AdminRepository adminRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    // ===== ДЛЯ ОТПРАВКИ ПИСЕМ =====
+    private final JavaMailSender mailSender;
+
+    // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ: временное хранение токенов =====
+    private final Map<String, TokenData> resetTokens = new ConcurrentHashMap<>();
+
+    private static class TokenData {
+        String token;
+        String email;
+        LocalDateTime expiry;
+
+        TokenData(String token, String email, LocalDateTime expiry) {
+            this.token = token;
+            this.email = email;
+            this.expiry = expiry;
+        }
+    }
+
+    // ===== ОСНОВНЫЕ МЕТОДЫ =====
 
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
@@ -60,14 +86,12 @@ public class UserService {
             user.setClub(null);
         }
 
-        // ===== ПЕРВЫЙ ПОЛЬЗОВАТЕЛЬ СТАНОВИТСЯ АДМИНОМ =====
         long userCount = userRepository.count();
         boolean isFirstUser = (userCount == 0);
         user.setIsAdmin(isFirstUser);
 
         User savedUser = userRepository.save(user);
 
-        // ===== ЕСЛИ ПЕРВЫЙ ПОЛЬЗОВАТЕЛЬ – ДОБАВЛЯЕМ В ТАБЛИЦУ АДМИНИСТРАТОРОВ =====
         if (isFirstUser) {
             Admin admin = new Admin();
             admin.setEmail(savedUser.getEmail());
@@ -75,7 +99,6 @@ public class UserService {
             admin.setFirstName(savedUser.getFirstName());
             admin.setLastName(savedUser.getLastName());
 
-            // Если у пользователя нет клуба, берём первый существующий клуб
             if (savedUser.getClub() != null) {
                 admin.setClub(savedUser.getClub());
             } else {
@@ -83,8 +106,6 @@ public class UserService {
                 if (!clubs.isEmpty()) {
                     admin.setClub(clubs.get(0));
                 } else {
-                    // Если клубов нет вообще, создаём временный клуб (можно выбросить исключение)
-                    // Вместо исключения создадим клуб "Главный офис"
                     Club defaultClub = new Club();
                     defaultClub.setName("Главный офис");
                     defaultClub.setAddress("г. Минск, ул. Центральная, 1");
@@ -118,7 +139,6 @@ public class UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
 
-        // Обновляем клуб, если передан
         if (dto.getClubId() != null && dto.getClubId() > 0) {
             Club club = clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new RuntimeException("Клуб не найден"));
@@ -127,7 +147,6 @@ public class UserService {
             user.setClub(null);
         }
 
-        // Пароль не обновляется через DTO – только через DashboardController
         return userMapper.toDto(userRepository.save(user));
     }
 
@@ -136,5 +155,91 @@ public class UserService {
             throw new RuntimeException("Пользователь не найден");
         }
         userRepository.deleteById(id);
+    }
+
+    // ==========================================================
+    // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ (6-значный код) =====
+    // ==========================================================
+
+    /**
+     * Генерирует 6-значный цифровой код, сохраняет в памяти на 5 минут
+     * и отправляет его на почту пользователя.
+     */
+    public String generateResetToken(String email) {
+        // Проверяем, существует ли пользователь
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким email не найден"));
+
+        // Удаляем старый токен, если был
+        resetTokens.values().removeIf(data -> data.email.equals(email));
+
+        // Генерируем 6-значный цифровой код (с ведущими нулями)
+        String token = String.format("%06d", new Random().nextInt(999999));
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
+        resetTokens.put(token, new TokenData(token, email, expiry));
+
+        // ===== ОТПРАВКА ПИСЬМА С КОДОМ =====
+        try {
+            sendResetEmail(email, token);
+        } catch (Exception e) {
+            System.err.println("Ошибка отправки письма на " + email + ": " + e.getMessage());
+            throw new RuntimeException("Не удалось отправить письмо. Проверьте настройки почты.");
+        }
+
+        return token;
+    }
+
+    /**
+     * Отправляет письмо с 6-значным кодом сброса пароля.
+     */
+    private void sendResetEmail(String toEmail, String token) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Восстановление пароля в FoxClub");
+        message.setText(
+                "Здравствуйте!\n\n" +
+                "Вы запросили восстановление пароля в FoxClub.\n" +
+                "Ваш код для сброса пароля: " + token + "\n\n" +
+                "Код действителен 5 минут.\n\n" +
+                "Если вы не запрашивали восстановление, просто проигнорируйте это письмо.\n\n" +
+                "С уважением,\nКоманда FoxClub"
+        );
+        mailSender.send(message);
+        System.out.println("Письмо с кодом отправлено на " + toEmail);
+    }
+
+    /**
+     * Проверяет код: существует ли он, не истёк ли.
+     * Возвращает email пользователя, если код валиден.
+     */
+    private String validateResetToken(String token) {
+        TokenData data = resetTokens.get(token);
+        if (data == null) {
+            throw new RuntimeException("Недействительный код");
+        }
+        if (data.expiry.isBefore(LocalDateTime.now())) {
+            resetTokens.remove(token);
+            throw new RuntimeException("Срок действия кода истёк (5 минут)");
+        }
+        return data.email;
+    }
+
+    /**
+     * Сбрасывает пароль пользователя по коду.
+     */
+    public void resetPasswordWithToken(String token, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new RuntimeException("Пароль должен быть не менее 6 символов");
+        }
+
+        String email = validateResetToken(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Удаляем использованный код
+        resetTokens.remove(token);
     }
 }

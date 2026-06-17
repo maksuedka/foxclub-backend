@@ -5,9 +5,18 @@
  * Исправлен поиск полей для корректировки (учитывает initialWeight/targetWeight)
  */
 
-// ======================= КОНСТАНТЫ И КОНФИГУРАЦИЯ =======================
-const API_BASE_URL = "";
+// ======================= ДИНАМИЧЕСКОЕ ОПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
+function getBaseUrl() {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8080';
+    }
+    return `${window.location.protocol}//${window.location.hostname}`;
+}
 
+const API_BASE_URL = getBaseUrl();
+console.log('API base URL:', API_BASE_URL);
+
+// ======================= КОНСТАНТЫ И КОНФИГУРАЦИЯ =======================
 const CITY_MAPPING = {
     "minsk": "Минск",
     "mogilev": "Могилев",
