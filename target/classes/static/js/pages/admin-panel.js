@@ -59,11 +59,9 @@ function toggleTheme() {
     const isDark = body.classList.contains('dark-theme');
     
     if (isDark) {
-        // Тёмная тема → показываем «Светлая тема» и солнце
         if (label) label.textContent = 'Светлая тема';
         if (icon) icon.className = 'fas fa-sun';
     } else {
-        // Светлая тема → показываем «Тёмная тема» и луну
         if (label) label.textContent = 'Тёмная тема';
         if (icon) icon.className = 'fas fa-moon';
     }
@@ -79,24 +77,6 @@ function refreshTable() {
         showNotification('warning', 'Нет активной таблицы для обновления');
     }
 }
-
-// ======================= ИНИЦИАЛИЗАЦИЯ =======================
-document.addEventListener('DOMContentLoaded', async () => {
-    // Инициализация темы – по умолчанию тёмная
-    const body = document.body;
-    if (!body.classList.contains('dark-theme')) {
-        body.classList.add('dark-theme');
-    }
-    const label = document.getElementById('themeLabel');
-    const icon = document.getElementById('themeIcon');
-    if (label) label.textContent = 'Светлая тема';
-    if (icon) icon.className = 'fas fa-sun';
-
-    modal = new bootstrap.Modal(document.getElementById('dataModal'));
-    commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
-    photosModal = new bootstrap.Modal(document.getElementById('photosModal'));
-    await loadMenu();
-});
 
 // ======================= ЗАГРУЗКА СПРАВОЧНЫХ ДАННЫХ =======================
 async function loadReferenceData() {
@@ -364,7 +344,7 @@ async function selectTable(key, label, element) {
     }
 }
 
-// ======================= ОТРИСОВКА ТАБЛИЦЫ =======================
+// ======================= ОТРИСОВКА ТАБЛИЦЫ (ИСПРАВЛЕНА) =======================
 function renderTable(data) {
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
@@ -389,6 +369,14 @@ function renderTable(data) {
 
         tableHeaders.forEach(h => {
             let value = row[h.key] !== undefined && row[h.key] !== null ? row[h.key] : '';
+
+            // === АВАТАР КАК КАРТИНКА (ключ может быть avatar_url или avatarUrl) ===
+            if (currentTable === 'users' && (h.key === 'avatar_url' || h.key === 'avatarUrl') && value) {
+                rowHtml += `<td>
+                    <img src="${value}" class="post-thumb" style="width:40px; height:40px; object-fit:cover; border-radius:50%; cursor:pointer;" onclick="window.open('${value}', '_blank')">
+                </td>`;
+                return;
+            }
 
             // Спецобработка для связанных полей
             if (currentTable === 'users') {
@@ -435,10 +423,10 @@ function renderTable(data) {
     });
 }
 
-// ======================= ПОИСК В ТАБЛИЦЕ =======================
+// ======================= ПОИСК =======================
 let searchTimeout;
 
-document.addEventListener('DOMContentLoaded', () => {
+function setupSearch() {
     const searchBox = document.getElementById('searchBox');
     if (!searchBox) return;
 
@@ -455,9 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTable(filtered);
         }, 300);
     });
-});
+}
 
-// ======================= РЕДАКТИРОВАНИЕ ЗАПИСЕЙ =======================
 function openAddModal() {
     if (currentTable === 'posts_moderation') return;
     document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Новая запись';
@@ -605,6 +592,10 @@ function generateForm(data) {
                 input.type = 'password';
                 input.value = '';
                 input.placeholder = 'Оставьте пустым, если не хотите менять';
+            } else if (h.key === 'avatar_url' || h.key === 'avatarUrl') {
+                input.type = 'text';
+                input.value = data[h.key] || '';
+                input.placeholder = 'URL аватара';
             } else {
                 input.type = 'text';
                 input.value = data[h.key] !== undefined ? data[h.key] : '';
@@ -618,7 +609,6 @@ function generateForm(data) {
     });
 }
 
-// ======================= СОХРАНЕНИЕ ДАННЫХ =======================
 async function saveData() {
     if (currentTable === 'posts_moderation') return;
     const form = document.getElementById('dataForm');
@@ -673,7 +663,6 @@ async function saveData() {
     }
 }
 
-// ======================= УДАЛЕНИЕ ЗАПИСЕЙ =======================
 async function deleteSelected() {
     if (currentTable === 'posts_moderation') return;
 
@@ -715,7 +704,6 @@ async function deleteSelected() {
     }
 }
 
-// ======================= СОРТИРОВКА =======================
 function sortData(key) {
     if (currentTable === 'posts_moderation') return;
     sortOrder *= -1;
@@ -728,13 +716,11 @@ function sortData(key) {
     renderTable(tableData);
 }
 
-// ======================= ВЫБОР ВСЕХ =======================
 function toggleAll(source) {
     if (currentTable === 'posts_moderation') return;
     document.querySelectorAll('.row-check').forEach(c => c.checked = source.checked);
 }
 
-// ======================= ЭКСПОРТ В EXCEL =======================
 function exportData() {
     if (currentTable === 'posts_moderation') {
         showNotification('warning', 'Экспорт постов не реализован');
@@ -743,7 +729,6 @@ function exportData() {
     window.open(`${API_URL}/export/${currentTable}`, '_blank');
 }
 
-// ======================= УВЕДОМЛЕНИЯ =======================
 function showNotification(type, message) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'warning'} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
@@ -755,3 +740,25 @@ function showNotification(type, message) {
     document.body.appendChild(alertDiv);
     setTimeout(() => alertDiv.remove(), 5000);
 }
+
+// ======================= ОСНОВНОЙ ОБРАБОТЧИК =======================
+document.addEventListener('DOMContentLoaded', async function() {
+    const body = document.body;
+    if (!body.classList.contains('dark-theme')) {
+        body.classList.add('dark-theme');
+    }
+    const label = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeIcon');
+    if (label) label.textContent = 'Светлая тема';
+    if (icon) icon.className = 'fas fa-sun';
+
+    modal = new bootstrap.Modal(document.getElementById('dataModal'));
+    commentsModal = new bootstrap.Modal(document.getElementById('commentsModal'));
+    photosModal = new bootstrap.Modal(document.getElementById('photosModal'));
+    await loadMenu();
+});
+
+// ======================= ДОПОЛНИТЕЛЬНЫЙ ОБРАБОТЧИК ДЛЯ ПОИСКА =======================
+document.addEventListener('DOMContentLoaded', function() {
+    setupSearch();
+});

@@ -59,6 +59,8 @@ public class DashboardController {
         RU_HEADERS.put("goal_user", "Пользователь");
         RU_HEADERS.put("admin_email", "Почта");
         RU_HEADERS.put("admin_password", "Пароль");
+        RU_HEADERS.put("avatar_url", "Аватар");
+        RU_HEADERS.put("avatarUrl", "Аватар");
         RU_HEADERS.put("admin_firstName", "Имя");
         RU_HEADERS.put("admin_lastName", "Фамилия");
         RU_HEADERS.put("admin_club", "Клуб");
