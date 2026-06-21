@@ -11,6 +11,7 @@ import by.foxclub.repository.UserRepository;
 import by.foxclub.repository.ClubRepository;
 import by.foxclub.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,9 +35,10 @@ public class UserService {
     private final AdminRepository adminRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
-    // ===== ДЛЯ ОТПРАВКИ ПИСЕМ =====
     private final JavaMailSender mailSender;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
 
     // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ: временное хранение токенов =====
     private final Map<String, TokenData> resetTokens = new ConcurrentHashMap<>();
@@ -161,37 +163,36 @@ public class UserService {
     // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ (6-значный код) =====
     // ==========================================================
 
-    /**
-     * Генерирует 6-значный цифровой код, сохраняет в памяти на 5 минут
-     * и отправляет его на почту пользователя.
-     */
     public String generateResetToken(String email) {
-        // Проверяем, существует ли пользователь
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь с таким email не найден"));
 
-        // Удаляем старый токен, если был
         resetTokens.values().removeIf(data -> data.email.equals(email));
 
-        // Генерируем 6-значный цифровой код (с ведущими нулями)
         String token = String.format("%06d", new Random().nextInt(999999));
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
         resetTokens.put(token, new TokenData(token, email, expiry));
 
-        // ===== ОТПРАВКА ПИСЬМА С КОДОМ =====
-        try {
-            sendResetEmail(email, token);
-        } catch (Exception e) {
-            System.err.println("Ошибка отправки письма на " + email + ": " + e.getMessage());
-            throw new RuntimeException("Не удалось отправить письмо. Проверьте настройки почты.");
+        // ===== УСЛОВНАЯ ОТПРАВКА =====
+        if ("production".equals(activeProfile)) {
+            // На хостинге — выводим код в логи
+            System.out.println("=========================================");
+            System.out.println("Код для сброса пароля для " + email + ": " + token);
+            System.out.println("Действителен 5 минут");
+            System.out.println("=========================================");
+        } else {
+            // Локально — отправляем письмо через SMTP
+            try {
+                sendResetEmail(email, token);
+            } catch (Exception e) {
+                System.err.println("Ошибка отправки письма на " + email + ": " + e.getMessage());
+                throw new RuntimeException("Не удалось отправить письмо. Проверьте настройки почты.");
+            }
         }
 
         return token;
     }
 
-    /**
-     * Отправляет письмо с 6-значным кодом сброса пароля.
-     */
     private void sendResetEmail(String toEmail, String token) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -208,10 +209,6 @@ public class UserService {
         System.out.println("Письмо с кодом отправлено на " + toEmail);
     }
 
-    /**
-     * Проверяет код: существует ли он, не истёк ли.
-     * Возвращает email пользователя, если код валиден.
-     */
     private String validateResetToken(String token) {
         TokenData data = resetTokens.get(token);
         if (data == null) {
@@ -224,9 +221,6 @@ public class UserService {
         return data.email;
     }
 
-    /**
-     * Сбрасывает пароль пользователя по коду.
-     */
     public void resetPasswordWithToken(String token, String newPassword) {
         if (newPassword == null || newPassword.length() < 6) {
             throw new RuntimeException("Пароль должен быть не менее 6 символов");
@@ -239,8 +233,6 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Удаляем использованный код
         resetTokens.remove(token);
     }
-    
 }
