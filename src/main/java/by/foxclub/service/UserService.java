@@ -11,9 +11,6 @@ import by.foxclub.repository.UserRepository;
 import by.foxclub.repository.ClubRepository;
 import by.foxclub.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +32,7 @@ public class UserService {
     private final AdminRepository adminRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final JavaMailSender mailSender;
-
-    @Value("${spring.profiles.active:}")
-    private String activeProfile;
+    private final GoogleEmailService googleEmailService;   // <-- вместо JavaMailSender
 
     // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ: временное хранение токенов =====
     private final Map<String, TokenData> resetTokens = new ConcurrentHashMap<>();
@@ -55,8 +49,7 @@ public class UserService {
         }
     }
 
-    // ===== ОСНОВНЫЕ МЕТОДЫ =====
-
+    // ===== ОСНОВНЫЕ МЕТОДЫ (без изменений) =====
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
@@ -173,40 +166,15 @@ public class UserService {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
         resetTokens.put(token, new TokenData(token, email, expiry));
 
-        // ===== УСЛОВНАЯ ОТПРАВКА =====
-        if ("production".equals(activeProfile)) {
-            // На хостинге — выводим код в логи
-            System.out.println("=========================================");
-            System.out.println("Код для сброса пароля для " + email + ": " + token);
-            System.out.println("Действителен 5 минут");
-            System.out.println("=========================================");
-        } else {
-            // Локально — отправляем письмо через SMTP
-            try {
-                sendResetEmail(email, token);
-            } catch (Exception e) {
-                System.err.println("Ошибка отправки письма на " + email + ": " + e.getMessage());
-                throw new RuntimeException("Не удалось отправить письмо. Проверьте настройки почты.");
-            }
+        // ===== ОТПРАВКА ЧЕРЕЗ GMAIL API =====
+        try {
+            googleEmailService.sendResetCode(email, token);
+        } catch (Exception e) {
+            System.err.println("Ошибка отправки письма на " + email + ": " + e.getMessage());
+            throw new RuntimeException("Не удалось отправить письмо. Проверьте настройки Gmail API.");
         }
 
         return token;
-    }
-
-    private void sendResetEmail(String toEmail, String token) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Восстановление пароля в FoxClub");
-        message.setText(
-                "Здравствуйте!\n\n" +
-                "Вы запросили восстановление пароля в FoxClub.\n" +
-                "Ваш код для сброса пароля: " + token + "\n\n" +
-                "Код действителен 5 минут.\n\n" +
-                "Если вы не запрашивали восстановление, просто проигнорируйте это письмо.\n\n" +
-                "С уважением,\nКоманда FoxClub"
-        );
-        mailSender.send(message);
-        System.out.println("Письмо с кодом отправлено на " + toEmail);
     }
 
     private String validateResetToken(String token) {
