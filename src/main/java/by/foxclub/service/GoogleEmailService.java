@@ -75,7 +75,7 @@ public class GoogleEmailService {
                     .build();
 
             credential = new com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp(
-                    flow, new com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver()
+                    flow, new com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver.Builder().setPort(8888).build()
             ).authorize("user");
         }
 
