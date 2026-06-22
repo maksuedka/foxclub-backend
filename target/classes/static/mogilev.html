@@ -1,65 +1,433 @@
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>FOX CLUB - Могилев</title>
-        
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOX CLUB - Могилев</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components/home-posts.css">
-        
-        
-    </head>
-    <body>
+    <style>
+        /* === Общие стили (шапка, модалки) — без изменений === */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ff8c00;
+            cursor: pointer;
+        }
+        .profile-name {
+            color: #fff;
+            font-weight: 500;
+        }
+        .btn-logout, .btn-user-qr {
+            background: rgba(255,68,68,0.2);
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-user-qr {
+            background: #ff8c00;
+            color: white;
+            border: none;
+        }
+        .btn-logout:hover {
+            background: #ff4444;
+            color: white;
+        }
+        .btn-user-qr:hover {
+            background: #e67e00;
+        }
 
-        <header class="main-header">
-            <div class="container header-container">
-                <a href="index.html" class="logo">
-                    FOX CLUB 
-                </a>
+        /* Модалки — без изменений */
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+        }
+        .modal-content .close-button {
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            float: right;
+        }
+        .modal-content .close-button:hover {
+            color: #ff8c00;
+        }
+        .modal-content .form-group {
+            margin-bottom: 20px;
+        }
+        .modal-content .form-group label {
+            color: #ccc;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .modal-content .form-group input,
+        .modal-content .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .modal-content .form-group input:focus,
+        .modal-content .form-group textarea:focus {
+            outline: none;
+            border-color: #ff8c00;
+        }
+        .modal-content .btn-primary {
+            background: #ff8c00;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .modal-content .btn-primary:hover {
+            background: #e67e00;
+        }
 
-                <nav class="main-nav">
-                    <ul class="nav-list">
-                        <li class="nav-item"><a href="#about-us-section" class="nav-link" data-section="about-us-section">О нас</a></li>
-                        <li class="nav-item"><a href="#clubs-section" class="nav-link" data-section="clubs-section">Клубы</a></li>
-                        <li class="nav-item"><a href="#promotions-section" class="nav-link" data-section="promotions-section">Акции</a></li>
-                        <li class="nav-item"><a href="#trainers-section" class="nav-link" data-section="trainers-section">Тренера</a></li>
-                        <li class="nav-item"><a href="#home-posts-section" class="nav-link" data-section="home-posts-section">Посты</a></li>
-                        <li class="nav-item"><a href="#prices-section" class="nav-link" data-section="prices-section">Цены</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle">Могилев<span class="arrow-down">▼</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="minsk.html" class="dropdown-item">Минск</a></li>
-                                <li><a href="mogilev.html" class="dropdown-item">Могилев</a></li>
-                                <li><a href="index.html" class="dropdown-item">Гродно</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px dashed #ff8c00;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-file-upload:hover {
+            background: #ff8c00;
+            color: #fff;
+            border-color: #ff8c00;
+        }
+        .custom-file-upload input[type="file"] {
+            display: none;
+        }
+        #promoImagePreview {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #promoImagePreview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
 
-                <a href="login.html?city=Могилев" class="btn btn-primary btn-login">ВОЙТИ</a>
-            </div>
-        </header>
+        .delete-promotion-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,68,68,0.9);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .delete-promotion-btn:hover {
+            background: #ff0000;
+        }
 
-        <section class="hero-banner" id="hero-banner">
-            <div class="container hero-content">
-                <h1 class="hero-title">Достигайте своих <br> фитнес-целей с <br> помощью FOX <br> CLUB!</h1>
-                
-            </div>
-        </section>
+        #promotionDetailModal .modal-content {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #ff8c00;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            animation: fadeInUp 0.4s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #promotionDetailModal .promo-detail-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #promotionDetailModal .promo-detail-title {
+            color: #ff8c00;
+            font-size: 28px;
+            margin: 10px 0 15px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(255,140,0,0.2);
+        }
+        #promotionDetailModal .promo-detail-description {
+            color: #ddd;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+        #promotionDetailModal .promo-detail-link {
+            display: inline-block;
+            background: #ff8c00;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+        #promotionDetailModal .promo-detail-link:hover {
+            background: #e67e00;
+            transform: scale(1.05);
+        }
+        #promotionDetailModal .close-button {
+            color: #ccc;
+            font-size: 30px;
+            transition: color 0.3s;
+        }
+        #promotionDetailModal .close-button:hover {
+            color: #ff8c00;
+        }
 
-        <section class="about-us-section" id="about-us-section">
-            <div class="container about-us-container">
-                <div class="about-us-content">
-                    <p class="section-subtitle">О нас</p>
-                    <h2 class="section-title">Ваш путь к здоровому образу жизни</h2>
-                    <div class="about-us-main">
-                        <div class="about-us-image">
-                            
-                            <img src="assets/images/coach_2.jpg" alt="Интерьер фитнес-клуба FOX CLUB">
-                        </div>
-                        <div class="about-us-stats">
-                             <div class="stat-item">
+        #deleteConfirmationModal .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #ff4444;
+            max-width: 400px;
+            text-align: center;
+        }
+        #deleteConfirmationModal .modal-content h2 {
+            color: #ff4444;
+        }
+        #deleteConfirmationModal .modal-content .btn-primary {
+            transition: background 0.3s, transform 0.2s;
+        }
+        #deleteConfirmationModal .modal-content .btn-primary:hover {
+            transform: scale(1.05);
+        }
+        #deleteConfirmationModal .modal-content #confirmDeleteBtn:hover {
+            background: #cc0000;
+        }
+        #deleteConfirmationModal .modal-content .btn-secondary {
+            background: #666;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        #deleteConfirmationModal .modal-content .btn-secondary:hover {
+            background: #888;
+        }
+
+        /* === СТИЛИ ДЛЯ КАРУСЕЛИ АКЦИЙ === */
+        .promotions-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .promotions-heading .heading-text {
+            flex: 1;
+        }
+        .promotions-heading .btn-add-promo {
+            background: #ff8c00;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.3s;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+        .promotions-heading .btn-add-promo:hover {
+            background: #e67e00;
+        }
+
+        .promotions-carousel-wrapper {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            margin: 0 auto;
+        }
+        .promotions-carousel-track {
+            display: flex;
+            flex-wrap: nowrap;
+            will-change: transform;
+            transition: none;
+            gap: 20px;
+            padding: 10px 0;
+        }
+        .promotion-card {
+            flex: 0 0 300px;
+            min-height: 300px;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-sizing: border-box;
+        }
+        .promotion-card:hover {
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .promotion-card {
+                flex: 0 0 280px;
+                min-height: 260px;
+            }
+        }
+        @media (max-width: 480px) {
+            .promotion-card {
+                flex: 0 0 260px;
+                min-height: 240px;
+                padding: 20px;
+            }
+            .promotion-card h3 {
+                font-size: 18px;
+            }
+            .promotion-card p {
+                font-size: 12px;
+            }
+        }
+
+        /* Стили для пустых сообщений */
+        .empty-message {
+            color: #999;
+            font-size: 1rem;
+            text-align: center;
+            padding: 30px 0;
+            grid-column: 1 / -1;
+        }
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            padding: 20px;
+            grid-column: 1 / -1;
+        }
+
+        /* ===== ПРАВИЛЬНАЯ СЕТКА ДЛЯ АБОНЕМЕНТОВ (3 В РЯД) ===== */
+        .abonements-grid-container {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 20px !important;
+            width: 100% !important;
+            margin-top: 20px;
+        }
+
+        .abonements-grid-container .price-card {
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 992px) {
+            .abonements-grid-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 15px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .abonements-grid-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">FOX CLUB</a>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#about-us-section" class="nav-link" data-section="about-us-section">О нас</a></li>
+                    <li class="nav-item"><a href="#clubs-section" class="nav-link" data-section="clubs-section">Клубы</a></li>
+                    <li class="nav-item"><a href="#promotions-section" class="nav-link" data-section="promotions-section">Акции</a></li>
+                    <li class="nav-item"><a href="#trainers-section" class="nav-link" data-section="trainers-section">Тренера</a></li>
+                    <li class="nav-item"><a href="#home-posts-section" class="nav-link" data-section="home-posts-section">Посты</a></li>
+                    <li class="nav-item"><a href="#prices-section" class="nav-link" data-section="prices-section">Цены</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle">Могилев<span class="arrow-down">▼</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="minsk.html" class="dropdown-item">Минск</a></li>
+                            <li><a href="mogilev.html" class="dropdown-item">Могилев</a></li>
+                            <li><a href="index.html" class="dropdown-item">Гродно</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div class="profile-info"></div>
+        </div>
+    </header>
+
+    <section class="hero-banner" id="hero-banner">
+        <div class="container hero-content">
+            <h1 class="hero-title">Достигайте своих <br> фитнес-целей с <br> помощью FOX <br> CLUB!</h1>
+        </div>
+    </section>
+
+    <section class="about-us-section" id="about-us-section">
+        <div class="container about-us-container">
+            <div class="about-us-content">
+                <p class="section-subtitle">О нас</p>
+                <h2 class="section-title">Ваш путь к здоровому образу жизни</h2>
+                <div class="about-us-main">
+                    <div class="about-us-image">
+                        <img src="assets/images/coach_2.jpg" alt="Интерьер фитнес-клуба FOX CLUB">
+                    </div>
+                    <div class="about-us-stats">
+                        <div class="stat-item">
                             <span class="stat-number">08+</span>
                             <p class="stat-description">Лет опыта</p>
                         </div>
@@ -71,380 +439,197 @@
                             <span class="stat-number">100+</span>
                             <p class="stat-description">Занятий в неделю</p>
                         </div>
-                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="clubs-section" id="clubs-section">
-            <div class="container clubs-container"> 
-                <p class="section-subtitle">Наши фитнес-клубы</p> 
-                <h2 class="section-title">Выберите свой клуб</h2> 
-
-                <div class="club-cards-wrapper">
-                    
-                    <a href="shmidta-club.html" class="club-card-link"> 
-                        <div class="club-card">
-                            <img src="assets/images/main-banner/main-banner5.jpeg" alt="Интерьер фитнес-клуба" class="club-card-image">
-                            <div class="club-card-overlay">
-                                <p class="club-address">пр-т. Шмидта, 46</p>
-                            </div>
+    <section class="clubs-section" id="clubs-section">
+        <div class="container clubs-container">
+            <p class="section-subtitle">Наши фитнес-клубы</p>
+            <h2 class="section-title">Выберите свой клуб</h2>
+            <div class="club-cards-wrapper">
+                <a href="shmidta-club.html" class="club-card-link">
+                    <div class="club-card">
+                        <img src="assets/images/main-banner/main-banner5.jpeg" alt="Интерьер фитнес-клуба" class="club-card-image">
+                        <div class="club-card-overlay">
+                            <p class="club-address">пр-т. Шмидта, 46</p>
                         </div>
-                    </a>
-                </div>
+                    </div>
+                </a>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="promotions-section" id="promotions-section">
-            
-            <div class="promotions-ribbon top">
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-            </div>
-
-            <div class="promotions-ribbon middle">
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-            </div>
-
-            <div class="container promotions-container">
-                <div class="promotions-heading">
+    <!-- ===== БЛОК АКЦИЙ С БЕСКОНЕЧНОЙ КАРУСЕЛЬЮ ===== -->
+    <section class="promotions-section" id="promotions-section">
+        <div class="promotions-ribbon top">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+        <div class="promotions-ribbon middle">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+        <div class="container promotions-container">
+            <div class="promotions-heading">
+                <div class="heading-text">
                     <p class="section-subtitle">Акции</p>
                     <h2 class="section-title">Специальные предложения <br> от FOX CLUB</h2>
                 </div>
-
-                <div class="promotions-carousel">
-                    <div class="promotion-card promotion-card-1">
-                        <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                        <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                    </div>
-                    <div class="promotion-card promotion-card-2">
-                        <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                        <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                    </div>
-                    <div class="promotion-card promotion-card-3">
-                        <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                        <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                    </div>
-                    <div class="promotion-card promotion-card-4">
-                        <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                        <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                    </div>
-                </div>
-
-                
-                <div class="carousel-indicators">
-                    <span class="indicator-dot active"></span>
-                    <span class="indicator-dot"></span>
-                    <span class="indicator-dot"></span>
-                    <span class="indicator-dot"></span>
-                </div>
+                <button id="addPromotionBtn" class="btn-add-promo" style="display:none;">➕ Добавить акцию</button>
             </div>
 
-            
-            <div class="promotions-ribbon bottom">
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-                <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
-            </div>
-        </section>
-
-        <section class="trainers-section" id="trainers-section">
-            <div class="container trainers-content">
-                    <h2 class="trainers-title">Тренера</h2>
-                    <p class="trainers-description">Наши опытные тренеры готовы помочь вам на каждом этапе пути, будь то освоение основ или достижение новых вершин. Работайте индивидуально с личным наставником, чтобы максимально эффективно реализовать свой потенциал и превзойти ожидания.</p>
-                    
-            </div>
-        </section>
-
-        <section class="home-posts-section" id="home-posts-section">
-            <div class="container">
-                <div class="home-posts-top">
-                    <div>
-                        <p class="section-subtitle">Наши посты</p>
-                        <h2 class="section-title">Следите за новостями</h2>
-                    </div>
-                    <a href="post-feed.html" class="home-posts-open-all">Смотреть ленту →</a>
-                </div>
-                <div id="homePostsLoader" class="home-posts-loader">Загрузка постов...</div>
-                <div id="homePostsGrid" class="home-posts-grid" style="display:none;"></div>
-                <div id="homePostsEmpty" class="home-posts-empty" style="display:none;">Постов пока нет</div>
-            </div>
-        </section>
-
-        <section class="prices-section" id="prices-section">
-            <div class="container prices-container">
-                <p class="section-subtitle">Цены</p>
-                <h2 class="section-title">Цены FOX CLUB!</h2>
-
-                <div class="tabs-navigation">
-                    <button class="tab-button active" data-tab="single">РАЗОВЫЕ ЗАНЯТИЯ</button>
-                    <button class="tab-button" data-tab="by-class">АБОНЕМЕНТЫ ПО ЗАНЯТИЯМ</button>
-                    <button class="tab-button" data-tab="unlimited">БЕЗЛИМИТНЫЕ АБОНЕМЕНТЫ</button>
-                    <button class="tab-button" data-tab="fitness">ФИТНЕС</button>
-                </div>
-
-                <!-- Сетка с карточками цен -->
-                <div class="price-cards-grid">
-
-                    <!-- ===== КАРТОЧКИ ДЛЯ ВКЛАДКИ "РАЗОВЫЕ ЗАНЯТИЯ" ===== -->
-                    <!-- 1. Разовое занятие в тренажёрном зале -->
-                    <div class="price-card" data-tab="single">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Разовое занятие</h3>
-                        <p class="price-card-price">10 р.</p>
-                        <div class="price-card-details">
-                            <p>Тренажёры и кардиозона</p>
-                            <p>Без ограничения времени</p>
-                        </div>
-                    </div>
-                    <!-- 2. Разовое групповое занятие -->
-                    <div class="price-card" data-tab="single">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Разовое групповое</h3>
-                        <p class="price-card-price">8 р.</p>
-                        <div class="price-card-details">
-                            <p>Йога, пилатес, стретчинг</p>
-                            <p>Зумба, силовые классы</p>
-                        </div>
-                    </div>
-                    <!-- 3. Пробная тренировка с тренером -->
-                    <div class="price-card" data-tab="single">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Пробная с тренером</h3>
-                        <p class="price-card-price">12 р.</p>
-                        <div class="price-card-details">
-                            <p>Персональная тренировка</p>
-                            <p>Составление программы</p>
-                        </div>
-                    </div>
-                    <!-- 4. Гостевой визит -->
-                    <div class="price-card" data-tab="single">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Гостевой визит</h3>
-                        <p class="price-card-price">15 р.</p>
-                        <div class="price-card-details">
-                            <p>Для друзей и родственников</p>
-                            <p>участников клуба</p>
-                        </div>
-                    </div>
-                    <!-- 5. Тренировка выходного дня -->
-                    <div class="price-card" data-tab="single">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Тренировка выходного дня</h3>
-                        <p class="price-card-price">9 р.</p>
-                        <div class="price-card-details">
-                            <p>Суббота, воскресенье</p>
-                            <p>Праздничные дни</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== КАРТОЧКИ ДЛЯ ВКЛАДКИ "АБОНЕМЕНТЫ ПО ЗАНЯТИЯМ" ===== -->
-                    <!-- 1. Лёгкий старт на 4 занятия -->
-                    <div class="price-card hidden" data-tab="by-class">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Лёгкий старт</h3>
-                        <p class="price-card-price">35 р.</p>
-                        <div class="price-card-details">
-                            <p>4 занятия</p>
-                            <p>Срок: 20 дней</p>
-                        </div>
-                    </div>
-                    <!-- 2. Базовый на 8 занятий -->
-                    <div class="price-card hidden" data-tab="by-class">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Базовый</h3>
-                        <p class="price-card-price">60 р.</p>
-                        <div class="price-card-details">
-                            <p>8 занятий</p>
-                            <p>Срок: 30 дней</p>
-                        </div>
-                    </div>
-                    <!-- 3. Активный на 12 занятий -->
-                    <div class="price-card hidden" data-tab="by-class">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Активный</h3>
-                        <p class="price-card-price">80 р.</p>
-                        <div class="price-card-details">
-                            <p>12 занятий</p>
-                            <p>Срок: 45 дней</p>
-                        </div>
-                    </div>
-                    <!-- 4. Интенсив на 16 занятий -->
-                    <div class="price-card hidden" data-tab="by-class">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Интенсив</h3>
-                        <p class="price-card-price">100 р.</p>
-                        <div class="price-card-details">
-                            <p>16 занятий</p>
-                            <p>Срок: 55 дней</p>
-                        </div>
-                    </div>
-                    <!-- 5. Максимальный на 24 занятия -->
-                    <div class="price-card hidden" data-tab="by-class">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Максимальный</h3>
-                        <p class="price-card-price">140 р.</p>
-                        <div class="price-card-details">
-                            <p>24 занятия</p>
-                            <p>Срок: 75 дней</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== КАРТОЧКИ ДЛЯ ВКЛАДКИ "БЕЗЛИМИТНЫЕ АБОНЕМЕНТЫ" ===== -->
-                    <!-- 1. Безлимит на месяц -->
-                    <div class="price-card hidden" data-tab="unlimited">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Безлимит на месяц</h3>
-                        <p class="price-card-price">100 р.</p>
-                        <div class="price-card-details">
-                            <p>Неограниченно</p>
-                            <p>Зал + групповые</p>
-                        </div>
-                    </div>
-                    <!-- 2. Безлимит на 3 месяца -->
-                    <div class="price-card hidden" data-tab="unlimited">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Безлимит на 3 месяца</h3>
-                        <p class="price-card-price">270 р.</p>
-                        <div class="price-card-details">
-                            <p>Экономия 30 р.</p>
-                            <p>Заморозка 7 дней</p>
-                        </div>
-                    </div>
-                    <!-- 3. Безлимит на полгода -->
-                    <div class="price-card hidden" data-tab="unlimited">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Безлимит на полгода</h3>
-                        <p class="price-card-price">500 р.</p>
-                        <div class="price-card-details">
-                            <p>Выгодная цена</p>
-                            <p>Заморозка 14 дней</p>
-                        </div>
-                    </div>
-                    <!-- 4. Безлимит на год -->
-                    <div class="price-card hidden" data-tab="unlimited">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Безлимит на год</h3>
-                        <p class="price-card-price">900 р.</p>
-                        <div class="price-card-details">
-                            <p>Максимальная выгода</p>
-                            <p>+ 3 персональные тренировки</p>
-                        </div>
-                    </div>
-                    <!-- 5. Безлимит «Утро» на месяц -->
-                    <div class="price-card hidden" data-tab="unlimited">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Безлимит «Утро»</h3>
-                        <p class="price-card-price">80 р.</p>
-                        <div class="price-card-details">
-                            <p>В будни 7:00 - 16:00</p>
-                            <p>Срок: 1 месяц</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== КАРТОЧКИ ДЛЯ ВКЛАДКИ "ФИТНЕС" ===== -->
-                    <!-- 1. Групповой на месяц -->
-                    <div class="price-card hidden" data-tab="fitness">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Групповой на месяц</h3>
-                        <p class="price-card-price">55 р.</p>
-                        <div class="price-card-details">
-                            <p>Все групповые занятия</p>
-                            <p>Безлимит</p>
-                        </div>
-                    </div>
-                    <!-- 2. Групповой на 3 месяца -->
-                    <div class="price-card hidden" data-tab="fitness">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Групповой на 3 месяца</h3>
-                        <p class="price-card-price">150 р.</p>
-                        <div class="price-card-details">
-                            <p>Безлимит на 3 месяца</p>
-                            <p>Скидка при оплате</p>
-                        </div>
-                    </div>
-                    <!-- 3. Групповой на полгода -->
-                    <div class="price-card hidden" data-tab="fitness">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Групповой на полгода</h3>
-                        <p class="price-card-price">280 р.</p>
-                        <div class="price-card-details">
-                            <p>Для любителей групповых</p>
-                            <p>Выгодная цена</p>
-                        </div>
-                    </div>
-                    <!-- 4. Йога-абонемент на месяц -->
-                    <div class="price-card hidden" data-tab="fitness">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Йога-абонемент</h3>
-                        <p class="price-card-price">60 р.</p>
-                        <div class="price-card-details">
-                            <p>Все йога-направления</p>
-                            <p>Безлимит на месяц</p>
-                        </div>
-                    </div>
-                    <!-- 5. Танцевальный абонемент на месяц -->
-                    <div class="price-card hidden" data-tab="fitness">
-                        <div class="price-card-logo-bg"></div>
-                        <h3 class="price-card-title">Танцевальный</h3>
-                        <p class="price-card-price">65 р.</p>
-                        <div class="price-card-details">
-                            <p>Zumba, Dance Mix, High Heels</p>
-                            <p>Безлимит на месяц</p>
-                        </div>
-                    </div>
-
-                </div> <!-- Конец price-cards-grid -->
-            </div> <!-- Конец container -->
-        </section> <!-- Конец prices-section -->
-
-        <footer class="main-footer">
-            <div class="container footer-content">
-                <div class="footer-block footer-brand">
-                    <a href="#" class="footer-logo">FOX CLUB</a>
-                    <p class="footer-slogan">Станьте клиентом нашей сети.<br>Мы Fox Club!</p>
-                    <a href="#" class="btn btn-primary footer-btn">Записаться на занятие</a>
-                </div>
-
-                <div class="footer-block footer-contacts">
-                    <div class="location-group">
-                        <h4 class="location-title">Минск</h4>
-                        <p>УЛИЦА КАЗИНЦА, 11А (БЦ, ГЕРМЕС)</p>
-                        <p>УЛИЦА ДОЛГОБРОДСКАЯ, 43</p>
-                        <p>УЛИЦА ГРУШЕВСКАЯ, 83</p>
-                    </div>
-                </div>
-
-                <div class="footer-block footer-contacts">
-                    <div class="location-group">
-                        <h4 class="location-title">Могилев</h4>
-                        <p>ПРОСПЕКТ ШМИДТА, 46</p>
-                    </div>
-                    <div class="location-group">
-                        <h4 class="location-title">Гродно</h4>
-                        <p>ПРОСПЕКТ Я.КУПАЛЫ, 22</p>
-                    </div>
-                </div>
-
-                <div class="footer-social">
-                    <a href="#" class="social-icon"><img src="assets/images/icons/facebook.png" alt="Facebook"></a>
-                    <a href="#" class="social-icon"><img src="assets/images/icons/instagram.png" alt="Instagram"></a>
-                    <a href="#" class="social-icon"><img src="assets/images/icons/vk.png" alt="VK"></a>
-                    <a href="#" class="social-icon"><img src="assets/images/icons/youtube.png" alt="YouTube"></a>
+            <!-- Обёртка для карусели (без точек) -->
+            <div class="promotions-carousel-wrapper" id="promotionsCarouselWrapper">
+                <div class="promotions-carousel-track" id="promotionsCarouselTrack">
+                    <!-- Карточки будут сгенерированы скриптом -->
                 </div>
             </div>
-        <div class="footer-bottom">
+        </div>
+        <div class="promotions-ribbon bottom">
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+            <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
+        </div>
+    </section>
+
+    <!-- Модалки -->
+    <div id="addPromotionModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closePromotionModal">&times;</span>
+            <h2 style="color:#ff8c00; margin-top:0;">Добавить акцию</h2>
+            <form id="addPromotionForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Название *</label>
+                    <input type="text" id="promoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="promoDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Изображение</label>
+                    <label class="custom-file-upload">
+                        📷 Выбрать изображение
+                        <input type="file" id="promoImageFile" accept="image/jpeg,image/png,image/jpg,image/webp">
+                    </label>
+                    <div id="promoImagePreview" style="display:none;">
+                        <img id="promoImagePreviewImg" src="" alt="Предпросмотр">
+                    </div>
+                    <span style="color:#999; font-size:12px;">Максимум 5 МБ</span>
+                </div>
+                <button type="submit" class="btn-primary">Добавить акцию</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="promotionDetailModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closePromotionDetailModal">&times;</span>
+            <img id="promoDetailImage" class="promo-detail-image" src="" alt="Изображение акции" style="display:none;">
+            <h2 id="promoDetailTitle" class="promo-detail-title"></h2>
+            <p id="promoDetailDescription" class="promo-detail-description"></p>
+            <a id="promoDetailLink" class="promo-detail-link" href="#" target="_blank">Подробнее</a>
+        </div>
+    </div>
+
+    <div id="deleteConfirmationModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeDeleteConfirmModal" style="color:#fff; font-size:28px; cursor:pointer; float:right;">&times;</span>
+            <h2 style="color:#ff6b6b; margin-top:0;">Удалить акцию?</h2>
+            <p style="color:#ccc; margin:20px 0;">Вы уверены, что хотите удалить эту акцию? Это действие нельзя отменить.</p>
+            <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                <button id="confirmDeleteBtn" class="btn-primary" style="background:#ff4444; border:none; padding:12px 30px; border-radius:30px; color:#fff; font-weight:600; cursor:pointer;">Удалить</button>
+                <button id="cancelDeleteBtn" class="btn-secondary" style="background:#666; border:none; padding:12px 30px; border-radius:30px; color:#fff; font-weight:600; cursor:pointer;">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Остальные секции без изменений -->
+    <section class="trainers-section" id="trainers-section">
+        <div class="container trainers-content">
+            <h2 class="trainers-title">Тренера</h2>
+            <p class="trainers-description">Наши опытные тренеры готовы помочь вам на каждом этапе пути, будь то освоение основ или достижение новых вершин. Работайте индивидуально с личным наставником, чтобы максимально эффективно реализовать свой потенциал и превзойти ожидания.</p>
+        </div>
+    </section>
+
+    <section class="home-posts-section" id="home-posts-section">
         <div class="container">
-            <p>Copyright © 2003-2025</p>
-            <p>Сеть тренажерных залов Fox Club</p>
+            <div class="home-posts-top">
+                <div>
+                    <p class="section-subtitle">Наши посты</p>
+                    <h2 class="section-title">Следите за новостями</h2>
+                </div>
+                <a href="post-feed.html" class="home-posts-open-all">Смотреть ленту →</a>
+            </div>
+            <div id="homePostsLoader" class="home-posts-loader">Загрузка постов...</div>
+            <div id="homePostsGrid" class="home-posts-grid" style="display:none;"></div>
+            <div id="homePostsEmpty" class="home-posts-empty" style="display:none;">Постов пока нет</div>
         </div>
+    </section>
+
+    <section class="prices-section" id="prices-section">
+        <div class="container prices-container">
+            <p class="section-subtitle">Цены</p>
+            <h2 class="section-title">Цены FOX CLUB!</h2>
+            <div class="tabs-navigation">
+                <button class="tab-button active" data-tab="single">РАЗОВЫЕ ЗАНЯТИЯ</button>
+                <button class="tab-button" data-tab="by-class">АБОНЕМЕНТЫ ПО ЗАНЯТИЯМ</button>
+                <button class="tab-button" data-tab="unlimited">БЕЗЛИМИТНЫЕ АБОНЕМЕНТЫ</button>
+                <button class="tab-button" data-tab="fitness">ФИТНЕС</button>
+            </div>
+            <div class="price-cards-grid">
+                <!-- Контейнеры для абонементов -->
+                <div id="abonements-grid-single" class="abonements-grid-container" data-tab="single" style="display:block;"></div>
+                <div id="abonements-grid-by-class" class="abonements-grid-container" data-tab="by-class" style="display:none;"></div>
+                <div id="abonements-grid-unlimited" class="abonements-grid-container" data-tab="unlimited" style="display:none;"></div>
+                <div id="abonements-grid-fitness" class="abonements-grid-container" data-tab="fitness" style="display:none;"></div>
+            </div>
         </div>
+    </section>
 
-        </footer>
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-block footer-brand">
+                <a href="#" class="footer-logo">FOX CLUB</a>
+                <p class="footer-slogan">Станьте клиентом нашей сети.<br>Мы Fox Club!</p>
+                <a href="#" class="btn btn-primary footer-btn">Записаться на занятие</a>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Минск</h4>
+                    <p>УЛИЦА КАЗИНЦА, 11А (БЦ, ГЕРМЕС)</p>
+                    <p>УЛИЦА ДОЛГОБРОДСКАЯ, 43</p>
+                    <p>УЛИЦА ГРУШЕВСКАЯ, 83</p>
+                </div>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Могилев</h4>
+                    <p>ПРОСПЕКТ ШМИДТА, 46</p>
+                </div>
+                <div class="location-group">
+                    <h4 class="location-title">Гродно</h4>
+                    <p>ПРОСПЕКТ Я.КУПАЛЫ, 22</p>
+                </div>
+            </div>
+            <div class="footer-social">
+                <a href="#" class="social-icon"><img src="assets/images/icons/facebook.png" alt="Facebook"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/instagram.png" alt="Instagram"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/vk.png" alt="VK"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/youtube.png" alt="YouTube"></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright © 2003-2025</p>
+                <p>Сеть тренажерных залов Fox Club</p>
+            </div>
+        </div>
+    </footer>
 
-        
-      <script src="js/main.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/posts.js"></script>
     <script>
         // Загрузка случайных постов на главной
@@ -453,44 +638,140 @@
             const loader = document.getElementById('homePostsLoader');
             const emptyEl = document.getElementById('homePostsEmpty');
             if (!homeGrid || !window.loadRandomHomePosts) return;
-
             window.loadRandomHomePosts({
                 count: 3,
                 gridEl: homeGrid,
                 loaderEl: loader,
                 emptyEl: emptyEl
             });
-
-            // На всякий случай, если JS не прогрузился
             if (loader) loader.style.display = 'block';
         })();
-    </script>
-    <script>
 
-        // Дополнительно для страницы index: если пользователь залогинен, updateUserUI сам добавит блок
-        // Также добавим обработку плавной навигации (уже есть в main.js, но продублируем для надёжности)
         document.addEventListener('DOMContentLoaded', function() {
             // Табы для цен
             const tabs = document.querySelectorAll(".tab-button");
-            const cards = document.querySelectorAll(".price-card");
-            if (tabs.length && cards.length) {
+            const singleGrid = document.getElementById('abonements-grid-single');
+            const byClassGrid = document.getElementById('abonements-grid-by-class');
+            const unlimitedGrid = document.getElementById('abonements-grid-unlimited');
+            const fitnessGrid = document.getElementById('abonements-grid-fitness');
+
+            if (tabs.length) {
                 tabs.forEach(tab => {
                     tab.addEventListener("click", () => {
                         tabs.forEach(btn => btn.classList.remove("active"));
                         tab.classList.add("active");
                         const target = tab.getAttribute("data-tab");
-                        cards.forEach(card => {
-                            if (card.getAttribute("data-tab") === target) {
-                                card.classList.remove("hidden");
-                            } else {
-                                card.classList.add("hidden");
-                            }
-                        });
+
+                        if (singleGrid) singleGrid.style.display = 'none';
+                        if (byClassGrid) byClassGrid.style.display = 'none';
+                        if (unlimitedGrid) unlimitedGrid.style.display = 'none';
+                        if (fitnessGrid) fitnessGrid.style.display = 'none';
+
+                        if (target === 'single' && singleGrid) singleGrid.style.display = 'block';
+                        else if (target === 'by-class' && byClassGrid) byClassGrid.style.display = 'block';
+                        else if (target === 'unlimited' && unlimitedGrid) unlimitedGrid.style.display = 'block';
+                        else if (target === 'fitness' && fitnessGrid) fitnessGrid.style.display = 'block';
                     });
                 });
             }
+
+            // ===== ЗАГРУЗКА АКЦИЙ =====
+            if (window.loadPromotions) {
+                window.loadPromotions();
+            }
+
+            // ===== МОДАЛКА ДОБАВЛЕНИЯ АКЦИИ =====
+            const addPromoBtn = document.getElementById('addPromotionBtn');
+            const promoModal = document.getElementById('addPromotionModal');
+            const closePromoModal = document.getElementById('closePromotionModal');
+            const promoForm = document.getElementById('addPromotionForm');
+
+            if (addPromoBtn && promoModal) {
+                addPromoBtn.addEventListener('click', () => {
+                    promoModal.style.display = 'flex';
+                });
+            }
+            if (closePromoModal && promoModal) {
+                closePromoModal.addEventListener('click', () => {
+                    promoModal.style.display = 'none';
+                });
+            }
+            if (promoModal) {
+                promoModal.addEventListener('click', (e) => {
+                    if (e.target === promoModal) promoModal.style.display = 'none';
+                });
+            }
+            if (promoForm) {
+                promoForm.addEventListener('submit', window.addPromotion || function(e) { e.preventDefault(); });
+            }
+
+            // ===== ПРЕДПРОСМОТР ИЗОБРАЖЕНИЯ =====
+            const promoImageInput = document.getElementById('promoImageFile');
+            const promoImagePreview = document.getElementById('promoImagePreview');
+            const promoImagePreviewImg = document.getElementById('promoImagePreviewImg');
+            if (promoImageInput) {
+                promoImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            promoImagePreviewImg.src = ev.target.result;
+                            promoImagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        promoImagePreview.style.display = 'none';
+                    }
+                });
+            }
+
+            // ===== МОДАЛКА ДЕТАЛЕЙ АКЦИИ =====
+            const detailModal = document.getElementById('promotionDetailModal');
+            const closeDetailModal = document.getElementById('closePromotionDetailModal');
+            if (closeDetailModal) {
+                closeDetailModal.addEventListener('click', () => {
+                    detailModal.style.display = 'none';
+                });
+            }
+            if (detailModal) {
+                detailModal.addEventListener('click', (e) => {
+                    if (e.target === detailModal) detailModal.style.display = 'none';
+                });
+            }
+
+            // ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ =====
+            const deleteModal = document.getElementById('deleteConfirmationModal');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const closeDeleteConfirm = document.getElementById('closeDeleteConfirmModal');
+
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    if (window.confirmDeletePromotion) window.confirmDeletePromotion();
+                });
+            }
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', function() {
+                    if (window.cancelDeletePromotion) window.cancelDeletePromotion();
+                });
+            }
+            if (closeDeleteConfirm) {
+                closeDeleteConfirm.addEventListener('click', function() {
+                    if (deleteModal) deleteModal.style.display = 'none';
+                });
+            }
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function(e) {
+                    if (e.target === deleteModal) deleteModal.style.display = 'none';
+                });
+            }
+
+            // Показываем кнопку добавления только админу
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (addPromoBtn) {
+                addPromoBtn.style.display = (user && user.isAdmin) ? 'inline-block' : 'none';
+            }
         });
     </script>
-
-    </body>
-    </html>
+</body>
+</html>

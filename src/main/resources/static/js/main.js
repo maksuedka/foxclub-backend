@@ -1598,10 +1598,20 @@ document.addEventListener("DOMContentLoaded", () => {
     initMobileMenu();
     const user = getCurrentUser();
 
-    if (window.location.pathname.includes('index.html')) {
+    // === АВТОМАТИЧЕСКАЯ ЗАГРУЗКА АБОНЕМЕНТОВ (на любой странице) ===
+    if (document.getElementById('abonements-grid-single') ||
+        document.getElementById('abonements-grid-by-class') ||
+        document.getElementById('abonements-grid-unlimited') ||
+        document.getElementById('abonements-grid-fitness')) {
         loadAbonementsForHome();
     }
 
+    // === АВТОМАТИЧЕСКАЯ ЗАГРУЗКА АКЦИЙ (на любой странице) ===
+    if (document.getElementById('promotionsCarouselTrack')) {
+        loadPromotions();
+    }
+
+    // === ПРОФИЛЬ ===
     if (window.location.pathname.includes('profile.html')) {
         const profileName = document.getElementById('profileUserName');
         if (profileName && user) {
@@ -1641,7 +1651,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ===== ИЗМЕНЕНО: добавлен singleGrid =====
+    // ===== ТАБЫ ДЛЯ ЦЕН =====
     const tabs = document.querySelectorAll(".tab-button");
     const cards = document.querySelectorAll(".price-card");
     const singleGrid = document.getElementById('abonements-grid-single');
@@ -1672,6 +1682,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== СТАРАЯ КАРУСЕЛЬ (оставлена для обратной совместимости) =====
     const carousel = document.querySelector(".promotions-carousel");
     const promotionCards = document.querySelectorAll(".promotion-card");
     const indicatorsContainer = document.querySelector(".carousel-indicators");
@@ -1757,6 +1768,7 @@ document.addEventListener("DOMContentLoaded", () => {
         startAutoSlide();
     }
 
+    // ===== ГАЛЕРЕЯ =====
     const strips = document.querySelectorAll(".gallery-strip");
     if (strips.length > 0) {
         const normalDuration = 15;
@@ -1785,6 +1797,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== ЦЕЛИ =====
     const goalModal = document.getElementById("goalModal");
     const openGoalModalBtn = document.getElementById("openGoalModalBtn");
     const addGoalBtn = document.getElementById("addGoalBtn");
@@ -1840,6 +1853,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cancelAdjustmentBtn.addEventListener('click', cancelAdjustment);
     }
 
+    // ===== ВЫПАДАЮЩЕЕ МЕНЮ =====
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     if (dropdownToggle) {
         dropdownToggle.addEventListener('click', function(e) {
@@ -1848,6 +1862,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== НАВИГАЦИЯ ПО РАЗДЕЛАМ (СКРОЛЛ) =====
     const navLinks = document.querySelectorAll('.main-nav .nav-link[data-section]');
     const sections = document.querySelectorAll('section[id]');
     const mainHeader = document.querySelector('.main-header');
@@ -1870,6 +1885,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== РЕГИСТРАЦИЯ / ЛОГИН =====
     const loginBlock = document.getElementById("loginBlock");
     const registerBlock = document.getElementById("registerBlock");
     const showRegisterBtn = document.getElementById("showRegisterBtn");
@@ -1977,6 +1993,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== КЛУБЫ ПРИ РЕГИСТРАЦИИ =====
     const regClubSelect = document.getElementById('regClub');
     const urlParams = new URLSearchParams(window.location.search);
     let cityParam = urlParams.get('city') ? decodeURIComponent(urlParams.get('city')).trim() : null;
@@ -1992,6 +2009,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ ВНЕ =====
     window.addEventListener('click', (event) => {
         const isProfilePage = window.location.pathname.includes('profile.html');
         const isIndexPage = window.location.pathname.includes('index.html');
@@ -2006,6 +2024,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (userQrModal && event.target === userQrModal) userQrModal.style.display = 'none';
     });
 
+    // ===== ДЕТАЛИ ЦЕЛИ =====
     const goalDetailModal = document.getElementById('goalDetailModal');
     const closeGoalDetailBtn = document.getElementById('closeGoalDetailModal');
     const updateGoalBtn = document.getElementById('updateGoalBtn');
@@ -2032,6 +2051,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ===== КНОПКА ФИЛЬТРА АБОНЕМЕНТОВ =====
     addExpiredFilterButton();
 });
 
@@ -2413,10 +2433,10 @@ window.saveGoalDirectly = saveGoalDirectly;
 window.applyAdjustment = applyAdjustment;
 window.cancelAdjustment = cancelAdjustment;
 window.updateUnitForExercise = updateUnitForExercise;
-window.getCurrentGoalValue = getCurrentGoalValue;
 
-// Дополнительные экспорты для акций
+// Дополнительные экспорты для акций и абонементов
 window.loadPromotions = loadPromotions;
+window.loadAbonementsForHome = loadAbonementsForHome;
 window.renderPromotions = renderPromotions;
 window.openPromotionDetails = openPromotionDetails;
 window.addPromotion = addPromotion;
