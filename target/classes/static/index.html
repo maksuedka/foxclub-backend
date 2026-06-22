@@ -257,7 +257,7 @@
             background: #888;
         }
 
-        /* === НОВЫЕ СТИЛИ ДЛЯ БЕСКОНЕЧНОЙ КАРУСЕЛИ === */
+        /* === СТИЛИ ДЛЯ КАРУСЕЛИ АКЦИЙ === */
         .promotions-heading {
             display: flex;
             justify-content: space-between;
@@ -322,7 +322,6 @@
             z-index: 2;
         }
 
-        /* Адаптивность — карточки не переносятся */
         @media (max-width: 768px) {
             .promotion-card {
                 flex: 0 0 280px;
@@ -343,7 +342,47 @@
             }
         }
 
-        /* Остальные стили без изменений */
+        /* Стили для пустых сообщений */
+        .empty-message {
+            color: #999;
+            font-size: 1rem;
+            text-align: center;
+            padding: 30px 0;
+            grid-column: 1 / -1;
+        }
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            padding: 20px;
+            grid-column: 1 / -1;
+        }
+
+        /* ===== ПРАВИЛЬНАЯ СЕТКА ДЛЯ АБОНЕМЕНТОВ (3 В РЯД) ===== */
+        .abonements-grid-container {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 20px !important;
+            width: 100% !important;
+            margin-top: 20px;
+        }
+
+        .abonements-grid-container .price-card {
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 992px) {
+            .abonements-grid-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 15px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .abonements-grid-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -541,51 +580,8 @@
                 <button class="tab-button" data-tab="fitness">ФИТНЕС</button>
             </div>
             <div class="price-cards-grid">
-                <div class="price-card" data-tab="single">
-                    <div class="price-card-logo-bg"></div>
-                    <h3 class="price-card-title">Разовое занятие</h3>
-                    <p class="price-card-price">10 р.</p>
-                    <div class="price-card-details">
-                        <p>Тренажёры и кардиозона</p>
-                        <p>Без ограничения времени</p>
-                    </div>
-                </div>
-                <div class="price-card" data-tab="single">
-                    <div class="price-card-logo-bg"></div>
-                    <h3 class="price-card-title">Разовое групповое</h3>
-                    <p class="price-card-price">8 р.</p>
-                    <div class="price-card-details">
-                        <p>Йога, пилатес, стретчинг</p>
-                        <p>Зумба, силовые классы</p>
-                    </div>
-                </div>
-                <div class="price-card" data-tab="single">
-                    <div class="price-card-logo-bg"></div>
-                    <h3 class="price-card-title">Пробная с тренером</h3>
-                    <p class="price-card-price">12 р.</p>
-                    <div class="price-card-details">
-                        <p>Персональная тренировка</p>
-                        <p>Составление программы</p>
-                    </div>
-                </div>
-                <div class="price-card" data-tab="single">
-                    <div class="price-card-logo-bg"></div>
-                    <h3 class="price-card-title">Гостевой визит</h3>
-                    <p class="price-card-price">15 р.</p>
-                    <div class="price-card-details">
-                        <p>Для друзей и родственников</p>
-                        <p>участников клуба</p>
-                    </div>
-                </div>
-                <div class="price-card" data-tab="single">
-                    <div class="price-card-logo-bg"></div>
-                    <h3 class="price-card-title">Тренировка выходного дня</h3>
-                    <p class="price-card-price">9 р.</p>
-                    <div class="price-card-details">
-                        <p>Суббота, воскресенье</p>
-                        <p>Праздничные дни</p>
-                    </div>
-                </div>
+                <!-- ===== КОНТЕЙНЕРЫ ДЛЯ АБОНЕМЕНТОВ (ЗАГРУЖАЮТСЯ ИЗ БД) ===== -->
+                <div id="abonements-grid-single" class="abonements-grid-container" data-tab="single" style="display:block;"></div>
                 <div id="abonements-grid-by-class" class="abonements-grid-container" data-tab="by-class" style="display:none;"></div>
                 <div id="abonements-grid-unlimited" class="abonements-grid-container" data-tab="unlimited" style="display:none;"></div>
                 <div id="abonements-grid-fitness" class="abonements-grid-container" data-tab="fitness" style="display:none;"></div>
@@ -654,20 +650,29 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Табы для цен
             const tabs = document.querySelectorAll(".tab-button");
-            const cards = document.querySelectorAll(".price-card");
-            if (tabs.length && cards.length) {
+            const singleGrid = document.getElementById('abonements-grid-single');
+            const byClassGrid = document.getElementById('abonements-grid-by-class');
+            const unlimitedGrid = document.getElementById('abonements-grid-unlimited');
+            const fitnessGrid = document.getElementById('abonements-grid-fitness');
+
+            if (tabs.length) {
                 tabs.forEach(tab => {
                     tab.addEventListener("click", () => {
                         tabs.forEach(btn => btn.classList.remove("active"));
                         tab.classList.add("active");
                         const target = tab.getAttribute("data-tab");
-                        cards.forEach(card => {
-                            if (card.getAttribute("data-tab") === target) {
-                                card.classList.remove("hidden");
-                            } else {
-                                card.classList.add("hidden");
-                            }
-                        });
+
+                        // Скрываем все контейнеры
+                        if (singleGrid) singleGrid.style.display = 'none';
+                        if (byClassGrid) byClassGrid.style.display = 'none';
+                        if (unlimitedGrid) unlimitedGrid.style.display = 'none';
+                        if (fitnessGrid) fitnessGrid.style.display = 'none';
+
+                        // Показываем нужный
+                        if (target === 'single' && singleGrid) singleGrid.style.display = 'block';
+                        else if (target === 'by-class' && byClassGrid) byClassGrid.style.display = 'block';
+                        else if (target === 'unlimited' && unlimitedGrid) unlimitedGrid.style.display = 'block';
+                        else if (target === 'fitness' && fitnessGrid) fitnessGrid.style.display = 'block';
                     });
                 });
             }

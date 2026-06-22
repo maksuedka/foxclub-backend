@@ -31,17 +31,20 @@
 @import 'sections/_login.css';
 @import 'responsive.css';
 
-/* Исправление: подвал не перекрывает модалки */
+/* ===== ИСПРАВЛЕНИЕ Z-INDEX ПОДВАЛА И МОДАЛОК ===== */
+
+/* Подвал должен быть над обычным контентом, но под модалками */
 .main-footer {
     position: relative;
-    z-index: 1;
+    z-index: 10 !important;
 }
+
+/* Все модалки и их подложки – поверх всего */
 .modal,
-.modal-backdrop {
-    z-index: 1050 !important;
-}
-.modal-content {
-    z-index: 1060;
+.modal-backdrop,
+.modal-content,
+[id$="Modal"] {
+    z-index: 9999 !important;
 }
 
 

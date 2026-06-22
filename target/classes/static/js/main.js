@@ -7,6 +7,7 @@
  * Добавлена отмена корректировки и логика сохранения без повторной валидации
  * Добавлено управление акциями (бесконечная карусель с управлением тачпадом)
  * Добавлен статус "Ожидает активации" для абонементов без startDate
+ * Добавлена поддержка вкладки "РАЗОВЫЕ ЗАНЯТИЯ" из БД
  */
 
 // ======================= ДИНАМИЧЕСКОЕ ОПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
@@ -1495,12 +1496,72 @@ async function getAllClubs() {
 }
 
 // ======================= ЗАГРУЗКА АБОНЕМЕНТОВ НА ГЛАВНУЮ =======================
+// ===== ИЗМЕНЕНО: добавлена поддержка single =====
 function getAbonementsGroupKey(abonement) {
     const d = abonement.duration;
     if (d == null) return 'by-class';
-    if (d <= 30) return 'by-class';
-    if (d <= 150) return 'unlimited';
-    return 'fitness';
+    if (d === 1) return 'single';               // разовые занятия
+    if (d <= 30) return 'by-class';             // абонементы по занятиям
+    if (d <= 150) return 'unlimited';           // безлимитные
+    return 'fitness';                           // фитнес
+}
+
+// ===== ИЗМЕНЕНО: добавлена загрузка для single =====
+async function loadAbonementsForHome() {
+    const singleEl = document.getElementById('abonements-grid-single');
+    const byClassEl = document.getElementById('abonements-grid-by-class');
+    const unlimitedEl = document.getElementById('abonements-grid-unlimited');
+    const fitnessEl = document.getElementById('abonements-grid-fitness');
+
+    if (!singleEl || !byClassEl || !unlimitedEl || !fitnessEl) return;
+
+    // Показываем загрузку
+    singleEl.innerHTML = '<div class="price-card" style="padding:30px;">Загрузка...</div>';
+    byClassEl.innerHTML = '<div class="price-card" style="padding:30px;">Загрузка...</div>';
+    unlimitedEl.innerHTML = '';
+    fitnessEl.innerHTML = '';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/abonements`);
+        if (!response.ok) throw new Error('Ошибка загрузки абонементов');
+        const abonements = await response.json();
+
+        const groups = { 'single': [], 'by-class': [], 'unlimited': [], 'fitness': [] };
+        if (Array.isArray(abonements)) {
+            abonements.forEach(a => {
+                const key = getAbonementsGroupKey(a);
+                if (groups[key]) {
+                    groups[key].push(a);
+                } else {
+                    // fallback
+                    groups['by-class'].push(a);
+                }
+            });
+        }
+
+        singleEl.innerHTML = groups['single'].length
+            ? groups['single'].map(renderAbonementCard).join('')
+            : '<p class="empty-message">Разовых занятий пока нет</p>';
+
+        byClassEl.innerHTML = groups['by-class'].length
+            ? groups['by-class'].map(renderAbonementCard).join('')
+            : '<p class="empty-message">Абонементов по занятиям пока нет</p>';
+
+        unlimitedEl.innerHTML = groups['unlimited'].length
+            ? groups['unlimited'].map(renderAbonementCard).join('')
+            : '<p class="empty-message">Безлимитных абонементов пока нет</p>';
+
+        fitnessEl.innerHTML = groups['fitness'].length
+            ? groups['fitness'].map(renderAbonementCard).join('')
+            : '<p class="empty-message">Фитнес-абонементов пока нет</p>';
+
+    } catch (e) {
+        console.error(e);
+        singleEl.innerHTML = '<p class="error-message">Ошибка загрузки</p>';
+        byClassEl.innerHTML = '<p class="error-message">Ошибка загрузки</p>';
+        unlimitedEl.innerHTML = '';
+        fitnessEl.innerHTML = '';
+    }
 }
 
 function renderAbonementCard(abonement) {
@@ -1527,42 +1588,6 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
-}
-
-async function loadAbonementsForHome() {
-    const byClassEl = document.getElementById('abonements-grid-by-class');
-    const unlimitedEl = document.getElementById('abonements-grid-unlimited');
-    const fitnessEl = document.getElementById('abonements-grid-fitness');
-    if (!byClassEl || !unlimitedEl || !fitnessEl) return;
-    byClassEl.innerHTML = '<div class="price-card" style="padding:30px;">Загрузка...</div>';
-    unlimitedEl.innerHTML = '';
-    fitnessEl.innerHTML = '';
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/abonements`);
-        if (!response.ok) throw new Error('Ошибка загрузки абонементов');
-        const abonements = await response.json();
-        const groups = { 'by-class': [], 'unlimited': [], 'fitness': [] };
-        if (Array.isArray(abonements)) {
-            abonements.forEach(a => {
-                const key = getAbonementsGroupKey(a);
-                groups[key].push(a);
-            });
-        }
-        byClassEl.innerHTML = groups['by-class'].length
-            ? groups['by-class'].map(renderAbonementCard).join('')
-            : '<p class="empty-message">Абонементов пока нет</p>';
-        unlimitedEl.innerHTML = groups['unlimited'].length
-            ? groups['unlimited'].map(renderAbonementCard).join('')
-            : '<p class="empty-message">Абонементов пока нет</p>';
-        fitnessEl.innerHTML = groups['fitness'].length
-            ? groups['fitness'].map(renderAbonementCard).join('')
-            : '<p class="empty-message">Абонементов пока нет</p>';
-    } catch (e) {
-        console.error(e);
-        byClassEl.innerHTML = '<p class="error-message">Ошибка загрузки абонементов</p>';
-        unlimitedEl.innerHTML = '';
-        fitnessEl.innerHTML = '';
-    }
 }
 
 // ======================= ОСНОВНОЙ ОБРАБОТЧИК СОБЫТИЙ =======================
@@ -1616,17 +1641,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ===== ИЗМЕНЕНО: добавлен singleGrid =====
     const tabs = document.querySelectorAll(".tab-button");
     const cards = document.querySelectorAll(".price-card");
+    const singleGrid = document.getElementById('abonements-grid-single');
     const byClassGrid = document.getElementById('abonements-grid-by-class');
     const unlimitedGrid = document.getElementById('abonements-grid-unlimited');
     const fitnessGrid = document.getElementById('abonements-grid-fitness');
+
     if (tabs.length > 0) {
         tabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 tabs.forEach(btn => btn.classList.remove("active"));
                 tab.classList.add("active");
                 const target = tab.getAttribute("data-tab");
+                // Скрываем статические карточки (если есть)
                 cards.forEach(card => {
                     if (card.getAttribute("data-tab") === target) {
                         card.classList.remove("hidden");
@@ -1634,6 +1663,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         card.classList.add("hidden");
                     }
                 });
+                // Управляем контейнерами
+                if (singleGrid) singleGrid.style.display = target === 'single' ? '' : 'none';
                 if (byClassGrid) byClassGrid.style.display = target === 'by-class' ? '' : 'none';
                 if (unlimitedGrid) unlimitedGrid.style.display = target === 'unlimited' ? '' : 'none';
                 if (fitnessGrid) fitnessGrid.style.display = target === 'fitness' ? '' : 'none';
