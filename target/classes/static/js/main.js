@@ -3,6 +3,7 @@
  * Версия с select вместо datalist и улучшенной модалкой создания цели
  * Исправлена функция "Скорректировать" для всех типов целей
  * Исправлен поиск полей для корректировки (учитывает initialWeight/targetWeight)
+ * Добавлена очистка description от JSON-мусора, fallback на тип цели
  */
 
 // ======================= ДИНАМИЧЕСКОЕ ОПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
@@ -132,6 +133,13 @@ let goalChart = null;
 let goalValidationDone = false;
 let goalValidationData = null;
 let currentGoalType = 'weight-loss';
+
+// ===== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОЧИСТКИ DESCRIPTION ОТ JSON =====
+function isJsonDescription(desc) {
+    if (!desc) return false;
+    // Проверяем, похоже ли на JSON (содержит фигурные скобки и ключи)
+    return desc.includes('{') && desc.includes('}') && (desc.includes('"initialValue"') || desc.includes('"history"'));
+}
 
 // ======================= ОСНОВНЫЕ ФУНКЦИИ =======================
 function getCurrentUser() {
@@ -483,7 +491,13 @@ function renderGoalCard(goal) {
     const goalsCarousel = document.getElementById('goalsCardsCarousel');
     if (!goalsCarousel) return;
     const config = GOAL_TYPE_CONFIG[goal.type] || GOAL_TYPE_CONFIG['weight-loss'];
-    const displayTitle = goal.description || config.title;
+    // Если описание — JSON, используем заголовок типа цели, иначе — само описание
+    let displayTitle;
+    if (goal.description && !isJsonDescription(goal.description)) {
+        displayTitle = goal.description;
+    } else {
+        displayTitle = config.title;
+    }
     const unit = goal.unit || config.unit;
     const { percentComplete, progressText } = calculateGoalProgress(goal, unit);
     const startDate = goal.startDate ? formatDisplayDate(goal.startDate) : '—';
@@ -1092,34 +1106,119 @@ function fillGoalDetailModal(goal) {
         titleEl.textContent = config ? config.title : goal.type;
     }
     const descEl = document.getElementById('goalDetailDescription');
-    if (descEl) descEl.textContent = goal.description || 'Нет описания';
+    if (descEl) {
+        // Если описание — JSON, показываем тип цели, иначе — само описание
+        let displayDesc;
+        if (goal.description && !isJsonDescription(goal.description)) {
+            displayDesc = goal.description;
+        } else {
+            const config = GOAL_TYPE_CONFIG[goal.type];
+            displayDesc = config ? config.title : 'Цель';
+        }
+        descEl.textContent = displayDesc;
+    }
     const modal = document.getElementById('goalDetailModal');
     if (modal) modal.dataset.goalId = goal.id;
     updateGoalProgressDisplay(goal);
     const history = goal.history || [];
     const unit = goal.unit || GOAL_TYPE_CONFIG[goal.type]?.unit || '';
     renderGoalHistoryChart(history, unit);
+
+    // ===== МОТИВАЦИОННОЕ СООБЩЕНИЕ =====
     const motivationMsg = document.getElementById('goalMotivationMessage');
-    if (motivationMsg && history.length >= 2) {
-        const last = parseFloat(history[history.length-1].value);
-        const prev = parseFloat(history[history.length-2].value);
-        const diff = last - prev;
-        const unitLocal = unit;
-        if (goal.type === 'weight-loss') {
-            if (diff < 0) motivationMsg.innerHTML = `🎉 Отлично! Вы сбросили ${Math.abs(diff).toFixed(1)} ${unitLocal} с прошлого замера!`;
-            else if (diff > 0) motivationMsg.innerHTML = `⚠️ Вес увеличился на ${diff.toFixed(1)} ${unitLocal}. Возможно, стоит скорректировать питание.`;
-            else motivationMsg.innerHTML = `👍 Прогресс стабильный. Продолжайте в том же духе!`;
-        } else if (goal.type === 'mass-gain' || goal.type === 'strength') {
-            if (diff > 0) motivationMsg.innerHTML = `💪 Отличный рост! +${diff.toFixed(1)} ${unitLocal} с прошлого раза!`;
-            else if (diff < 0) motivationMsg.innerHTML = `📉 Прогресс замедлился. Возможно, нужна смена программы.`;
-            else motivationMsg.innerHTML = `👍 Стабильно, продолжайте!`;
-        } else if (goal.type === 'cardio') {
-            if (diff > 0) motivationMsg.innerHTML = `🏃‍♂️ Супер! Вы прошли на ${diff.toFixed(0)} ${unitLocal} больше!`;
-            else if (diff < 0) motivationMsg.innerHTML = `😴 Немного меньше, чем в прошлый раз. Держите темп!`;
-            else motivationMsg.innerHTML = `✅ Стабильно, так держать!`;
+    if (motivationMsg) {
+        if (history.length >= 2) {
+            const last = parseFloat(history[history.length-1].value);
+            const prev = parseFloat(history[history.length-2].value);
+            const diff = last - prev;
+            const unitLocal = unit;
+            let msg = '';
+            if (goal.type === 'weight-loss') {
+                if (diff < 0) msg = `🎉 Отлично! Вы сбросили ${Math.abs(diff).toFixed(1)} ${unitLocal} с прошлого замера!`;
+                else if (diff > 0) msg = `⚠️ Вес увеличился на ${diff.toFixed(1)} ${unitLocal}. Возможно, стоит скорректировать питание.`;
+                else msg = `👍 Прогресс стабильный. Продолжайте в том же духе!`;
+            } else if (goal.type === 'mass-gain' || goal.type === 'strength') {
+                if (diff > 0) msg = `💪 Отличный рост! +${diff.toFixed(1)} ${unitLocal} с прошлого раза!`;
+                else if (diff < 0) msg = `📉 Прогресс замедлился. Возможно, нужна смена программы.`;
+                else msg = `👍 Стабильно, продолжайте!`;
+            } else if (goal.type === 'cardio') {
+                if (diff > 0) msg = `🏃‍♂️ Супер! Вы прошли на ${diff.toFixed(0)} ${unitLocal} больше!`;
+                else if (diff < 0) msg = `😴 Немного меньше, чем в прошлый раз. Держите темп!`;
+                else msg = `✅ Стабильно, так держать!`;
+            }
+            motivationMsg.innerHTML = msg;
+            motivationMsg.style.display = 'block';
+        } else {
+            motivationMsg.innerHTML = '';
+            motivationMsg.style.display = 'none';
         }
-    } else if (motivationMsg) {
-        motivationMsg.innerHTML = 'Ведите прогресс регулярно для лучших результатов!';
+    }
+
+    // ===== ПОДСКАЗКИ =====
+    const tipsContent = document.getElementById('goalTipsContent');
+    if (tipsContent) {
+        let tipsText = '';
+        const target = parseFloat(goal.targetValue);
+        const current = parseFloat(goal.currentValue) || 0;
+        const initial = goal.initialValue !== undefined ? parseFloat(goal.initialValue) : current;
+        const weeksLeft = goal.endDate ? Math.max(0, Math.ceil((new Date(goal.endDate) - new Date()) / (1000 * 60 * 60 * 24 * 7))) : null;
+
+        switch (goal.type) {
+            case 'weight-loss':
+                tipsText = '📉 Для похудения рекомендуется обновлять вес 2–3 раза в неделю (утром натощак).\n' +
+                           '📊 Прогресс = снижение веса от начального к целевому.\n' +
+                           '⚖️ Безопасный темп: 0.5–1 кг в неделю.';
+                if (weeksLeft !== null && target < initial) {
+                    const neededLoss = initial - target;
+                    const weeklyRate = neededLoss / (weeksLeft || 1);
+                    if (weeklyRate > 1) {
+                        tipsText += `\n⚠️ Ваш темп (${weeklyRate.toFixed(1)} кг/нед) выше безопасного. Рекомендуем скорректировать цель.`;
+                    }
+                }
+                break;
+            case 'mass-gain':
+                tipsText = '💪 Для набора массы обновляйте вес раз в неделю в одно и то же время.\n' +
+                           '📊 Прогресс = увеличение веса от начального к целевому.\n' +
+                           '🏋️ Безопасный темп: 0.2–0.5 кг в неделю.';
+                if (weeksLeft !== null && target > initial) {
+                    const neededGain = target - initial;
+                    const weeklyRate = neededGain / (weeksLeft || 1);
+                    if (weeklyRate > 0.5) {
+                        tipsText += `\n⚠️ Ваш темп (${weeklyRate.toFixed(1)} кг/нед) выше безопасного. Рекомендуем снизить темп.`;
+                    }
+                }
+                break;
+            case 'strength':
+                tipsText = '🏋️‍♂️ Для силовых целей обновляйте результат каждую тренировку (или раз в неделю).\n' +
+                           '📊 Прогресс = увеличение веса/повторений от начального к целевому.\n' +
+                           '📈 Безопасный темп: +2–5% к весу снаряда в неделю.';
+                if (weeksLeft !== null && target > current) {
+                    const neededGain = target - current;
+                    const weeklyRate = (neededGain / (weeksLeft || 1));
+                    const currentWeight = current || 1;
+                    const percentPerWeek = (weeklyRate / currentWeight) * 100;
+                    if (percentPerWeek > 5) {
+                        tipsText += `\n⚠️ Ваш темп (${percentPerWeek.toFixed(0)}% в нед) выше рекомендуемого (2–5%). Скорректируйте цель.`;
+                    }
+                }
+                break;
+            case 'cardio':
+                tipsText = '🏃 Для кардио обновляйте показатели после каждой тренировки.\n' +
+                           '📊 Прогресс = увеличение дистанции/времени от начального к целевому.\n' +
+                           '📈 Безопасный темп: +5–10% к нагрузке в неделю.';
+                if (weeksLeft !== null && target > current) {
+                    const neededGain = target - current;
+                    const weeklyRate = neededGain / (weeksLeft || 1);
+                    const percentPerWeek = (weeklyRate / (current || 1)) * 100;
+                    if (percentPerWeek > 10) {
+                        tipsText += `\n⚠️ Ваш темп (${percentPerWeek.toFixed(0)}% в нед) выше безопасного (5–10%). Рекомендуем снизить темп.`;
+                    }
+                }
+                break;
+            default:
+                tipsText = 'Обновляйте прогресс регулярно и следуйте вашей цели.';
+        }
+        tipsContent.textContent = tipsText;
     }
 }
 

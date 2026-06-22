@@ -48,10 +48,20 @@ public class GroqService {
         }
 
         String prompt = buildPrompt(dto, daysLeft);
-        String responseJson = callGroqApi(prompt);
-        log.info("Ответ от Groq API: {}", responseJson);
-
-        return parseResponse(responseJson);
+        try {
+            String responseJson = callGroqApi(prompt);
+            log.info("Ответ от Groq API: {}", responseJson);
+            return parseResponse(responseJson);
+        } catch (Exception e) {
+            log.error("Ошибка при вызове Groq API: {}", e.getMessage(), e);
+            return new GoalValidationResponse(
+                    true,
+                    "Проверка ИИ временно недоступна. Цель создана без валидации.",
+                    "Рекомендуем проконсультироваться с тренером очно.",
+                    "",
+                    ""
+            );
+        }
     }
 
     private GoalValidationResponse quickValidate(GoalDto dto) {
