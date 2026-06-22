@@ -32,7 +32,7 @@ public class UserService {
     private final AdminRepository adminRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final GoogleEmailService googleEmailService;   // <-- вместо JavaMailSender
+    private final GoogleEmailService googleEmailService;
 
     // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ: временное хранение токенов =====
     private final Map<String, TokenData> resetTokens = new ConcurrentHashMap<>();
@@ -49,7 +49,7 @@ public class UserService {
         }
     }
 
-    // ===== ОСНОВНЫЕ МЕТОДЫ (без изменений) =====
+    // ===== ОСНОВНЫЕ МЕТОДЫ =====
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
@@ -166,7 +166,6 @@ public class UserService {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(5);
         resetTokens.put(token, new TokenData(token, email, expiry));
 
-        // ===== ОТПРАВКА ЧЕРЕЗ GMAIL API =====
         try {
             googleEmailService.sendResetCode(email, token);
         } catch (Exception e) {
@@ -202,5 +201,13 @@ public class UserService {
         userRepository.save(user);
 
         resetTokens.remove(token);
+    }
+
+    // ===== УДАЛЕНИЕ АВАТАРА =====
+    public void deleteAvatar(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        user.setAvatarUrl(null);
+        userRepository.save(user);
     }
 }

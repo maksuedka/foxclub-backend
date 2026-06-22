@@ -45,7 +45,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    // НОВЫЙ МЕТОД ДЛЯ ЗАГРУЗКИ АВАТАРА
+    // ===== ЗАГРУЗКА АВАТАРА =====
     @PostMapping("/{id}/avatar")
     public ResponseEntity<?> uploadAvatar(@PathVariable Integer id,
                                           @RequestParam("avatar") MultipartFile file) {
@@ -65,5 +65,12 @@ public class UserController {
             error.put("error", "Ошибка загрузки: " + e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
+    }
+
+    // ===== НОВЫЙ МЕТОД ДЛЯ УДАЛЕНИЯ АВАТАРА =====
+    @DeleteMapping("/{id}/avatar")
+    public ResponseEntity<?> deleteAvatar(@PathVariable Integer id) {
+        userService.deleteAvatar(id);
+        return ResponseEntity.ok().build();
     }
 }

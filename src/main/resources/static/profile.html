@@ -49,14 +49,21 @@
                 <a href="admin-panel.html" class="btn-admin-panel" id="adminPanelBtn" style="display:none; background:#ff8c00; color:#fff; padding:8px 20px; border-radius:30px; text-decoration:none; font-weight:600; font-size:14px; margin-left:10px;">
                     ⚙️ Админ-панель
                 </a>
+                <!-- Кнопка удаления аватара УДАЛЕНА из хедера, перенесена в модалку -->
                 <button class="btn-logout" id="logoutBtn">Выйти</button>
                 <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
             </div>
         </div>
     </header>
 
-    <!-- Остальной код страницы без изменений ... -->
-    <section class="my-abonements-section"><div class="container"><h2 class="section-title">Мои абонементы</h2><div class="my-abonements-grid" id="myAbonementsGrid"><p class="loading-message">Загрузка...</p></div></div></section>
+    <section class="my-abonements-section">
+        <div class="container">
+            <h2 class="section-title">Мои абонементы</h2>
+            <div class="my-abonements-grid" id="myAbonementsGrid">
+                <p class="loading-message">Загрузка...</p>
+            </div>
+        </div>
+    </section>
 
     <section class="posts-section">
         <div class="container">
@@ -71,15 +78,54 @@
                 <div id="imagePreviewContainer" class="post-images-preview"></div>
                 <button class="btn btn-primary" id="createPostBtn">Опубликовать</button>
             </div>
-            <div id="myPostsGrid" class="my-posts-grid"><p class="loading-message">Загрузка постов...</p></div>
+            <div id="myPostsGrid" class="my-posts-grid">
+                <p class="loading-message">Загрузка постов...</p>
+            </div>
         </div>
     </section>
 
-    <section class="goals-section"><div class="container goals-container"><h2 class="section-title goals-title">Мои цели</h2><div class="goals-cards-and-add-wrapper"><div class="goals-carousel-wrapper"><div class="goals-cards-carousel" id="goalsCardsCarousel"><p class="empty-message">У вас пока нет целей</p></div></div><div class="add-goal-column"><button class="add-button" id="openGoalModalBtn">+</button></div></div></div></section>
+    <section class="goals-section">
+        <div class="container goals-container">
+            <h2 class="section-title goals-title">Мои цели</h2>
+            <div class="goals-cards-and-add-wrapper">
+                <div class="goals-carousel-wrapper">
+                    <div class="goals-cards-carousel" id="goalsCardsCarousel">
+                        <p class="empty-message">У вас пока нет целей</p>
+                    </div>
+                </div>
+                <div class="add-goal-column">
+                    <button class="add-button" id="openGoalModalBtn">+</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Модальные окна -->
-    <div id="qrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeQrModal">&times;</span><h2 id="qrModalTitle">Ваш абонемент</h2><div class="qr-code-container" id="qrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="abonement-dates"><p>Дата покупки: <span id="qrPurchaseDate"></span></p><p>Действует до: <span id="qrExpiryDate"></span></p></div></div></div>
-    <div id="userQrModal" class="modal"><div class="modal-content"><span class="close-button" id="closeUserQrModal">&times;</span><h2>Ваш QR-код</h2><div class="qr-code-container" id="userQrCodeContainer"></div><p class="qr-info">Покажите этот код администратору</p><div class="user-info"><p>Пользователь: <span id="userQrName"></span></p><p>Email: <span id="userQrEmail"></span></p></div></div></div>
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeQrModal">&times;</span>
+            <h2 id="qrModalTitle">Ваш абонемент</h2>
+            <div class="qr-code-container" id="qrCodeContainer"></div>
+            <p class="qr-info">Покажите этот код администратору</p>
+            <div class="abonement-dates">
+                <p>Дата покупки: <span id="qrPurchaseDate"></span></p>
+                <p>Действует до: <span id="qrExpiryDate"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="userQrModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeUserQrModal">&times;</span>
+            <h2>Ваш QR-код</h2>
+            <div class="qr-code-container" id="userQrCodeContainer"></div>
+            <p class="qr-info">Покажите этот код администратору</p>
+            <div class="user-info">
+                <p>Пользователь: <span id="userQrName"></span></p>
+                <p>Email: <span id="userQrEmail"></span></p>
+            </div>
+        </div>
+    </div>
     
     <!-- Модалка создания цели -->
     <div id="goalModal" class="modal">
@@ -195,19 +241,89 @@
         </div>
     </div>
     
-    <div id="avatarModal" class="modal"><div class="modal-content" style="max-width:650px; max-height:85vh; display:flex; flex-direction:column;"><span class="close-button" id="closeAvatarModal">&times;</span><h2>Редактировать аватар</h2><div style="flex:1; overflow-y:auto; text-align:center; background:#1a1a1a; border-radius:16px; padding:20px;"><img id="avatarPreviewBig" src="" alt="Текущий аватар" style="max-width:100%; max-height:50vh; border-radius:12px; display:block; margin:0 auto;"><div id="cropperContainer" style="display:none;"><img id="cropImage" src="" alt="Обрезка"></div><div id="noImageMessage" style="display:none; padding:40px; color:#999;">Нет изображения</div></div><div style="margin-top:20px; display:flex; gap:15px; justify-content:center;"><button id="uploadPhotoBtn" class="btn-upload-photo">📷 Загрузить фото</button><button id="saveAvatarBtn" class="btn-save-avatar" style="display:none;">💾 Сохранить</button><button id="cancelCropBtn" class="btn-cancel-crop" style="display:none;">Отмена</button></div><input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/jpg" style="display:none;"></div></div>
-    <div id="commentsModal" class="modal"><div class="modal-content" style="max-width:650px;"><span class="close-button" id="closeCommentsModal">&times;</span><h2>Комментарии</h2><div id="commentsList" style="max-height:400px; overflow-y:auto; margin:20px 0;"></div><div class="modal-comment-form" style="display:flex; gap:10px; margin-top:20px;"><textarea id="commentText" placeholder="Ваш комментарий..." rows="3"></textarea><button id="sendCommentBtn" class="btn-send-comment">Отправить</button></div></div></div>
-    <div id="lightbox" class="lightbox"><button class="lightbox-close">&times;</button><div class="lightbox-content"><img class="lightbox-img" src=""><button class="lightbox-prev">&#10094;</button><button class="lightbox-next">&#10095;</button></div><div class="lightbox-indicators"></div></div>
+    <!-- ===== МОДАЛКА АВАТАРА (с кнопкой удаления) ===== -->
+    <div id="avatarModal" class="modal">
+        <div class="modal-content" style="max-width:650px; max-height:85vh; display:flex; flex-direction:column;">
+            <span class="close-button" id="closeAvatarModal">&times;</span>
+            <h2>Редактировать аватар</h2>
+            <div style="flex:1; overflow-y:auto; text-align:center; background:#1a1a1a; border-radius:16px; padding:20px;">
+                <img id="avatarPreviewBig" src="" alt="Текущий аватар" style="max-width:100%; max-height:50vh; border-radius:12px; display:block; margin:0 auto;">
+                <div id="cropperContainer" style="display:none;"><img id="cropImage" src="" alt="Обрезка"></div>
+                <div id="noImageMessage" style="display:none; padding:40px; color:#999;">Нет изображения</div>
+            </div>
+            <div style="margin-top:20px; display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                <button id="uploadPhotoBtn" class="btn-upload-photo">📷 Загрузить фото</button>
+                <button id="saveAvatarBtn" class="btn-save-avatar" style="display:none;">💾 Сохранить</button>
+                <button id="cancelCropBtn" class="btn-cancel-crop" style="display:none;">Отмена</button>
+                <!-- ===== НОВАЯ КНОПКА УДАЛЕНИЯ АВАТАРА В МОДАЛКЕ ===== -->
+                <button id="deleteAvatarBtn" class="btn-delete-avatar-modal" style="background:#ff4444; color:#fff; border:none; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:600;">🗑️ Удалить аватар</button>
+            </div>
+            <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/jpg" style="display:none;">
+        </div>
+    </div>
+
+    <div id="commentsModal" class="modal">
+        <div class="modal-content" style="max-width:650px;">
+            <span class="close-button" id="closeCommentsModal">&times;</span>
+            <h2>Комментарии</h2>
+            <div id="commentsList" style="max-height:400px; overflow-y:auto; margin:20px 0;"></div>
+            <div class="modal-comment-form" style="display:flex; gap:10px; margin-top:20px;">
+                <textarea id="commentText" placeholder="Ваш комментарий..." rows="3"></textarea>
+                <button id="sendCommentBtn" class="btn-send-comment">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox">
+        <button class="lightbox-close">&times;</button>
+        <div class="lightbox-content">
+            <img class="lightbox-img" src="">
+            <button class="lightbox-prev">&#10094;</button>
+            <button class="lightbox-next">&#10095;</button>
+        </div>
+        <div class="lightbox-indicators"></div>
+    </div>
+
     <div id="temporaryMessage" class="temporary-message" style="display:none;"></div>
 
     <footer class="main-footer">
         <div class="container footer-content">
-            <div class="footer-block footer-brand"><a href="#" class="footer-logo">FOX CLUB</a><p class="footer-slogan">Станьте клиентом нашей сети.<br>Мы Fox Club!</p><a href="#" class="btn btn-primary footer-btn">Записаться на занятие</a></div>
-            <div class="footer-block footer-contacts"><div class="location-group"><h4 class="location-title">Минск</h4><p>УЛИЦА КАЗИНЦА, 11А (БЦ, ГЕРМЕС)</p><p>УЛИЦА ДОЛГОБРОДСКАЯ, 43</p><p>УЛИЦА ГРУШЕВСКАЯ, 83</p></div></div>
-            <div class="footer-block footer-contacts"><div class="location-group"><h4 class="location-title">Могилев</h4><p>ПРОСПЕКТ ШМИДТА, 46</p></div><div class="location-group"><h4 class="location-title">Гродно</h4><p>ПРОСПЕКТ Я.КУПАЛЫ, 22</p></div></div>
-            <div class="footer-social"><a href="#" class="social-icon"><img src="assets/images/icons/facebook.png" alt="Facebook"></a><a href="#" class="social-icon"><img src="assets/images/icons/instagram.png" alt="Instagram"></a><a href="#" class="social-icon"><img src="assets/images/icons/vk.png" alt="VK"></a><a href="#" class="social-icon"><img src="assets/images/icons/youtube.png" alt="YouTube"></a></div>
+            <div class="footer-block footer-brand">
+                <a href="#" class="footer-logo">FOX CLUB</a>
+                <p class="footer-slogan">Станьте клиентом нашей сети.<br>Мы Fox Club!</p>
+                <a href="#" class="btn btn-primary footer-btn">Записаться на занятие</a>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Минск</h4>
+                    <p>УЛИЦА КАЗИНЦА, 11А (БЦ, ГЕРМЕС)</p>
+                    <p>УЛИЦА ДОЛГОБРОДСКАЯ, 43</p>
+                    <p>УЛИЦА ГРУШЕВСКАЯ, 83</p>
+                </div>
+            </div>
+            <div class="footer-block footer-contacts">
+                <div class="location-group">
+                    <h4 class="location-title">Могилев</h4>
+                    <p>ПРОСПЕКТ ШМИДТА, 46</p>
+                </div>
+                <div class="location-group">
+                    <h4 class="location-title">Гродно</h4>
+                    <p>ПРОСПЕКТ Я.КУПАЛЫ, 22</p>
+                </div>
+            </div>
+            <div class="footer-social">
+                <a href="#" class="social-icon"><img src="assets/images/icons/facebook.png" alt="Facebook"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/instagram.png" alt="Instagram"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/vk.png" alt="VK"></a>
+                <a href="#" class="social-icon"><img src="assets/images/icons/youtube.png" alt="YouTube"></a>
+            </div>
         </div>
-        <div class="footer-bottom"><div class="container"><p>Copyright © 2003-2025</p><p>Сеть тренажерных залов Fox Club</p></div></div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>Copyright © 2003-2025</p>
+                <p>Сеть тренажерных залов Fox Club</p>
+            </div>
+        </div>
     </footer>
 
     <script src="js/main.js"></script>

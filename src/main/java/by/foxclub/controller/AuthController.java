@@ -19,45 +19,45 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(userService.register(request));
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            UserDto userDto = userService.register(request);
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            UserDto userDto = userService.login(request);
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ =====
 
-    /**
-     * Эндпоинт для запроса кода сброса пароля.
-     * Принимает email, генерирует токен и возвращает сообщение.
-     */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email обязателен");
+            return ResponseEntity.badRequest().body(Map.of("error", "Email обязателен"));
         }
 
         try {
             String token = userService.generateResetToken(email);
-            // Токен выводится в консоль на бэкенде, но можно вернуть его в ответе для теста
-            // Для продакшена убрать token из ответа!
             return ResponseEntity.ok(Map.of(
                     "message", "Код отправлен на почту",
-                    "token", token // только для отладки, потом удалить
+                    "token", token
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /**
-     * Эндпоинт для сброса пароля.
-     * Принимает токен и новый пароль, меняет пароль, если токен валиден.
-     */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
         String token = payload.get("token");

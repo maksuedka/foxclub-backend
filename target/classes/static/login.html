@@ -432,6 +432,34 @@
             color: #e67e00;
             text-decoration: underline;
         }
+
+        /* ===== СТИЛИ ДЛЯ ВРЕМЕННЫХ СООБЩЕНИЙ ===== */
+        .temporary-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 350px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            z-index: 99999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        .temporary-message.success {
+            background: #4CAF50;
+        }
+        .temporary-message.error {
+            background: #f44336;
+        }
+        .temporary-message.warning {
+            background: #ff9800;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -540,6 +568,9 @@
             <div class="message" id="resetPasswordMessage"></div>
         </div>
     </div>
+
+    <!-- ===== БЛОК ДЛЯ ВРЕМЕННЫХ СООБЩЕНИЙ ===== -->
+    <div id="temporaryMessage" class="temporary-message" style="display:none;"></div>
 
     <script src="js/main.js"></script>
     <script>
