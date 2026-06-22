@@ -59,4 +59,11 @@ public class ImageKitService {
         }
         throw new RuntimeException("ImageKit upload error: " + response.getBody());
     }
+
+    // ===== НОВЫЙ МЕТОД ДЛЯ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ АКЦИЙ =====
+    public String uploadPromotionImage(MultipartFile file) throws IOException {
+        // Можно использовать тот же uploadAvatar, либо расширить логику
+        // Например, добавить префикс для файлов акций
+        return uploadAvatar(file);
+    }
 }

@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components/home-posts.css">
     <style>
-
-        /* Небольшие корректировки для шапки */
+        /* === Общие стили (шапка, модалки) — без изменений === */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -56,6 +55,295 @@
         .btn-user-qr:hover {
             background: #e67e00;
         }
+
+        /* Модалки — без изменений */
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+        }
+        .modal-content .close-button {
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            float: right;
+        }
+        .modal-content .close-button:hover {
+            color: #ff8c00;
+        }
+        .modal-content .form-group {
+            margin-bottom: 20px;
+        }
+        .modal-content .form-group label {
+            color: #ccc;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .modal-content .form-group input,
+        .modal-content .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .modal-content .form-group input:focus,
+        .modal-content .form-group textarea:focus {
+            outline: none;
+            border-color: #ff8c00;
+        }
+        .modal-content .btn-primary {
+            background: #ff8c00;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .modal-content .btn-primary:hover {
+            background: #e67e00;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px dashed #ff8c00;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-file-upload:hover {
+            background: #ff8c00;
+            color: #fff;
+            border-color: #ff8c00;
+        }
+        .custom-file-upload input[type="file"] {
+            display: none;
+        }
+        #promoImagePreview {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #promoImagePreview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        .delete-promotion-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,68,68,0.9);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .delete-promotion-btn:hover {
+            background: #ff0000;
+        }
+
+        #promotionDetailModal .modal-content {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #ff8c00;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            animation: fadeInUp 0.4s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #promotionDetailModal .promo-detail-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #promotionDetailModal .promo-detail-title {
+            color: #ff8c00;
+            font-size: 28px;
+            margin: 10px 0 15px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(255,140,0,0.2);
+        }
+        #promotionDetailModal .promo-detail-description {
+            color: #ddd;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+        #promotionDetailModal .promo-detail-link {
+            display: inline-block;
+            background: #ff8c00;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+        #promotionDetailModal .promo-detail-link:hover {
+            background: #e67e00;
+            transform: scale(1.05);
+        }
+        #promotionDetailModal .close-button {
+            color: #ccc;
+            font-size: 30px;
+            transition: color 0.3s;
+        }
+        #promotionDetailModal .close-button:hover {
+            color: #ff8c00;
+        }
+
+        #deleteConfirmationModal .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #ff4444;
+            max-width: 400px;
+            text-align: center;
+        }
+        #deleteConfirmationModal .modal-content h2 {
+            color: #ff4444;
+        }
+        #deleteConfirmationModal .modal-content .btn-primary {
+            transition: background 0.3s, transform 0.2s;
+        }
+        #deleteConfirmationModal .modal-content .btn-primary:hover {
+            transform: scale(1.05);
+        }
+        #deleteConfirmationModal .modal-content #confirmDeleteBtn:hover {
+            background: #cc0000;
+        }
+        #deleteConfirmationModal .modal-content .btn-secondary {
+            background: #666;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        #deleteConfirmationModal .modal-content .btn-secondary:hover {
+            background: #888;
+        }
+
+        /* === НОВЫЕ СТИЛИ ДЛЯ БЕСКОНЕЧНОЙ КАРУСЕЛИ === */
+        .promotions-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .promotions-heading .heading-text {
+            flex: 1;
+        }
+        .promotions-heading .btn-add-promo {
+            background: #ff8c00;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.3s;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+        .promotions-heading .btn-add-promo:hover {
+            background: #e67e00;
+        }
+
+        .promotions-carousel-wrapper {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            margin: 0 auto;
+        }
+        .promotions-carousel-track {
+            display: flex;
+            flex-wrap: nowrap;
+            will-change: transform;
+            transition: none;
+            gap: 20px;
+            padding: 10px 0;
+        }
+        .promotion-card {
+            flex: 0 0 300px;
+            min-height: 300px;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-sizing: border-box;
+        }
+        .promotion-card:hover {
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        /* Адаптивность — карточки не переносятся */
+        @media (max-width: 768px) {
+            .promotion-card {
+                flex: 0 0 280px;
+                min-height: 260px;
+            }
+        }
+        @media (max-width: 480px) {
+            .promotion-card {
+                flex: 0 0 260px;
+                min-height: 240px;
+                padding: 20px;
+            }
+            .promotion-card h3 {
+                font-size: 18px;
+            }
+            .promotion-card p {
+                font-size: 12px;
+            }
+        }
+
+        /* Остальные стили без изменений */
     </style>
 </head>
 <body>
@@ -80,7 +368,6 @@
                     </li>
                 </ul>
             </nav>
-            <!-- Контейнер для информации о пользователе (заполняется через main.js) -->
             <div class="profile-info"></div>
         </div>
     </header>
@@ -120,7 +407,6 @@
     </section>
 
     <section class="clubs-section" id="clubs-section">
-
         <div class="container clubs-container">
             <p class="section-subtitle">Наши фитнес-клубы</p>
             <h2 class="section-title">Выберите свой клуб</h2>
@@ -133,11 +419,11 @@
                         </div>
                     </div>
                 </a>
-                <!-- Здесь можно добавить другие клубы, если нужно -->
             </div>
         </div>
     </section>
 
+    <!-- ===== БЛОК АКЦИЙ С БЕСКОНЕЧНОЙ КАРУСЕЛЬЮ ===== -->
     <section class="promotions-section" id="promotions-section">
         <div class="promotions-ribbon top">
             <p class="ribbon-text">АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span> АКЦИИ!!! <span>АКЦИИ!!!</span></p>
@@ -149,32 +435,18 @@
         </div>
         <div class="container promotions-container">
             <div class="promotions-heading">
-                <p class="section-subtitle">Акции</p>
-                <h2 class="section-title">Специальные предложения <br> от FOX CLUB</h2>
+                <div class="heading-text">
+                    <p class="section-subtitle">Акции</p>
+                    <h2 class="section-title">Специальные предложения <br> от FOX CLUB</h2>
+                </div>
+                <button id="addPromotionBtn" class="btn-add-promo" style="display:none;">➕ Добавить акцию</button>
             </div>
-            <div class="promotions-carousel">
-                <div class="promotion-card promotion-card-1">
-                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
+
+            <!-- Обёртка для карусели (без точек) -->
+            <div class="promotions-carousel-wrapper" id="promotionsCarouselWrapper">
+                <div class="promotions-carousel-track" id="promotionsCarouselTrack">
+                    <!-- Карточки будут сгенерированы скриптом -->
                 </div>
-                <div class="promotion-card promotion-card-2">
-                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                </div>
-                <div class="promotion-card promotion-card-3">
-                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                </div>
-                <div class="promotion-card promotion-card-4">
-                    <h3 class="promotion-card-title">Приведи друга — получите скидку!</h3>
-                    <a href="#" class="btn btn-secondary">УЗНАТЬ БОЛЬШЕ</a>
-                </div>
-            </div>
-            <div class="carousel-indicators">
-                <span class="indicator-dot active"></span>
-                <span class="indicator-dot"></span>
-                <span class="indicator-dot"></span>
-                <span class="indicator-dot"></span>
             </div>
         </div>
         <div class="promotions-ribbon bottom">
@@ -183,8 +455,59 @@
         </div>
     </section>
 
-  
+    <!-- Модалки (без изменений) -->
+    <div id="addPromotionModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closePromotionModal">&times;</span>
+            <h2 style="color:#ff8c00; margin-top:0;">Добавить акцию</h2>
+            <form id="addPromotionForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Название *</label>
+                    <input type="text" id="promoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="promoDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Изображение</label>
+                    <label class="custom-file-upload">
+                        📷 Выбрать изображение
+                        <input type="file" id="promoImageFile" accept="image/jpeg,image/png,image/jpg,image/webp">
+                    </label>
+                    <div id="promoImagePreview" style="display:none;">
+                        <img id="promoImagePreviewImg" src="" alt="Предпросмотр">
+                    </div>
+                    <span style="color:#999; font-size:12px;">Максимум 5 МБ</span>
+                </div>
+                <button type="submit" class="btn-primary">Добавить акцию</button>
+            </form>
+        </div>
+    </div>
 
+    <div id="promotionDetailModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closePromotionDetailModal">&times;</span>
+            <img id="promoDetailImage" class="promo-detail-image" src="" alt="Изображение акции" style="display:none;">
+            <h2 id="promoDetailTitle" class="promo-detail-title"></h2>
+            <p id="promoDetailDescription" class="promo-detail-description"></p>
+            <a id="promoDetailLink" class="promo-detail-link" href="#" target="_blank">Подробнее</a>
+        </div>
+    </div>
+
+    <div id="deleteConfirmationModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeDeleteConfirmModal" style="color:#fff; font-size:28px; cursor:pointer; float:right;">&times;</span>
+            <h2 style="color:#ff6b6b; margin-top:0;">Удалить акцию?</h2>
+            <p style="color:#ccc; margin:20px 0;">Вы уверены, что хотите удалить эту акцию? Это действие нельзя отменить.</p>
+            <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                <button id="confirmDeleteBtn" class="btn-primary" style="background:#ff4444; border:none; padding:12px 30px; border-radius:30px; color:#fff; font-weight:600; cursor:pointer;">Удалить</button>
+                <button id="cancelDeleteBtn" class="btn-secondary" style="background:#666; border:none; padding:12px 30px; border-radius:30px; color:#fff; font-weight:600; cursor:pointer;">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Остальные секции без изменений -->
     <section class="trainers-section" id="trainers-section">
         <div class="container trainers-content">
             <h2 class="trainers-title">Тренера</h2>
@@ -192,20 +515,20 @@
         </div>
     </section>
 
-<section class="home-posts-section" id="home-posts-section">
-    <div class="container">
-        <div class="home-posts-top">
-            <div>
-                <p class="section-subtitle">Наши посты</p>
-                <h2 class="section-title">Следите за новостями</h2>
+    <section class="home-posts-section" id="home-posts-section">
+        <div class="container">
+            <div class="home-posts-top">
+                <div>
+                    <p class="section-subtitle">Наши посты</p>
+                    <h2 class="section-title">Следите за новостями</h2>
+                </div>
+                <a href="post-feed.html" class="home-posts-open-all">Смотреть ленту →</a>
             </div>
-            <a href="post-feed.html" class="home-posts-open-all">Смотреть ленту →</a>
+            <div id="homePostsLoader" class="home-posts-loader">Загрузка постов...</div>
+            <div id="homePostsGrid" class="home-posts-grid" style="display:none;"></div>
+            <div id="homePostsEmpty" class="home-posts-empty" style="display:none;">Постов пока нет</div>
         </div>
-        <div id="homePostsLoader" class="home-posts-loader">Загрузка постов...</div>
-        <div id="homePostsGrid" class="home-posts-grid" style="display:none;"></div>
-        <div id="homePostsEmpty" class="home-posts-empty" style="display:none;">Постов пока нет</div>
-    </div>
-</section>
+    </section>
 
     <section class="prices-section" id="prices-section">
         <div class="container prices-container">
@@ -216,17 +539,8 @@
                 <button class="tab-button" data-tab="by-class">АБОНЕМЕНТЫ ПО ЗАНЯТИЯМ</button>
                 <button class="tab-button" data-tab="unlimited">БЕЗЛИМИТНЫЕ АБОНЕМЕНТЫ</button>
                 <button class="tab-button" data-tab="fitness">ФИТНЕС</button>
-
-                <style>
-                    /* Абонементы из БД показываются/скрываются JS (контейнеры) */
-                    #abonements-grid-by-class,
-                    #abonements-grid-unlimited,
-                    #abonements-grid-fitness { width: 100%; }
-                </style>
-
             </div>
             <div class="price-cards-grid">
-                <!-- Разовые занятия -->
                 <div class="price-card" data-tab="single">
                     <div class="price-card-logo-bg"></div>
                     <h3 class="price-card-title">Разовое занятие</h3>
@@ -272,17 +586,12 @@
                         <p>Праздничные дни</p>
                     </div>
                 </div>
-                <!-- Абонементы по занятиям -->
-                <!-- Абонементы: заполняются через /api/abonements (JS) -->
                 <div id="abonements-grid-by-class" class="abonements-grid-container" data-tab="by-class" style="display:none;"></div>
                 <div id="abonements-grid-unlimited" class="abonements-grid-container" data-tab="unlimited" style="display:none;"></div>
                 <div id="abonements-grid-fitness" class="abonements-grid-container" data-tab="fitness" style="display:none;"></div>
-
             </div>
         </div>
     </section>
-
-
 
     <footer class="main-footer">
         <div class="container footer-content">
@@ -333,22 +642,15 @@
             const loader = document.getElementById('homePostsLoader');
             const emptyEl = document.getElementById('homePostsEmpty');
             if (!homeGrid || !window.loadRandomHomePosts) return;
-
             window.loadRandomHomePosts({
                 count: 3,
                 gridEl: homeGrid,
                 loaderEl: loader,
                 emptyEl: emptyEl
             });
-
-            // На всякий случай, если JS не прогрузился
             if (loader) loader.style.display = 'block';
         })();
-    </script>
-    <script>
 
-        // Дополнительно для страницы index: если пользователь залогинен, updateUserUI сам добавит блок
-        // Также добавим обработку плавной навигации (уже есть в main.js, но продублируем для надёжности)
         document.addEventListener('DOMContentLoaded', function() {
             // Табы для цен
             const tabs = document.querySelectorAll(".tab-button");
@@ -368,6 +670,103 @@
                         });
                     });
                 });
+            }
+
+            // ===== ЗАГРУЗКА АКЦИЙ =====
+            if (window.loadPromotions) {
+                window.loadPromotions();
+            }
+
+            // ===== МОДАЛКА ДОБАВЛЕНИЯ АКЦИИ =====
+            const addPromoBtn = document.getElementById('addPromotionBtn');
+            const promoModal = document.getElementById('addPromotionModal');
+            const closePromoModal = document.getElementById('closePromotionModal');
+            const promoForm = document.getElementById('addPromotionForm');
+
+            if (addPromoBtn && promoModal) {
+                addPromoBtn.addEventListener('click', () => {
+                    promoModal.style.display = 'flex';
+                });
+            }
+            if (closePromoModal && promoModal) {
+                closePromoModal.addEventListener('click', () => {
+                    promoModal.style.display = 'none';
+                });
+            }
+            if (promoModal) {
+                promoModal.addEventListener('click', (e) => {
+                    if (e.target === promoModal) promoModal.style.display = 'none';
+                });
+            }
+            if (promoForm) {
+                promoForm.addEventListener('submit', window.addPromotion || function(e) { e.preventDefault(); });
+            }
+
+            // ===== ПРЕДПРОСМОТР ИЗОБРАЖЕНИЯ =====
+            const promoImageInput = document.getElementById('promoImageFile');
+            const promoImagePreview = document.getElementById('promoImagePreview');
+            const promoImagePreviewImg = document.getElementById('promoImagePreviewImg');
+            if (promoImageInput) {
+                promoImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            promoImagePreviewImg.src = ev.target.result;
+                            promoImagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        promoImagePreview.style.display = 'none';
+                    }
+                });
+            }
+
+            // ===== МОДАЛКА ДЕТАЛЕЙ АКЦИИ =====
+            const detailModal = document.getElementById('promotionDetailModal');
+            const closeDetailModal = document.getElementById('closePromotionDetailModal');
+            if (closeDetailModal) {
+                closeDetailModal.addEventListener('click', () => {
+                    detailModal.style.display = 'none';
+                });
+            }
+            if (detailModal) {
+                detailModal.addEventListener('click', (e) => {
+                    if (e.target === detailModal) detailModal.style.display = 'none';
+                });
+            }
+
+            // ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ =====
+            const deleteModal = document.getElementById('deleteConfirmationModal');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const closeDeleteConfirm = document.getElementById('closeDeleteConfirmModal');
+
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    if (window.confirmDeletePromotion) window.confirmDeletePromotion();
+                });
+            }
+            if (cancelDeleteBtn) {
+                cancelDeleteBtn.addEventListener('click', function() {
+                    if (window.cancelDeletePromotion) window.cancelDeletePromotion();
+                });
+            }
+            if (closeDeleteConfirm) {
+                closeDeleteConfirm.addEventListener('click', function() {
+                    if (deleteModal) deleteModal.style.display = 'none';
+                });
+            }
+            if (deleteModal) {
+                deleteModal.addEventListener('click', function(e) {
+                    if (e.target === deleteModal) deleteModal.style.display = 'none';
+                });
+            }
+
+            // Показываем кнопку добавления только админу
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (addPromoBtn) {
+                addPromoBtn.style.display = (user && user.isAdmin) ? 'inline-block' : 'none';
             }
         });
     </script>

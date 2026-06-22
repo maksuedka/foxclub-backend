@@ -4,6 +4,9 @@
  * Исправлена функция "Скорректировать" для всех типов целей
  * Исправлен поиск полей для корректировки (учитывает initialWeight/targetWeight)
  * Добавлена очистка description от JSON-мусора, fallback на тип цели
+ * Добавлена отмена корректировки и логика сохранения без повторной валидации
+ * Добавлено управление акциями (бесконечная карусель с управлением тачпадом)
+ * Добавлен статус "Ожидает активации" для абонементов без startDate
  */
 
 // ======================= ДИНАМИЧЕСКОЕ ОПРЕДЕЛЕНИЕ БАЗОВОГО URL =======================
@@ -137,7 +140,6 @@ let currentGoalType = 'weight-loss';
 // ===== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ОЧИСТКИ DESCRIPTION ОТ JSON =====
 function isJsonDescription(desc) {
     if (!desc) return false;
-    // Проверяем, похоже ли на JSON (содержит фигурные скобки и ключи)
     return desc.includes('{') && desc.includes('}') && (desc.includes('"initialValue"') || desc.includes('"history"'));
 }
 
@@ -271,6 +273,7 @@ function filterAndDisplayAbonements() {
     if (hideExpiredAbonements) {
         const now = new Date();
         filteredAbonements = allPurchasedAbonements.filter(item => {
+            if (!item.startDate) return false; // без даты начала считаем неактивным
             const endDate = item.endDate ? new Date(item.endDate) : null;
             return endDate && endDate > now;
         });
@@ -324,22 +327,41 @@ function addExpiredFilterButton() {
     section.prepend(headerContainer);
 }
 
+// ===== ОСНОВНОЕ ИЗМЕНЕНИЕ: статус "Ожидает активации" =====
 function createPurchasedAbonementCard(purchased) {
     const card = document.createElement('div');
     card.className = 'price-card purchased-abonement-card';
     card.dataset.id = purchased.id;
     const purchaseDate = purchased.purchaseDate ? new Date(purchased.purchaseDate) : new Date();
-    const endDate = purchased.endDate ? new Date(purchased.endDate) : new Date();
-    const now = new Date();
-    const isActive = endDate > now;
+
+    let statusText = '';
+    let statusClass = '';
+
+    if (!purchased.startDate) {
+        statusText = 'Ожидает активации';
+        statusClass = 'status-pending';
+    } else {
+        const endDate = purchased.endDate ? new Date(purchased.endDate) : new Date();
+        const now = new Date();
+        if (endDate > now) {
+            statusText = 'Активен';
+            statusClass = 'status-active';
+        } else {
+            statusText = 'Истек';
+            statusClass = 'status-expired';
+        }
+    }
+
+    const displayEndDate = purchased.endDate ? formatDisplayDate(new Date(purchased.endDate)) : '—';
+
     card.innerHTML = `
         <div class="price-card-logo-bg"></div>
         <h3 class="price-card-title">${purchased.abonementName || 'Абонемент'}</h3>
         <p class="price-card-price">${purchased.priceAtPurchase || 0} р.</p>
         <div class="price-card-details">
             <p>Куплен: ${formatDisplayDate(purchaseDate)}</p>
-            <p>Действует до: ${formatDisplayDate(endDate)}</p>
-            <p class="abonement-status ${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Активен' : 'Истек'}</p>
+            <p>Действует до: ${displayEndDate}</p>
+            <p class="abonement-status ${statusClass}">${statusText}</p>
         </div>
         <button class="btn-show-qr" data-id="${purchased.id}">ПОКАЗАТЬ QR-КОД</button>
     `;
@@ -359,7 +381,7 @@ function showQrCode(purchased) {
     const expiryDateSpan = document.getElementById('qrExpiryDate');
     if (title) title.textContent = purchased.abonementName || 'Абонемент';
     if (purchaseDateSpan) purchaseDateSpan.textContent = formatDisplayDate(new Date(purchased.purchaseDate));
-    if (expiryDateSpan) expiryDateSpan.textContent = formatDisplayDate(new Date(purchased.endDate));
+    if (expiryDateSpan) expiryDateSpan.textContent = purchased.endDate ? formatDisplayDate(new Date(purchased.endDate)) : '—';
     const qrData = `FC-${purchased.id}-${purchased.userId}`;
     const qrContainer = document.getElementById('qrCodeContainer');
     qrContainer.innerHTML = '';
@@ -491,7 +513,6 @@ function renderGoalCard(goal) {
     const goalsCarousel = document.getElementById('goalsCardsCarousel');
     if (!goalsCarousel) return;
     const config = GOAL_TYPE_CONFIG[goal.type] || GOAL_TYPE_CONFIG['weight-loss'];
-    // Если описание — JSON, используем заголовок типа цели, иначе — само описание
     let displayTitle;
     if (goal.description && !isJsonDescription(goal.description)) {
         displayTitle = goal.description;
@@ -669,6 +690,12 @@ function clearGoalForm() {
         addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
         addBtn.style.background = '';
     }
+    // Скрыть кнопку отмены
+    const cancelBtn = document.getElementById('cancelAdjustmentBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    // Показать кнопку "Скорректировать" (если была скрыта)
+    const adjustBtn = document.getElementById('adjustGoalBtn');
+    if (adjustBtn) adjustBtn.style.display = 'none';
 }
 
 // ===== ВАЛИДАЦИЯ ЧЕРЕЗ ИИ =====
@@ -706,6 +733,7 @@ function showRecommendations(result) {
     const warning = document.getElementById('aiRecommendationWarning');
     const safeChange = document.getElementById('aiRecommendationSafeChange');
     const adjustBtn = document.getElementById('adjustGoalBtn');
+    const cancelBtn = document.getElementById('cancelAdjustmentBtn');
 
     block.style.display = 'block';
     icon.textContent = result.realistic ? '✅' : '⚠️';
@@ -726,31 +754,9 @@ function showRecommendations(result) {
             adjustBtn.style.display = 'none';
         }
     }
-}
-
-// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ТЕКУЩЕГО ЗНАЧЕНИЯ =====
-function getCurrentGoalValue() {
-    const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
-    const goalType = activeTab ? activeTab.dataset.goalType : 'strength';
-    
-    let fieldId = 'initialValue';
-    if (goalType === 'weight-loss' || goalType === 'mass-gain') {
-        fieldId = 'initialWeight';
+    if (cancelBtn) {
+        cancelBtn.style.display = 'none';
     }
-    const field = document.getElementById(fieldId);
-    if (field) {
-        const val = parseFloat(field.value);
-        if (!isNaN(val) && val > 0) return val;
-    }
-    const altField = document.getElementById('currentValue') || document.getElementById('initialValue');
-    if (altField) {
-        const val = parseFloat(altField.value);
-        if (!isNaN(val) && val > 0) return val;
-    }
-    if (goalValidationData && goalValidationData.currentValue) {
-        return parseFloat(goalValidationData.currentValue);
-    }
-    return null;
 }
 
 // ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ "СКОРРЕКТИРОВАТЬ" =====
@@ -780,6 +786,8 @@ function applyAdjustment(validationResult) {
         showTemporaryMessage('Не удалось определить текущее значение', 'error');
         return;
     }
+    
+    const originalTarget = targetInput.value;
     
     let safeChange = 0.5;
     if (validationResult.safeWeeklyChange) {
@@ -865,7 +873,71 @@ function applyAdjustment(validationResult) {
     
     targetInput.value = newTarget;
     
-    document.getElementById('aiRecommendationBlock').style.display = 'none';
+    if (goalValidationData) {
+        goalValidationData.realistic = true;
+        goalValidationData.reason = 'Цель скорректирована до безопасного значения.';
+        goalValidationData.recommendation = 'Вы можете изменить значения вручную, если нужно.';
+        goalValidationData.warning = '';
+        goalValidationData.safeWeeklyChange = validationResult.safeWeeklyChange || '';
+    } else {
+        goalValidationData = {
+            realistic: true,
+            reason: 'Цель скорректирована до безопасного значения.',
+            recommendation: 'Вы можете изменить значения вручную, если нужно.',
+            warning: '',
+            safeWeeklyChange: validationResult.safeWeeklyChange || ''
+        };
+    }
+    goalValidationDone = true;
+    
+    goalValidationData._originalTarget = originalTarget;
+    
+    const addBtn = document.getElementById('addGoalBtn');
+    if (addBtn) {
+        addBtn.textContent = 'СОХРАНИТЬ ЦЕЛЬ';
+        addBtn.style.background = '#4CAF50';
+    }
+    
+    const cancelBtn = document.getElementById('cancelAdjustmentBtn');
+    if (cancelBtn) {
+        cancelBtn.style.display = 'inline-block';
+    }
+    
+    const adjustBtn = document.getElementById('adjustGoalBtn');
+    if (adjustBtn) {
+        adjustBtn.style.display = 'none';
+    }
+    
+    const statusEl = document.getElementById('aiRecommendationStatus');
+    if (statusEl) {
+        statusEl.textContent = '✅ Цель скорректирована!';
+        statusEl.style.color = '#4CAF50';
+    }
+    const reasonEl = document.getElementById('aiRecommendationReason');
+    if (reasonEl) {
+        reasonEl.textContent = 'Целевое значение установлено на ' + newTarget + '. Сохраните цель или отмените корректировку.';
+    }
+    const adviceEl = document.getElementById('aiRecommendationAdvice');
+    if (adviceEl) {
+        adviceEl.textContent = 'Вы можете изменить значения вручную перед сохранением.';
+    }
+    
+    showTemporaryMessage('Целевое значение скорректировано до ' + newTarget + '. Нажмите "СОХРАНИТЬ ЦЕЛЬ" для создания.', 'success');
+}
+
+// ===== ОТМЕНА КОРРЕКТИРОВКИ =====
+function cancelAdjustment() {
+    const activeTab = document.querySelector("#modalGoalTabs .modal-tab.active");
+    const goalType = activeTab ? activeTab.dataset.goalType : 'strength';
+    let targetFieldId = 'targetValue';
+    if (goalType === 'weight-loss' || goalType === 'mass-gain') {
+        targetFieldId = 'targetWeight';
+    }
+    const targetInput = document.getElementById(targetFieldId);
+    if (targetInput && goalValidationData && goalValidationData._originalTarget !== undefined) {
+        targetInput.value = goalValidationData._originalTarget;
+    }
+    
     goalValidationDone = false;
     goalValidationData = null;
     
@@ -874,8 +946,18 @@ function applyAdjustment(validationResult) {
         addBtn.textContent = 'ДОБАВИТЬ ЦЕЛЬ';
         addBtn.style.background = '';
     }
+    const adjustBtn = document.getElementById('adjustGoalBtn');
+    if (adjustBtn) {
+        adjustBtn.style.display = 'inline-block';
+    }
+    const cancelBtn = document.getElementById('cancelAdjustmentBtn');
+    if (cancelBtn) {
+        cancelBtn.style.display = 'none';
+    }
     
-    showTemporaryMessage('Целевое значение скорректировано до ' + newTarget, 'success');
+    document.getElementById('aiRecommendationBlock').style.display = 'none';
+    
+    showTemporaryMessage('Корректировка отменена', 'info');
 }
 
 // ===== СОЗДАНИЕ ЦЕЛИ (С ВАЛИДАЦИЕЙ) =====
@@ -884,6 +966,11 @@ async function addNewGoal() {
     if (!user) {
         showTemporaryMessage('Необходимо авторизоваться', 'error');
         window.location.href = 'login.html';
+        return;
+    }
+
+    if (goalValidationDone && goalValidationData && goalValidationData.realistic) {
+        await saveGoalDirectly();
         return;
     }
 
@@ -1107,7 +1194,6 @@ function fillGoalDetailModal(goal) {
     }
     const descEl = document.getElementById('goalDetailDescription');
     if (descEl) {
-        // Если описание — JSON, показываем тип цели, иначе — само описание
         let displayDesc;
         if (goal.description && !isJsonDescription(goal.description)) {
             displayDesc = goal.description;
@@ -1124,7 +1210,6 @@ function fillGoalDetailModal(goal) {
     const unit = goal.unit || GOAL_TYPE_CONFIG[goal.type]?.unit || '';
     renderGoalHistoryChart(history, unit);
 
-    // ===== МОТИВАЦИОННОЕ СООБЩЕНИЕ =====
     const motivationMsg = document.getElementById('goalMotivationMessage');
     if (motivationMsg) {
         if (history.length >= 2) {
@@ -1154,7 +1239,6 @@ function fillGoalDetailModal(goal) {
         }
     }
 
-    // ===== ПОДСКАЗКИ =====
     const tipsContent = document.getElementById('goalTipsContent');
     if (tipsContent) {
         let tipsText = '';
@@ -1692,6 +1776,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 addBtn.style.background = '';
             }
             document.getElementById('aiRecommendationBlock').style.display = 'none';
+            const cancelBtn = document.getElementById('cancelAdjustmentBtn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
         });
         closeGoalModalButtons.forEach(button => {
             button.addEventListener("click", () => {
@@ -1715,6 +1801,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 clearGoalForm();
             }
         });
+    }
+
+    // Привязываем кнопку отмены корректировки
+    const cancelAdjustmentBtn = document.getElementById('cancelAdjustmentBtn');
+    if (cancelAdjustmentBtn) {
+        cancelAdjustmentBtn.addEventListener('click', cancelAdjustment);
     }
 
     const dropdownToggle = document.querySelector('.dropdown-toggle');
@@ -1955,9 +2047,321 @@ function initMobileMenu() {
     });
 }
 
-function applyAllStyles() {}
+// ======================= УПРАВЛЕНИЕ АКЦИЯМИ (БЕСКОНЕЧНАЯ КАРУСЕЛЬ) =======================
 
-// Экспорт в глобальную область
+let currentPromotions = [];
+let animationId = null;
+let speed = 1; // базовая скорость (пикселей за кадр)
+let direction = 1; // 1 = влево, -1 = вправо
+let isPaused = false;
+
+async function loadPromotions() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/promotions`);
+        if (response.ok) {
+            currentPromotions = await response.json();
+            renderPromotions();
+            return currentPromotions;
+        } else {
+            console.error('Ошибка загрузки акций');
+            return [];
+        }
+    } catch (error) {
+        console.error('Ошибка сети при загрузке акций:', error);
+        return [];
+    }
+}
+
+function renderPromotions() {
+    const track = document.getElementById('promotionsCarouselTrack');
+    const addBtn = document.getElementById('addPromotionBtn');
+    
+    if (!track) return;
+    
+    const user = getCurrentUser();
+    const isAdmin = user && user.isAdmin;
+    
+    if (addBtn) {
+        addBtn.style.display = isAdmin ? 'inline-block' : 'none';
+    }
+    
+    track.innerHTML = '';
+    
+    if (!currentPromotions || currentPromotions.length === 0) {
+        let emptyMessage = 'Акций пока нет.';
+        if (isAdmin) {
+            emptyMessage = 'Акций пока нет. Добавьте первую акцию!';
+        }
+        track.innerHTML = `
+            <div class="promotion-card" style="flex:1; text-align:center; padding:40px; background:#2a2a2a; border-radius:20px;">
+                <p style="color:#999; font-size:18px;">${emptyMessage}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Создаём карточки и дублируем их для бесконечного эффекта (3 копии)
+    const cardCount = currentPromotions.length;
+    const cloneCount = 3; // сколько раз клонировать набор
+    const totalCards = cardCount * cloneCount;
+    
+    for (let i = 0; i < totalCards; i++) {
+        const promo = currentPromotions[i % cardCount];
+        const card = createPromotionCard(promo, isAdmin);
+        track.appendChild(card);
+    }
+    
+    // Запускаем анимацию
+    startInfiniteScroll();
+}
+
+function createPromotionCard(promo, isAdmin) {
+    const card = document.createElement('div');
+    card.className = 'promotion-card';
+    card.dataset.id = promo.id;
+    card.style.background = promo.imageUrl ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${promo.imageUrl}) center/cover` : 'linear-gradient(45deg, #ff8c00, #cc7a00)';
+    card.style.backgroundSize = 'cover';
+    card.style.backgroundPosition = 'center';
+    
+    let deleteBtnHtml = '';
+    if (isAdmin) {
+        deleteBtnHtml = `<button class="delete-promotion-btn" data-id="${promo.id}" style="position:absolute; top:15px; right:15px; background:rgba(255,68,68,0.9); color:#fff; border:none; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; z-index:10;">✖</button>`;
+    }
+    
+    card.innerHTML = `
+        ${deleteBtnHtml}
+        <h3 style="font-size:22px; margin:0 0 8px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">${escapeHtml(promo.title)}</h3>
+        <p style="font-size:14px; opacity:0.9; margin:0 0 15px 0; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">${escapeHtml(promo.description)}</p>
+        ${promo.link && promo.link !== '#' ? `<a href="${promo.link}" class="btn btn-secondary" style="display:inline-block; background:rgba(255,255,255,0.2); color:#fff; padding:10px 25px; border-radius:30px; text-decoration:none; font-weight:600; backdrop-filter:blur(4px);">УЗНАТЬ БОЛЬШЕ</a>` : ''}
+    `;
+    
+    card.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-promotion-btn')) return;
+        openPromotionDetails(promo.id);
+    });
+    
+    const deleteBtn = card.querySelector('.delete-promotion-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDeleteConfirmation(promo.id);
+        });
+    }
+    
+    return card;
+}
+
+function startInfiniteScroll() {
+    const track = document.getElementById('promotionsCarouselTrack');
+    if (!track) return;
+    
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    
+    let position = 0;
+    const cardWidth = track.querySelector('.promotion-card')?.offsetWidth || 300;
+    const gap = 20;
+    const step = cardWidth + gap;
+    const totalWidth = track.scrollWidth;
+    
+    function animate() {
+        if (!isPaused) {
+            position -= speed * direction;
+            // Циклический сброс
+            if (position <= -totalWidth / 3) {
+                position += totalWidth / 3;
+            } else if (position > 0) {
+                position -= totalWidth / 3;
+            }
+            track.style.transform = `translateX(${position}px)`;
+        }
+        animationId = requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    const wrapper = document.getElementById('promotionsCarouselWrapper');
+    if (wrapper) {
+        wrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY !== 0) {
+                const delta = e.deltaY > 0 ? 1 : -1;
+                speed = Math.max(0.1, speed + delta * 0.3);
+                if (speed < 0.1) speed = 0.1;
+            }
+            if (e.deltaX !== 0) {
+                direction = e.deltaX > 0 ? -1 : 1;
+            }
+        }, { passive: false });
+    }
+    
+    if (wrapper) {
+        wrapper.addEventListener('mouseenter', () => {
+            isPaused = true;
+        });
+        wrapper.addEventListener('mouseleave', () => {
+            isPaused = false;
+        });
+    }
+}
+
+// ===== ОТКРЫТИЕ ДЕТАЛЕЙ АКЦИИ =====
+function openPromotionDetails(id) {
+    const promo = currentPromotions.find(p => p.id === id);
+    if (!promo) {
+        showTemporaryMessage('Акция не найдена', 'error');
+        return;
+    }
+
+    const modal = document.getElementById('promotionDetailModal');
+    const titleEl = document.getElementById('promoDetailTitle');
+    const descEl = document.getElementById('promoDetailDescription');
+    const imageEl = document.getElementById('promoDetailImage');
+    const linkEl = document.getElementById('promoDetailLink');
+
+    if (titleEl) titleEl.textContent = promo.title;
+    if (descEl) descEl.textContent = promo.description || 'Подробности отсутствуют';
+    if (imageEl) {
+        if (promo.imageUrl) {
+            imageEl.src = promo.imageUrl;
+            imageEl.style.display = 'block';
+        } else {
+            imageEl.style.display = 'none';
+        }
+    }
+    if (linkEl) {
+        if (promo.link && promo.link !== '#') {
+            linkEl.href = promo.link;
+            linkEl.style.display = 'inline-block';
+        } else {
+            linkEl.style.display = 'none';
+        }
+    }
+
+    modal.style.display = 'flex';
+}
+
+// ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ =====
+let pendingDeleteId = null;
+
+function showDeleteConfirmation(id) {
+    pendingDeleteId = id;
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function confirmDeletePromotion() {
+    if (pendingDeleteId === null) return;
+    const id = pendingDeleteId;
+    pendingDeleteId = null;
+    deletePromotion(id);
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function cancelDeletePromotion() {
+    pendingDeleteId = null;
+    const modal = document.getElementById('deleteConfirmationModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// ===== ДОБАВЛЕНИЕ АКЦИИ =====
+async function addPromotion(event) {
+    event.preventDefault();
+    
+    const user = getCurrentUser();
+    if (!user) {
+        showTemporaryMessage('Необходимо авторизоваться как администратор', 'error');
+        return;
+    }
+    
+    const title = document.getElementById('promoTitle')?.value.trim();
+    const description = document.getElementById('promoDescription')?.value.trim();
+    const link = document.getElementById('promoLink')?.value.trim() || '#';
+    const imageFile = document.getElementById('promoImageFile')?.files[0];
+    
+    if (!title) {
+        showTemporaryMessage('Введите название акции', 'error');
+        return;
+    }
+    
+    let imageUrl = '';
+    if (imageFile) {
+        try {
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            const uploadResponse = await fetch(`${API_BASE_URL}/api/promotions/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!uploadResponse.ok) {
+                const error = await uploadResponse.text();
+                showTemporaryMessage('Ошибка загрузки изображения: ' + error, 'error');
+                return;
+            }
+            const uploadResult = await uploadResponse.json();
+            imageUrl = uploadResult.imageUrl;
+        } catch (error) {
+            showTemporaryMessage('Ошибка загрузки изображения: ' + error.message, 'error');
+            return;
+        }
+    }
+    
+    const newPromotion = {
+        title: title,
+        description: description || title,
+        link: link,
+        imageUrl: imageUrl,
+        active: true
+    };
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/promotions?userId=${user.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newPromotion)
+        });
+        if (response.ok) {
+            showTemporaryMessage('Акция добавлена!', 'success');
+            document.getElementById('addPromotionModal').style.display = 'none';
+            document.getElementById('addPromotionForm').reset();
+            document.getElementById('promoImagePreview').style.display = 'none';
+            await loadPromotions();
+        } else {
+            const error = await response.text();
+            showTemporaryMessage('Ошибка добавления: ' + error, 'error');
+        }
+    } catch (error) {
+        showTemporaryMessage('Ошибка сети: ' + error.message, 'error');
+    }
+}
+
+async function deletePromotion(id) {
+    const user = getCurrentUser();
+    if (!user) {
+        showTemporaryMessage('Необходимо авторизоваться', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/promotions/${id}?userId=${user.id}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            showTemporaryMessage('Акция удалена', 'success');
+            await loadPromotions();
+        } else {
+            const error = await response.text();
+            showTemporaryMessage('Ошибка удаления: ' + error, 'error');
+        }
+    } catch (error) {
+        showTemporaryMessage('Ошибка сети: ' + error.message, 'error');
+    }
+}
+
+// ===== ЭКСПОРТ В ГЛОБАЛЬНУЮ ОБЛАСТЬ =====
 window.getCurrentUser = getCurrentUser;
 window.requireAuth = requireAuth;
 window.updateUserUI = updateUserUI;
@@ -1976,5 +2380,19 @@ window.validateGoal = validateGoal;
 window.showRecommendations = showRecommendations;
 window.saveGoalDirectly = saveGoalDirectly;
 window.applyAdjustment = applyAdjustment;
+window.cancelAdjustment = cancelAdjustment;
 window.updateUnitForExercise = updateUnitForExercise;
 window.getCurrentGoalValue = getCurrentGoalValue;
+
+// Дополнительные экспорты для акций
+window.loadPromotions = loadPromotions;
+window.renderPromotions = renderPromotions;
+window.openPromotionDetails = openPromotionDetails;
+window.addPromotion = addPromotion;
+window.deletePromotion = deletePromotion;
+window.showDeleteConfirmation = showDeleteConfirmation;
+window.confirmDeletePromotion = confirmDeletePromotion;
+window.cancelDeletePromotion = cancelDeletePromotion;
+window.startInfiniteScroll = startInfiniteScroll;
+
+function applyAllStyles() {}

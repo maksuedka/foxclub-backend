@@ -12,7 +12,9 @@ public interface PurchasedAbonementMapper {
     @Mappings({
             @Mapping(target = "userId", source = "user.id"),
             @Mapping(target = "abonementId", source = "abonement.id"),
-            @Mapping(target = "abonementName", source = "abonement.name")
+            @Mapping(target = "abonementName", source = "abonement.name"),
+            @Mapping(target = "startDate", source = "startDate"),   // явное указание
+            @Mapping(target = "endDate", source = "endDate")        // явное указание
     })
     PurchasedAbonementDto toDto(PurchasedAbonement entity);
 

@@ -50,4 +50,10 @@ public class PurchasedAbonementController {
         purchasedAbonementService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    // ===== НОВЫЙ ЭНДПОЙНТ ДЛЯ АКТИВАЦИИ =====
+    @PutMapping("/{id}/activate")
+    public ResponseEntity<PurchasedAbonementDto> activate(@PathVariable Integer id) {
+        return ResponseEntity.ok(purchasedAbonementService.activate(id));
+    }
 }

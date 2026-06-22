@@ -1,4 +1,5 @@
 /* admin-panel.js – универсальная работа и локально, и на Railway */
+/* Исправлено имя поля для абонемента с abonementId → abonement */
 
 // ======================= ПРОВЕРКА ПРАВ АДМИНИСТРАТОРА =======================
 (function checkAdminAccess() {
@@ -344,7 +345,7 @@ async function selectTable(key, label, element) {
     }
 }
 
-// ======================= ОТРИСОВКА ТАБЛИЦЫ (ИСПРАВЛЕНА) =======================
+// ======================= ОТРИСОВКА ТАБЛИЦЫ =======================
 function renderTable(data) {
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
@@ -370,7 +371,7 @@ function renderTable(data) {
         tableHeaders.forEach(h => {
             let value = row[h.key] !== undefined && row[h.key] !== null ? row[h.key] : '';
 
-            // === АВАТАР КАК КАРТИНКА (ключ может быть avatar_url или avatarUrl) ===
+            // === АВАТАР КАК КАРТИНКА ===
             if (currentTable === 'users' && (h.key === 'avatar_url' || h.key === 'avatarUrl') && value) {
                 rowHtml += `<td>
                     <img src="${value}" class="post-thumb" style="width:40px; height:40px; object-fit:cover; border-radius:50%; cursor:pointer;" onclick="window.open('${value}', '_blank')">
@@ -461,11 +462,19 @@ function openEditModal(id) {
     modal.show();
 }
 
+// ======================= ГЕНЕРАЦИЯ ФОРМЫ (С АВТОМАТИЗАЦИЕЙ ДЛЯ PURCHASED-ABONEMENTS) =======================
 function generateForm(data) {
     if (currentTable === 'posts_moderation') return;
     const container = document.getElementById('formFields');
     container.innerHTML = '';
 
+    // Для purchased-abonements используем специальную логику
+    if (currentTable === 'purchased-abonements') {
+        generatePurchasedAbonementForm(data, container);
+        return;
+    }
+
+    // Стандартная форма для остальных таблиц
     tableHeaders.forEach(h => {
         if (h.key === 'id') {
             if (data.id) container.innerHTML += `<input type="hidden" name="id" value="${data.id}">`;
@@ -609,6 +618,179 @@ function generateForm(data) {
     });
 }
 
+// ===== СПЕЦИАЛЬНАЯ ФОРМА ДЛЯ PURCHASED-ABONEMENTS =====
+function generatePurchasedAbonementForm(data, container) {
+    // Поля, которые мы будем показывать
+    const fields = [
+        { key: 'user', title: 'Пользователь', type: 'select' },
+        { key: 'abonement', title: 'Абонемент', type: 'select' },  // <-- ИСПРАВЛЕНО: было 'abonementId'
+        { key: 'startDate', title: 'Дата начала', type: 'date' },
+        { key: 'endDate', title: 'Дата окончания', type: 'date' },
+        { key: 'priceAtPurchase', title: 'Цена покупки', type: 'number' }
+    ];
+
+    // Скрытое поле для ID
+    if (data.id) {
+        container.innerHTML += `<input type="hidden" name="id" value="${data.id}">`;
+    }
+
+    // Поле для покупки (скрытое, всегда сегодня)
+    const purchaseDate = new Date().toISOString().split('T')[0];
+    container.innerHTML += `<input type="hidden" name="purchaseDate" value="${purchaseDate}">`;
+
+    fields.forEach(f => {
+        const col = document.createElement('div');
+        col.className = 'col-md-6';
+
+        const div = document.createElement('div');
+        div.className = 'mb-3';
+        div.innerHTML = `<label class="form-label fw-bold" style="color:var(--primary-color);">${f.title}</label>`;
+
+        if (f.key === 'user') {
+            const select = document.createElement('select');
+            select.className = 'form-select';
+            select.name = 'user';
+            select.id = 'purchasedUser';
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = '-- Выберите пользователя --';
+            select.appendChild(empty);
+            usersList.forEach(user => {
+                const opt = document.createElement('option');
+                opt.value = user.id;
+                opt.textContent = `${user.firstName || ''} ${user.lastName || ''} (${user.email || '?'})`.trim();
+                if (data.user == user.id) opt.selected = true;
+                select.appendChild(opt);
+            });
+            div.appendChild(select);
+            // Добавим поле для поиска (фильтрация)
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'form-control mt-2';
+            searchInput.placeholder = 'Поиск пользователя...';
+            searchInput.style.background = '#2a2a2a';
+            searchInput.style.border = '1px solid #444';
+            searchInput.style.color = '#fff';
+            searchInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                const options = select.querySelectorAll('option');
+                options.forEach(opt => {
+                    const text = opt.textContent.toLowerCase();
+                    opt.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+            div.appendChild(searchInput);
+        } else if (f.key === 'abonement') {
+            const select = document.createElement('select');
+            select.className = 'form-select';
+            select.name = 'abonement';  // <-- ИСПРАВЛЕНО: было 'abonementId'
+            select.id = 'purchasedAbonement';
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = '-- Выберите абонемент --';
+            select.appendChild(empty);
+            abonementsList.forEach(ab => {
+                const opt = document.createElement('option');
+                opt.value = ab.id;
+                opt.textContent = `${ab.name || '?'} (${ab.price || '?'} руб.)`;
+                if (data.abonement == ab.id || data.abonementId == ab.id) opt.selected = true;
+                select.appendChild(opt);
+            });
+            div.appendChild(select);
+            // Поиск по абонементам
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'form-control mt-2';
+            searchInput.placeholder = 'Поиск абонемента...';
+            searchInput.style.background = '#2a2a2a';
+            searchInput.style.border = '1px solid #444';
+            searchInput.style.color = '#fff';
+            searchInput.addEventListener('input', function() {
+                const term = this.value.toLowerCase().trim();
+                const options = select.querySelectorAll('option');
+                options.forEach(opt => {
+                    const text = opt.textContent.toLowerCase();
+                    opt.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+            div.appendChild(searchInput);
+
+            // Автоматическое заполнение цены при выборе абонемента
+            select.addEventListener('change', function() {
+                const abonementId = parseInt(this.value);
+                const abonement = abonementsList.find(a => a.id === abonementId);
+                const priceField = document.getElementById('purchasedPrice');
+                if (abonement && priceField) {
+                    priceField.value = abonement.price || 0;
+                }
+                // Если есть startDate, пересчитать endDate
+                const startDateInput = document.getElementById('purchasedStartDate');
+                if (startDateInput && startDateInput.value && abonement) {
+                    const start = new Date(startDateInput.value);
+                    const end = new Date(start);
+                    end.setDate(end.getDate() + (abonement.duration || 30));
+                    const endDateInput = document.getElementById('purchasedEndDate');
+                    if (endDateInput) {
+                        endDateInput.value = end.toISOString().split('T')[0];
+                    }
+                }
+            });
+        } else if (f.key === 'startDate') {
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.className = 'form-control';
+            input.name = 'startDate';
+            input.id = 'purchasedStartDate';
+            if (data.startDate) {
+                const d = new Date(data.startDate);
+                input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }
+            input.addEventListener('change', function() {
+                const abonementSelect = document.getElementById('purchasedAbonement');
+                const abonementId = parseInt(abonementSelect.value);
+                const abonement = abonementsList.find(a => a.id === abonementId);
+                if (this.value && abonement) {
+                    const start = new Date(this.value);
+                    const end = new Date(start);
+                    end.setDate(end.getDate() + (abonement.duration || 30));
+                    const endDateInput = document.getElementById('purchasedEndDate');
+                    if (endDateInput) {
+                        endDateInput.value = end.toISOString().split('T')[0];
+                    }
+                } else if (!this.value) {
+                    const endDateInput = document.getElementById('purchasedEndDate');
+                    if (endDateInput) endDateInput.value = '';
+                }
+            });
+            div.appendChild(input);
+        } else if (f.key === 'endDate') {
+            const input = document.createElement('input');
+            input.type = 'date';
+            input.className = 'form-control';
+            input.name = 'endDate';
+            input.id = 'purchasedEndDate';
+            if (data.endDate) {
+                const d = new Date(data.endDate);
+                input.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }
+            div.appendChild(input);
+        } else if (f.key === 'priceAtPurchase') {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.step = '0.01';
+            input.className = 'form-control';
+            input.name = 'priceAtPurchase';
+            input.id = 'purchasedPrice';
+            input.value = data.priceAtPurchase !== undefined ? data.priceAtPurchase : '';
+            div.appendChild(input);
+        }
+
+        col.appendChild(div);
+        container.appendChild(col);
+    });
+}
+
+// ======================= СОХРАНЕНИЕ ДАННЫХ =======================
 async function saveData() {
     if (currentTable === 'posts_moderation') return;
     const form = document.getElementById('dataForm');
@@ -618,7 +800,7 @@ async function saveData() {
     for (let [key, value] of formData.entries()) {
         if (key === 'id' && !value) continue;
 
-        if (key === 'club' || key === 'user' || key === 'duration' || key === 'age' || key === 'abonementId' || key === 'abonement') {
+        if (key === 'club' || key === 'user' || key === 'duration' || key === 'age' || key === 'abonement' || key === 'abonementId') {
             payload[key] = value ? parseInt(value, 10) : null;
         } else if (key === 'price' || key === 'targetValue' || key === 'currentValue' || key === 'priceAtPurchase') {
             payload[key] = value ? parseFloat(value) : null;

@@ -31,6 +31,17 @@
 @import 'sections/_login.css';
 @import 'responsive.css';
 
-
+/* Исправление: подвал не перекрывает модалки */
+.main-footer {
+    position: relative;
+    z-index: 1;
+}
+.modal,
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+.modal-content {
+    z-index: 1060;
+}
 
 

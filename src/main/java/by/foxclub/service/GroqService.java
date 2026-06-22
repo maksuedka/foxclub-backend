@@ -80,21 +80,13 @@ public class GroqService {
         double weeklyChange = Math.abs(target - current) / (days / 7.0);
 
         if ("weight-loss".equals(dto.getType())) {
+            // Убрана проверка на слишком медленный темп
             if (weeklyChange > 1.5) {
                 return new GoalValidationResponse(
                         false,
                         "Слишком быстрый темп похудения (" + String.format("%.2f", weeklyChange) + " кг/нед). Безопасный максимум — 1.5 кг/нед.",
                         "Рекомендуем замедлить темп до 0.5-1 кг в неделю для сохранения здоровья и мышц.",
                         "Резкое похудение может навредить гормональной системе.",
-                        "0.5-1 кг"
-                );
-            }
-            if (weeklyChange < 0.2 && current > target) {
-                return new GoalValidationResponse(
-                        false,
-                        "Слишком медленный темп похудения (" + String.format("%.2f", weeklyChange) + " кг/нед). Это может демотивировать.",
-                        "Попробуйте увеличить дефицит калорий или добавить кардио, чтобы выйти на 0.5-1 кг в неделю.",
-                        "",
                         "0.5-1 кг"
                 );
             }
@@ -108,6 +100,7 @@ public class GroqService {
                 return new GoalValidationResponse(false, "Целевой вес должен быть меньше текущего (" + String.format("%.1f", current) + " кг).", "", "", "");
             }
         } else if ("mass-gain".equals(dto.getType())) {
+            // Убрана проверка на слишком медленный темп
             if (weeklyChange > 1.0) {
                 return new GoalValidationResponse(
                         false,

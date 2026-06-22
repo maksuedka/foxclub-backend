@@ -75,9 +75,10 @@ public class PurchasedAbonementService {
         PurchasedAbonement entity = new PurchasedAbonement();
         entity.setUser(user);
         entity.setAbonement(abonement);
+
         entity.setPurchaseDate(dto.getPurchaseDate() != null ? dto.getPurchaseDate() : LocalDate.now());
-        entity.setStartDate(dto.getStartDate() != null ? dto.getStartDate() : LocalDate.now());
-        entity.setEndDate(dto.getEndDate());
+        entity.setStartDate(null);
+        entity.setEndDate(null);
         entity.setPriceAtPurchase(dto.getPriceAtPurchase() != null ? dto.getPriceAtPurchase() : abonement.getPrice());
 
         PurchasedAbonement saved = repository.save(entity);
@@ -115,5 +116,34 @@ public class PurchasedAbonementService {
     @Transactional
     public void delete(Integer id) {
         repository.deleteById(id);
+    }
+
+    /**
+     * Активирует абонемент при первом сканировании:
+     * устанавливает startDate = сегодня, endDate = startDate + длительность.
+     */
+    @Transactional
+    public PurchasedAbonementDto activate(Integer id) {
+        PurchasedAbonement existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Purchased abonement not found"));
+
+        if (existing.getStartDate() != null) {
+            log.warn("Abonement {} already activated at {}", id, existing.getStartDate());
+            return mapper.toDto(existing);
+        }
+
+        LocalDate today = LocalDate.now();
+        existing.setStartDate(today);
+
+        Integer duration = existing.getAbonement().getDuration();
+        if (duration != null && duration > 0) {
+            existing.setEndDate(today.plusDays(duration));
+        } else {
+            existing.setEndDate(today);
+        }
+
+        PurchasedAbonement saved = repository.save(existing);
+        log.info("Activated abonement {} with startDate {} and endDate {}", id, saved.getStartDate(), saved.getEndDate());
+        return mapper.toDto(saved);
     }
 }

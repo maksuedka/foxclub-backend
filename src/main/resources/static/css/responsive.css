@@ -266,7 +266,15 @@
     }
 }
 
-/* -------------------- МОДАЛЬНЫЕ ОКНА -------------------- */
+/* -------------------- МОДАЛЬНЫЕ ОКНА (исправлен z-index, адаптация) -------------------- */
+.modal,
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+.modal-content {
+    z-index: 1060;
+}
+
 @media (max-width: 768px) {
     .modal-content {
         width: 95%;
@@ -340,23 +348,34 @@
     }
 }
 
-/* -------------------- КАРУСЕЛЬ АКЦИЙ -------------------- */
+/* -------------------- КАРУСЕЛЬ АКЦИЙ (бесконечная, адаптивная) -------------------- */
 @media (max-width: 992px) {
-    .promotions-carousel {
-        justify-content: center;
-        flex-wrap: wrap;
+    .promotions-carousel-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
     }
     .promotion-card {
-        width: 280px;
+        scroll-snap-align: start;
+        flex: 0 0 85%;
+        margin-right: 15px;
+        min-height: 260px;
+    }
+    .promotions-carousel-track {
+        padding: 5px 0;
     }
 }
 @media (max-width: 576px) {
     .promotion-card {
-        width: 260px;
-        height: 280px;
+        flex: 0 0 85%;
+        min-height: 240px;
+        padding: 20px;
     }
-    .promotion-card-title {
-        font-size: 1.8rem;
+    .promotion-card h3 {
+        font-size: 18px;
+    }
+    .promotion-card p {
+        font-size: 12px;
     }
     .promotions-ribbon {
         font-size: 1.2em;
@@ -396,7 +415,11 @@
     }
 }
 
-/* -------------------- ФУТЕР -------------------- */
+/* -------------------- ФУТЕР (исправлен z-index, адаптация) -------------------- */
+.main-footer {
+    position: relative;
+    z-index: 1;
+}
 @media (max-width: 768px) {
     .footer-content {
         flex-direction: column;
@@ -519,5 +542,45 @@
     }
     .login-main {
         padding-top: 20px;
+    }
+    .profile-header-container {
+        flex-wrap: wrap;
+    }
+    .profile-info {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-admin-panel,
+    .btn-logout,
+    .btn-user-qr {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    .posts-create textarea {
+        font-size: 14px;
+    }
+    .post-images-picker {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .home-posts-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .home-posts-open-all {
+        align-self: flex-start;
+    }
+    .goal-card {
+        min-width: 100%;
+    }
+    .goals-carousel-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+    }
+    .goal-card {
+        scroll-snap-align: start;
     }
 }

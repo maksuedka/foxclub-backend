@@ -99,6 +99,7 @@
 - `src/main/resources/static/index.html`
   - секция `home-posts-section` присутствует на странице.
   - карточки кликабельны и ведут на `post-feed.html`.
+  - функция `window.loadRandomHomePosts(...)` вызывается прямо в inline-скрипте страницы.
 - `src/main/resources/static/js/posts.js`
   - реализована функция `loadRandomHomePosts({ count, gridEl, loaderEl, emptyEl })`.
   - карточки на главной создаются **без** бейджа статуса и **без** кнопки “Открыть ленту”.
@@ -107,6 +108,8 @@
   - карточки на главной открывают `post-feed.html`.
 - `src/main/resources/static/js/main.js`
   - на главной дополнительно загружаются абонементы (`loadAbonementsForHome`).
+  - на главной также загружаются/рисуются акции (бесконечная карусель) через `loadPromotions()` и `renderPromotions()`.
+
 
 
 ---
