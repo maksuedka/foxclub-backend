@@ -49,27 +49,29 @@
     transform: rotate(-135deg);
 }
 
+/* ===== УЛУЧШЕННЫЙ БУРГЕР-МЕНЮ ===== */
 .mobile-dropdown {
-    display: none;
     position: fixed;
     top: 0;
     right: 0;
-    width: 280px;
+    width: 100%;
+    max-width: 320px;
     height: 100vh;
-    background: var(--bg-dark-header, #0A0A0A);
+    background: #0A0A0A;
     border-left: 1px solid #333;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
     z-index: 1000;
     padding: 80px 20px 20px;
     transition: transform 0.3s ease;
     transform: translateX(100%);
     overflow-y: auto;
+    display: block !important;
 }
 .mobile-dropdown.open {
-    display: block;
     transform: translateX(0);
 }
 .mobile-dropdown .profile-info {
+    display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 20px !important;
@@ -90,24 +92,59 @@
     text-align: center;
     margin: 5px 0;
 }
+
+/* Кнопка "Войти" в бургере (гарантированное отображение) */
 .mobile-dropdown .btn-login-mobile {
-    display: block;
-    background: var(--primary-color, #ff8c00);
-    color: white;
-    text-decoration: none;
-    padding: 12px;
-    border-radius: 30px;
-    text-align: center;
-    font-weight: bold;
+    display: block !important;
+    background: #ff8c00 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 20px !important;
+    border-radius: 30px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+}
+.mobile-dropdown .btn-login-mobile:hover {
+    background: #e67e00 !important;
 }
 
+/* Пункты меню внутри бургера */
+.mobile-dropdown .nav-list-mobile {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.mobile-dropdown .nav-list-mobile li {
+    border-bottom: 1px solid #222;
+    padding: 8px 0;
+}
+.mobile-dropdown .nav-list-mobile a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    display: block;
+    padding: 8px 0;
+    transition: color 0.2s;
+}
+.mobile-dropdown .nav-list-mobile a:hover {
+    color: #ff8c00;
+}
+
+/* Адаптация для мобильных */
 @media (max-width: 768px) {
     .main-header .profile-info,
     .profile-header .profile-info {
         display: none !important;
     }
     .mobile-menu-btn {
-        display: block;
+        display: block !important;
     }
     .header-container,
     .profile-header-container {
@@ -118,18 +155,8 @@
     .profile-avatar {
         display: none;
     }
-    /* Навигационное меню (ссылки) – пусть остаётся под шапкой, но с прокруткой */
     .main-nav {
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        text-align: left;
-    }
-    .main-nav .nav-list {
-        display: inline-flex;
-        gap: 20px;
-        padding: 0 5px;
+        display: none !important;
     }
 }
 @media (min-width: 769px) {
@@ -147,8 +174,7 @@
         display: block !important;
     }
     .main-nav {
-        overflow: visible;
-        white-space: normal;
+        display: flex !important;
     }
 }
 
@@ -443,7 +469,7 @@
     }
 }
 
-/* -------------------- СТРАНИЦА КЛУБА -------------------- */
+/* -------------------- СТРАНИЦА КЛУБА (исправлен скролл) -------------------- */
 @media (max-width: 768px) {
     .club-contacts-container {
         flex-direction: column;
@@ -467,6 +493,30 @@
     .club-intro-subtitle {
         font-size: 1.2rem;
     }
+}
+
+/* ===== ПОЛНОЕ УБРАНЕ ГОРИЗОНТАЛЬНОЙ ПРОКРУТКИ НА ВСЕХ СТРАНИЦАХ ===== */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+.club-intro-image-wrapper,
+.club-map-wrapper,
+.gallery-strip-wrapper {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+.club-intro-image-wrapper img,
+.club-map,
+.gallery-item img,
+iframe.club-map {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+iframe.club-map {
+    width: 100% !important;
+    min-height: 250px;
 }
 
 /* -------------------- СКАНЕР QR -------------------- */
@@ -583,4 +633,85 @@
     .goal-card {
         scroll-snap-align: start;
     }
+}
+
+@media (min-width: 769px) {
+    .main-nav {
+        display: flex !important;
+        justify-content: center !important;
+        flex: 1;
+    }
+    .main-nav .nav-list {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 30px;
+        padding: 0;
+        margin: 0;
+    }
+    .mobile-menu-btn {
+        display: none !important;
+    }
+    .mobile-dropdown {
+        display: none !important;
+    }
+    .main-header .profile-info,
+    .profile-header .profile-info {
+        display: flex !important;
+        align-items: center;
+        gap: 15px;
+    }
+    .profile-avatar {
+        display: block !important;
+    }
+}
+
+/* ===== ГАРАНТИРОВАННОЕ ОТОБРАЖЕНИЕ ПРОФИЛЯ В БУРГЕРЕ ===== */
+.mobile-dropdown .profile-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.mobile-dropdown .profile-info .profile-avatar {
+    display: block !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    margin-bottom: 10px !important;
+}
+.mobile-dropdown .profile-info .profile-name {
+    display: block !important;
+    font-size: 18px !important;
+    color: #fff !important;
+    font-weight: 500 !important;
+}
+.mobile-dropdown .profile-info .btn-user-qr,
+.mobile-dropdown .profile-info .btn-logout,
+.mobile-dropdown .profile-info .btn-admin-panel {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 5px 0 !important;
+    padding: 10px !important;
+    border-radius: 30px !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
+}
+.mobile-dropdown .profile-info .btn-user-qr {
+    background: #ff8c00 !important;
+    color: white !important;
+    border: none !important;
+}
+.mobile-dropdown .profile-info .btn-logout {
+    background: rgba(255,68,68,0.2) !important;
+    color: #ff6b6b !important;
+    border: 2px solid #ff6b6b !important;
+}
+.mobile-dropdown .profile-info .btn-admin-panel {
+    background: #ff8c00 !important;
+    color: white !important;
+    border: none !important;
 }

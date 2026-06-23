@@ -17,7 +17,221 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
+
+    <style>
+        /* ===== УЛУЧШЕННЫЙ БЛОК ЦЕЛЕЙ ===== */
+        .goals-section {
+            padding: 20px 0;
+        }
+        .goals-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .goals-title {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .goals-cards-and-add-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .goals-carousel-wrapper {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #ff8c00 #2a2a2a;
+        }
+        .goals-carousel-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+        .goals-carousel-wrapper::-webkit-scrollbar-track {
+            background: #2a2a2a;
+            border-radius: 3px;
+        }
+        .goals-carousel-wrapper::-webkit-scrollbar-thumb {
+            background: #ff8c00;
+            border-radius: 3px;
+        }
+        .goals-cards-carousel {
+            display: flex;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+        .goal-card {
+            flex: 0 0 220px;
+            scroll-snap-align: start;
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #3a3a3a;
+            transition: transform 0.2s, border-color 0.2s;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .goal-card:hover {
+            transform: translateY(-3px);
+            border-color: #ff8c00;
+        }
+        .goal-card-icon-bg {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 140, 0, 0.15);
+            margin-bottom: 10px;
+        }
+        .goal-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 0 8px 0;
+            line-height: 1.2;
+        }
+        .goal-card-values p {
+            margin: 4px 0;
+            font-size: 13px;
+            color: #ccc;
+        }
+        .goal-card-values strong {
+            color: #fff;
+        }
+        .goal-card-progress {
+            margin-top: 8px;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .progress-percent {
+            font-size: 13px;
+            color: #ff8c00;
+            font-weight: bold;
+            margin-top: 4px;
+            display: block;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        .goal-card-dates {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
+        .add-goal-column {
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .add-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff8c00;
+            color: #fff;
+            border: none;
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+        }
+        .add-button:hover {
+            background: #e67e00;
+            transform: scale(1.05);
+        }
+        .empty-message {
+            color: #999;
+            font-size: 1rem;
+            text-align: center;
+            padding: 30px 0;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .goal-card {
+                flex: 0 0 180px;
+                min-height: 140px;
+                padding: 12px;
+            }
+            .add-button {
+                width: 36px;
+                height: 36px;
+                font-size: 24px;
+            }
+            .goals-title {
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .goal-card {
+                flex: 0 0 160px;
+                min-height: 130px;
+                padding: 10px;
+            }
+            .goal-card-title {
+                font-size: 14px;
+            }
+            .goal-card-values p {
+                font-size: 12px;
+            }
+            .add-button {
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+            }
+        }
+
+        /* ===== ГАРАНТИРОВАННОЕ ОТОБРАЖЕНИЕ ПРОФИЛЯ В БУРГЕРЕ ===== */
+        .mobile-dropdown .profile-info {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 20px !important;
+            margin: 0 !important;
+        }
+        .mobile-dropdown .profile-info .profile-avatar {
+            width: 60px !important;
+            height: 60px !important;
+            margin-bottom: 10px !important;
+        }
+        .mobile-dropdown .profile-info .profile-name {
+            font-size: 18px !important;
+            color: #fff !important;
+        }
+        .mobile-dropdown .profile-info .btn-user-qr,
+        .mobile-dropdown .profile-info .btn-logout {
+            width: 100% !important;
+            text-align: center !important;
+            margin: 5px 0 !important;
+        }
+
+        .modal, .modal-backdrop {
+            z-index: 1050 !important;
+        }
+        .modal-content {
+            z-index: 1060;
+        }
+    </style>
+
     <script>
         (function() {
             const backup = {};
@@ -45,7 +259,6 @@
                 <img id="profileAvatar" src="" alt="Аватар" class="profile-avatar">
                 <span class="profile-name" id="profileUserName">Загрузка...</span>
                 <button class="btn-user-qr" id="showUserQrBtn">Мой QR</button>
-                <!-- Кнопка "Админ-панель" (показывается только администраторам) -->
                 <a href="admin-panel.html" class="btn-admin-panel" id="adminPanelBtn" style="display:none; background:#ff8c00; color:#fff; padding:8px 20px; border-radius:30px; text-decoration:none; font-weight:600; font-size:14px; margin-left:10px;">
                     ⚙️ Админ-панель
                 </a>
@@ -99,7 +312,7 @@
         </div>
     </section>
 
-    <!-- Модальные окна -->
+    <!-- Модальные окна (без изменений) -->
     <div id="qrModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeQrModal">&times;</span>
@@ -221,7 +434,6 @@
                     <h3 class="chart-title" style="color:#ff8c00; font-size:15px; margin:0 0 6px 0;">Динамика прогресса</h3>
                     <canvas id="goalHistoryChart" width="400" height="150" style="background:#1a1a1a; border-radius:10px; padding:6px; width:100%; max-height:160px;"></canvas>
                     <div id="goalMotivationMessage" style="padding:8px 12px; background:#2a2a2a; border-radius:10px; text-align:center; font-size:13px; color:#ddd; min-height:40px;"></div>
-                    <!-- ===== БЛОК ПОДСКАЗОК ===== -->
                     <div id="goalTips" class="goal-tips" style="margin-top:16px; padding:12px 16px; background:#2a2a2a; border-radius:10px; border-left:4px solid #ff8c00;">
                         <div style="display:flex; gap:10px; align-items:flex-start;">
                             <div style="font-size:20px; flex-shrink:0;">💡</div>
@@ -338,7 +550,6 @@
     <script src="js/posts.js"></script>
     <script src="js/components/avatar.js"></script>
     <script>
-        // Показать кнопку "Админ-панель" только для администраторов
         document.addEventListener('DOMContentLoaded', function() {
             const userStr = localStorage.getItem('user');
             if (userStr) {

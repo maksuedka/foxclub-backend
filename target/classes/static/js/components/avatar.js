@@ -39,7 +39,7 @@
     const cropperContainer = document.getElementById('cropperContainer');
     const cropImage = document.getElementById('cropImage');
     const noImageMsg = document.getElementById('noImageMessage');
-    const deleteBtn = document.getElementById('deleteAvatarBtn'); // кнопка в модалке
+    const deleteBtn = document.getElementById('deleteAvatarBtn');
 
     let cropper = null;
     let currentFile = null;
@@ -153,14 +153,26 @@
                 body: formData
             });
             if (!response.ok) {
-                showTemporaryMessage('Ошибка загрузки на сервер', 'error');
+                const errText = await response.text();
+                showTemporaryMessage('Ошибка загрузки: ' + errText, 'error');
                 return;
             }
             const data = await response.json();
-            user.avatarUrl = data.avatarUrl;
-            localStorage.setItem('user', JSON.stringify(user));
+            // Обновляем данные пользователя в localStorage
+            const updatedUser = { ...user, avatarUrl: data.avatarUrl };
+            // Если сервер вернул firstName/lastName, обновляем их
+            if (data.firstName) updatedUser.firstName = data.firstName;
+            if (data.lastName) updatedUser.lastName = data.lastName;
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            // Обновляем UI
             setAvatarSrc(avatarThumb, data.avatarUrl);
             if (previewBig) setAvatarSrc(previewBig, data.avatarUrl);
+            // Обновляем имя на странице (если есть)
+            const nameSpan = document.getElementById('profileUserName');
+            if (nameSpan) {
+                nameSpan.textContent = `${updatedUser.firstName || ''} ${updatedUser.lastName || ''}`.trim() || 'Пользователь';
+            }
             showTemporaryMessage('Аватар обновлён!', 'success');
             closeModal();
         } catch (err) {
@@ -184,8 +196,10 @@
                 showTemporaryMessage('Ошибка удаления: ' + err, 'error');
                 return;
             }
-            userNow.avatarUrl = null;
-            localStorage.setItem('user', JSON.stringify(userNow));
+            // Обновляем localStorage
+            const updatedUser = { ...userNow, avatarUrl: null };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
             setAvatarSrc(avatarThumb, null);
             if (previewBig) setAvatarSrc(previewBig, null);
             showTemporaryMessage('Аватар удалён', 'success');
